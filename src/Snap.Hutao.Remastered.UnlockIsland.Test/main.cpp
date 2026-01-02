@@ -11,11 +11,15 @@
 using namespace winrt;
 using namespace Windows::Foundation;
 
+const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
+
+std::string OpenTeamPattern = "48 83 EC 28 80 3D ?? ?? ?? ?? 00 75 23 48 8B 0D ?? ?? ?? ?? 80 B9 ?? ?? ?? ?? 00 74 3A";
+std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 EC 20 89 CB 80 3D ?? ?? ?? ?? 00 74 7A 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F85 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 85 D2 0F84 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 0F85 ?? ?? ?? ?? 48 8B 88";
+
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
-void InitializeHookEnvironment(HookEnvironment* pEnv);
+void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
 void CleanupSharedMemory(HookEnvironment* pEnv, HANDLE hMapFile);
 
-// 辅助函数：获取模块基址
 uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 {
     MODULEENTRY32W me = { 0 };
@@ -53,7 +57,6 @@ std::wstring GetDLLPath()
     wchar_t currentDir[MAX_PATH];
     GetCurrentDirectoryW(MAX_PATH, currentDir);
     
-    // 构建DLL路径
     std::filesystem::path dllPath(currentDir);
     dllPath /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
     
@@ -102,17 +105,7 @@ void TestPatternScannerAndInject()
         return;
     }
 
-    std::wcout << L"Process found for scanning." << std::endl;
-
-    // 特征码扫描
-    std::string pattern = "48 83 EC 28 80 3D ?? ?? ?? ?? 00 75 23 48 8B 0D ?? ?? ?? ?? 80 B9 ?? ?? ?? ?? 00 74 3A";
     std::wstring moduleName = L"YuanShen.exe";
-    DWORD foundAddress = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
-    if (foundAddress == 0)
-    {
-        moduleName = L"GenshinImpact.exe";
-        foundAddress = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
-    }
 
     if (hProcess != nullptr)
     {
@@ -123,12 +116,10 @@ void TestPatternScannerAndInject()
         std::wcout << L"\n=== Creating Shared Memory for Configuration ===" << std::endl;
         if (CreateSharedMemoryForHookEnvironment(pEnv, hMapFile))
         {
-            // 初始化HookEnvironment结构
-            InitializeHookEnvironment(pEnv);
+            InitializeHookEnvironment(hProcess, moduleName, pEnv);
 
             std::wcout << L"Configuration parameters prepared for DLL." << std::endl;
 
-            // 注入DLL
             if (PatternScanner::InjectDLL(hProcess, dllPath))
             {
                 std::wcout << L"\n=== Injection Successful ===" << std::endl;
@@ -156,13 +147,8 @@ void TestPatternScannerAndInject()
     std::wcout << L"\n=== Operation Completed ===" << std::endl;
 }
 
-// 创建共享内存用于HookEnvironment
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile)
 {
-    // 共享内存名称（必须与dllmain.cpp中的名称匹配）
-    const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
-    
-    // 创建文件映射对象
     hMapFile = CreateFileMappingW(
         INVALID_HANDLE_VALUE,
         NULL,
@@ -198,20 +184,23 @@ bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFi
     return true;
 }
 
-// 初始化HookEnvironment结构
-void InitializeHookEnvironment(HookEnvironment* pEnv)
+DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name)
+{
+	DWORD offset = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
+	std::cout << name << " Offset= 0x" << std::hex << offset << std::dec << std::endl;
+}
+
+void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv)
 {
     if (pEnv == nullptr)
         return;
     
-    // 初始化结构体
     ZeroMemory(pEnv, sizeof(HookEnvironment));
     pEnv->Size = sizeof(HookEnvironment);
     pEnv->State = TRUE;
     pEnv->LastError = 0;
     pEnv->Uid = 123456; // 示例UID
     
-    // 设置各种功能选项（示例配置）
     pEnv->EnableSetFov = FALSE;
     pEnv->FieldOfView = 90.0f;
     pEnv->FixLowFov = FALSE;
@@ -229,6 +218,32 @@ void InitializeHookEnvironment(HookEnvironment* pEnv)
     pEnv->ResinItem107009 = FALSE;
     pEnv->ResinItem107012 = FALSE;
     pEnv->ResinItem220007 = FALSE;
+
+    pEnv->Offsets.MickeyWonderMethod = 0x5e0d680; //
+    pEnv->Offsets.MickeyWonderMethodPartner = 0x3e87b0; //
+    pEnv->Offsets.MickeyWonderMethodPartner2 = 0x7728b90; //
+    pEnv->Offsets.SetFieldOfView = 0x10407c0; //
+    pEnv->Offsets.SetEnableFogRendering = 0x14f2cb90; //
+    pEnv->Offsets.SetTargetFrameRate = 0x14f18ea0; //
+    pEnv->Offsets.OpenTeam = ScanOffset(hProcess, moduleName, OpenTeamPattern, "OpenTeam"); //
+    pEnv->Offsets.OpenTeamPageAccordingly = ScanOffset(hProcess, moduleName, OpenTeamPageAccordinglyPattern, "OpenTeamPageAccordingly");
+    pEnv->Offsets.CheckCanEnter = 0x954f230; //
+    pEnv->Offsets.SetupQuestBanner = 0xdbb1320; //
+    pEnv->Offsets.FindGameObject = 0x14f1bf20; //
+    pEnv->Offsets.SetActive = 0x14f1bc60; //
+    pEnv->Offsets.EventCameraMove = 0xe076e80; //
+    pEnv->Offsets.ShowOneDamageTextEx = 0xfea2160; //
+    pEnv->Offsets.SwitchInputDeviceToTouchScreen = 0xab06670; //
+    pEnv->Offsets.MickeyWonderCombineEntryMethod = 0xa0a2d00; //
+    pEnv->Offsets.MickeyWonderCombineEntryMethodPartner = 0x84fb720; //
+    pEnv->Offsets.GetTargetFrameRate = 0x125a050; //
+    pEnv->Offsets.GameManagerAwake = 0xc4007c0; //
+    //pEnv->Offsets.SetupResinList = 0xd03a400; //!!!!!!!!!!
+    //pEnv->Offsets.ResinListRemove = 0x13CDA8C0;
+    //pEnv->Offsets.ResinList = 0x1F0;
+    //pEnv->Offsets.ResinListGetItem = 0x13CD8FF0;
+    //pEnv->Offsets.ResinListGetCount = 0x13CD8F90;
+    //pEnv->Offsets.SetLastUid = 0x0F43BA90;
     
     std::wcout << L"HookEnvironment initialized with configuration." << std::endl;
 }

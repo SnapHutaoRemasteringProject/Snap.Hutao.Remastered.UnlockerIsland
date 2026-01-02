@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="Snap.Hutao.Remastered.UnlockIsland.Test/Snap.Hutao.Remastered.UnlockIsland.Test.vcxproj" Id="42e4e7cf-f1eb-4d6b-815a-c21d02b9f4d4" />
+  <Project Path="Snap.Hutao.Remastered.UnlockIsland/Snap.Hutao.Remastered.UnlockIsland.vcxproj" Id="c99e2c8c-bf78-442f-a47b-0e177b51e3f8" />
+</Solution>

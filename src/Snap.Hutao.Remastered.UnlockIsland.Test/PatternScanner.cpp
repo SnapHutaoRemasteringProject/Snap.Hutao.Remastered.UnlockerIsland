@@ -541,15 +541,12 @@ DWORD PatternScanner::ScanPatternInModuleMultiThreaded(HANDLE hProcess, const st
                                                        std::memory_order_relaxed, 
                                                        std::memory_order_relaxed))
                 {
-                    // 第一个找到结果的线程设置停止标志
                     shouldStop.store(true, std::memory_order_relaxed);
-                    std::cout << "Found match at offset: 0x" << std::hex << localResult << std::dec << std::endl;
                 }
             }
         });
     }
 
-    // 等待所有线程完成
     for (auto& thread : threads)
     {
         if (thread.joinable())
@@ -558,11 +555,5 @@ DWORD PatternScanner::ScanPatternInModuleMultiThreaded(HANDLE hProcess, const st
         }
     }
 
-    DWORD result = finalResult.load();
-    if (result == 0)
-    {
-        std::cout << "No match found for pattern" << std::endl;
-    }
-    
-    return result;
+    return finalResult.load();
 }

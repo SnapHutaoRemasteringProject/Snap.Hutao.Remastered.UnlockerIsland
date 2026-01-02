@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <filesystem>
 #include <Windows.h>
+#include <chrono>
 
 // 包含HookEnvironment结构定义
 #include "../../Snap.Hutao.Remastered.UnlockIsland/HookEnvironment.h"
@@ -14,7 +15,7 @@ using namespace Windows::Foundation;
 const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
 std::string OpenTeamPattern = "48 83 EC 28 80 3D ?? ?? ?? ?? 00 75 23 48 8B 0D ?? ?? ?? ?? 80 B9 ?? ?? ?? ?? 00 74 3A";
-std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 EC 20 89 CB 80 3D ?? ?? ?? ?? 00 74 7A 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F85 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 85 D2 0F84 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 0F85 ?? ?? ?? ?? 48 8B 88";
+std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 EC 20 89 CB 80 3D ?? ?? ?? ?? 00 74 7A 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 85 D2 0F 84 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 88";
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
 void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
@@ -66,6 +67,7 @@ std::wstring GetDLLPath()
         dllPath /= L"Snap.Hutao.Remastered.UnlockIsland";
         dllPath /= L"x64";
         dllPath /= L"Debug";
+        dllPath /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
     }
 
     if (!std::filesystem::exists(dllPath))
@@ -78,7 +80,7 @@ std::wstring GetDLLPath()
     return dllPath.wstring();
 }
 
-void TestPatternScannerAndInject()
+void Inject()
 {
     std::wcout << L"=== Automated Pattern Scanner and DLL Injector ===" << std::endl;
     std::wcout << L"Looking for game process..." << std::endl;
@@ -186,8 +188,30 @@ bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFi
 
 DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name)
 {
-	DWORD offset = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
-	std::cout << name << " Offset= 0x" << std::hex << offset << std::dec << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    DWORD offset = PatternScanner::ScanPatternInModuleMultiThreaded(hProcess, moduleName, pattern, 16);
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    std::cout << name << " Offset= 0x" << std::hex << offset << std::dec 
+              << " (Time: " << duration.count() << "ms)" << std::endl;
+    return offset;
+}
+
+DWORD ScanOffsetMultiThreaded(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name, int threadCount = 16)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    DWORD offset = PatternScanner::ScanPatternInModuleMultiThreaded(hProcess, moduleName, pattern, threadCount);
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    std::cout << name << " Offset= 0x" << std::hex << offset << std::dec 
+              << " (Time: " << duration.count() << "ms)" << std::endl;
+    return offset;
 }
 
 void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv)
@@ -268,7 +292,9 @@ int main()
 {
     init_apartment();
     
-    TestPatternScannerAndInject();
+    std::wcout << L"=== Pattern Scanner and DLL Injector ===" << std::endl;
+
+    Inject();
     
     std::wcout << L"\nPress any key to exit..." << std::endl;
     std::cin.ignore();

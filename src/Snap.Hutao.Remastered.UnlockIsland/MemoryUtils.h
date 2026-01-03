@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-typedef void(__stdcall* VoidFunc)();
+typedef void(__fastcall* VoidFunc)();
 
 VoidFunc GetFunctionAddress(DWORD offset);
 void InitializeModuleHandle();

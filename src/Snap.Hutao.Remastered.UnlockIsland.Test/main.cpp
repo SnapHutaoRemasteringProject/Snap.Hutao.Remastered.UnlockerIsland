@@ -16,6 +16,7 @@ const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
 std::string OpenTeamPattern = "48 83 EC 28 80 3D ?? ?? ?? ?? 00 75 23 48 8B 0D ?? ?? ?? ?? 80 B9 ?? ?? ?? ?? 00 74 3A";
 std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 EC 20 89 CB 80 3D ?? ?? ?? ?? 00 74 7A 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 85 D2 0F 84 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 88";
+std::string SwitchInputDeviceToTouchScreenPattern = "56 57 48 83 EC 28 48 89 CE 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 48 8B 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 89 C7 48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84";
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
 void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
@@ -235,7 +236,7 @@ void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, 
     pEnv->HideQuestBanner = FALSE;
     pEnv->DisableCameraMove = FALSE;
     pEnv->DisableDamageText = FALSE;
-    pEnv->TouchMode = FALSE;
+    pEnv->TouchMode = TRUE;
     pEnv->RedirectCombine = FALSE;
     pEnv->ResinItem000106 = FALSE;
     pEnv->ResinItem000201 = FALSE;
@@ -257,7 +258,8 @@ void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, 
     pEnv->Offsets.SetActive = 0x14f1bc60; //
     pEnv->Offsets.EventCameraMove = 0xe076e80; //
     pEnv->Offsets.ShowOneDamageTextEx = 0xfea2160; //
-    pEnv->Offsets.SwitchInputDeviceToTouchScreen = 0xab06670; //
+    //pEnv->Offsets.SwitchInputDeviceToTouchScreen = 0xab06670;
+    pEnv->Offsets.SwitchInputDeviceToTouchScreen = ScanOffset(hProcess, moduleName, SwitchInputDeviceToTouchScreenPattern, "SwitchInputDeviceToTouchScreen"); //
     pEnv->Offsets.MickeyWonderCombineEntryMethod = 0xa0a2d00; //
     pEnv->Offsets.MickeyWonderCombineEntryMethodPartner = 0x84fb720; //
     pEnv->Offsets.GetTargetFrameRate = 0x125a050; //

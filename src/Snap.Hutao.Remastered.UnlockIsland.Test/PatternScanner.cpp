@@ -342,7 +342,7 @@ DWORD PatternScanner::ScanChunk(HANDLE hProcess, uintptr_t baseAddress, uintptr_
     }
 
     // 大幅增加读取缓冲区大小，减少系统调用次数
-    const size_t chunkSize = 1024 * 1024; // 1MB缓冲区，显著减少ReadProcessMemory调用
+    const size_t chunkSize = 4 * 1024 * 1024; // 1MB缓冲区，显著减少ReadProcessMemory调用
     std::vector<uint8_t> buffer(chunkSize);
     size_t patternSize = patternBytes.size();
     

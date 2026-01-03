@@ -3,11 +3,18 @@
 #include "HookFunctionOffsets.h"
 #include "MemoryUtils.h"
 #include "include/MinHook.h"
+#include <cstdint>
 
 
 void SetupHooks()
 {
 	SetupOpenTeamHook();
+	if (g_pEnv->State && g_pEnv->TouchMode) {
+		typedef void(__fastcall* SwitchInputDeviceToTouchScreenFunc)(void*);
+		SwitchInputDeviceToTouchScreenFunc SwitchInputDeviceToTouchScreen = (SwitchInputDeviceToTouchScreenFunc)GetFunctionAddress(g_pEnv->Offsets.SwitchInputDeviceToTouchScreen);
+		SwitchInputDeviceToTouchScreen(0);
+		return;
+	}
 }
 
 void SetupOpenTeamHook()

@@ -4,9 +4,9 @@
 #include <iomanip>
 #include <filesystem>
 #include <Windows.h>
+#include <ShellAPI.h>
 #include <chrono>
 
-// 包含HookEnvironment结构定义
 #include "../../Snap.Hutao.Remastered.UnlockIsland/HookEnvironment.h"
 
 using namespace winrt;
@@ -14,13 +14,26 @@ using namespace Windows::Foundation;
 
 const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
-std::string OpenTeamPattern = "48 83 EC 28 80 3D ?? ?? ?? ?? 00 75 23 48 8B 0D ?? ?? ?? ?? 80 B9 ?? ?? ?? ?? 00 74 3A";
-std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 EC 20 89 CB 80 3D ?? ?? ?? ?? 00 74 7A 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 85 D2 0F 84 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 88";
-std::string SwitchInputDeviceToTouchScreenPattern = "56 57 48 83 EC 28 48 89 CE 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 48 8B 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 89 C7 48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84";
+std::string GetFrameCountPattern = "E8 ? ? ? ? 85 C0 7E 0E E8 ? ? ? ? 0F 57 C0 F3 0F 2A C0 EB 08";
+std::string SetFrameCountPattern = "E8 ? ? ? ? E8 ? ? ? ? 83 F8 1F 0F 9C 05 ? ? ? ? 48 8B 05";
+std::string SetFovPattern = "40 53 48 83 EC 60 0F 29 74 24 ? 48 8B D9 0F 28 F1 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B C8 ";
+std::string SwitchInputDeviceToTouchScreenPattern = "56 57 48 83 EC ? 48 89 CE 80 3D ? ? ? ? 00 48 8B 05 ? ? ? ? 0F 85 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 48 8B 15 ? ? ? ? E8 ? ? ? ? 48 89 C7 48 8B 05 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 31 D2";
+std::string SetupQuestBannerPattern = "41 57 41 56 56 57 55 53 48 81 EC ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 48 8B 96";
+std::string FindGameObjectPattern = "E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? 48 83 EC ? C7 44 24 ? 00 00 00 00 48 8D 54 24";
+std::string SetActivePattern = "E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? 45 31 C9";
+std::string EventCameraMovePattern = "41 57 41 56 56 57 55 53 48 83 EC ? 48 89 D7 49 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 80 3D ? ? ? ? 00";
+std::string ShowOneDamageTextExPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 44 0F 29 9C 24 ? ? ? ? 44 0F 29 94 24 ? ? ? ? 44 0F 29 8C 24 ? ? ? ? 44 0F 29 84 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 44 89 CF 45 89 C4";
+std::string DisplayFogPattern = "0F B6 02 88 01 8B 42 04 89 41 04 F3 0F 10 52 ? F3 0F 10 4A ? F3 0F 10 42 ? 8B 42 08 ";
+std::string PlayerPerspectivePattern = "E8 ? ? ? ? 48 8B BE ? ? ? ? 80 3D ? ? ? ? ? 0F 85 ? ? ? ? 80 BE ? ? ? ? ? 74 11";
+std::string FindStringPattern = "56 48 83 ec 20 48 89 ce e8 ? ? ? ? 48 89 f1 89 c2 48 83 c4 20 5e e9 ? ? ? ? cc cc cc cc";
+std::string CraftEntryPartnerPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 4D 89 ? 4C 89 C6 49 89 D4 49 89 CE";
+std::string CraftEntryPattern = "41 56 56 57 53 48 83 EC 58 49 89 CE 80 3D ? ? ? ? 00 0F 84 ? ? ? ? 80 3D ? ? ? ? 00 48 8B 0D ? ? ? ? 0F 85";
+std::string CheckCanEnterPattern = "56 48 81 ec 80 00 00 00 80 3d ? ? ? ? 00 0f 84 ? ? ? ? 80 3d ? ? ? ? 00";
+std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 ec 20 89 cb 80 3d ? ? ? ? 00 74 7a 80 3d ? ? ? ? 00 48 8b 05";
+std::string OpenTeamPattern = "48 83 EC ? 80 3D ? ? ? ? 00 75 ? 48 8B 0D ? ? ? ? 80 B9 ? ? ? ? 00 0F 84 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 84 C0 75";
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
 void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
-void CleanupSharedMemory(HookEnvironment* pEnv, HANDLE hMapFile);
 
 uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 {
@@ -56,98 +69,83 @@ uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 
 std::wstring GetDLLPath()
 {
+    // 尝试多个可能的DLL位置
+    std::vector<std::filesystem::path> possiblePaths;
+    
+    // 1. 当前目录
     wchar_t currentDir[MAX_PATH];
     GetCurrentDirectoryW(MAX_PATH, currentDir);
+    possiblePaths.push_back(std::filesystem::path(currentDir) / L"Snap.Hutao.Remastered.UnlockIsland.dll");
     
-    std::filesystem::path dllPath(currentDir);
-    dllPath /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
+    // 2. 当前目录的父目录的x64/Debug（对于注入器在Test项目的Debug目录中）
+    std::filesystem::path path1(currentDir);
+    path1 = path1.parent_path().parent_path().parent_path(); // 回到src目录
+    path1 /= L"x64";
+    path1 /= L"Debug";
+    path1 /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
+    possiblePaths.push_back(path1);
     
-    if (!std::filesystem::exists(dllPath)) {
-		dllPath = std::filesystem::path(currentDir);
-        dllPath = dllPath.parent_path();
-        dllPath /= L"Snap.Hutao.Remastered.UnlockIsland";
-        dllPath /= L"x64";
-        dllPath /= L"Debug";
-        dllPath /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
-    }
-
-    if (!std::filesystem::exists(dllPath))
+    // 3. 绝对路径到主项目的x64/Debug
+    std::filesystem::path path2 = L"e:\\SnapHutaoRemasteringProject\\Snap.Hutao.Remastered.UnlockIsland\\src\\x64\\Debug\\Snap.Hutao.Remastered.UnlockIsland.dll";
+    possiblePaths.push_back(path2);
+    
+    // 4. 相对路径：../../x64/Debug（从Test项目的Debug目录）
+    std::filesystem::path path3(currentDir);
+    path3 = path3.parent_path().parent_path(); // 回到Test目录
+    path3 = path3.parent_path(); // 回到src目录
+    path3 /= L"x64";
+    path3 /= L"Debug";
+    path3 /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
+    possiblePaths.push_back(path3);
+    
+    for (const auto& path : possiblePaths)
     {
-        std::wcerr << L"DLL not found at: " << dllPath.wstring() << std::endl;
-        std::wcerr << L"Please build the main project first." << std::endl;
-        return L"";
+        if (std::filesystem::exists(path))
+        {
+            return path.wstring();
+        }
     }
     
-    return dllPath.wstring();
+    // 如果都没找到，显示错误信息
+    std::wcerr << L"DLL not found in any of the following locations:" << std::endl;
+    for (const auto& path : possiblePaths)
+    {
+        std::wcerr << L"  " << path.wstring() << std::endl;
+    }
+    std::wcerr << L"Please build the main project first." << std::endl;
+    return L"";
 }
 
 void Inject()
 {
-    std::wcout << L"=== Automated Pattern Scanner and DLL Injector ===" << std::endl;
-    std::wcout << L"Looking for game process..." << std::endl;
-
     std::wstring dllPath = GetDLLPath();
     if (dllPath.empty())
     {
         return;
     }
-    
-    std::wcout << L"DLL found at: " << dllPath << std::endl;
 
     HANDLE hProcess = PatternScanner::OpenProcessHandle(L"YuanShen.exe");
 
     if (hProcess == nullptr)
     {
-        std::wcout << L"Failed to open YuanShen.exe. Trying GenshinImpact.exe..." << std::endl;
         hProcess = PatternScanner::OpenProcessHandle(L"GenshinImpact.exe");
     }
 
     if (hProcess == nullptr)
     {
-        std::wcout << L"No target process found. Please ensure the game is running." << std::endl;
         return;
     }
+    HookEnvironment* pEnv = nullptr;
+    HANDLE hMapFile = NULL;
 
-    std::wstring moduleName = L"YuanShen.exe";
-
-    if (hProcess != nullptr)
+    if (CreateSharedMemoryForHookEnvironment(pEnv, hMapFile))
     {
-        std::wcout << L"\n=== Starting DLL Injection ===" << std::endl;
-        HookEnvironment* pEnv = nullptr;
-        HANDLE hMapFile = NULL;
+        InitializeHookEnvironment(hProcess, L"YuanShen.exe", pEnv);
 
-        std::wcout << L"\n=== Creating Shared Memory for Configuration ===" << std::endl;
-        if (CreateSharedMemoryForHookEnvironment(pEnv, hMapFile))
-        {
-            InitializeHookEnvironment(hProcess, moduleName, pEnv);
-
-            std::wcout << L"Configuration parameters prepared for DLL." << std::endl;
-
-            if (PatternScanner::InjectDLL(hProcess, dllPath))
-            {
-                std::wcout << L"\n=== Injection Successful ===" << std::endl;
-                std::wcout << L"DLL has been injected into the game process." << std::endl;
-                std::wcout << L"The game should now have the unlock island functionality." << std::endl;
-            }
-            else
-            {
-                std::wcerr << L"\n=== Injection Failed ===" << std::endl;
-                std::wcerr << L"Failed to inject DLL into the game process." << std::endl;
-            }
-        }
-        else
-        {
-            std::wcerr << L"Failed to create shared memory. Injection aborted." << std::endl;
-        }
-
-        CloseHandle(hProcess);
-    }
-    else
-    {
-        std::wcerr << L"Failed to open process with injection permissions: " << GetLastError() << std::endl;
+        PatternScanner::InjectDLL(hProcess, dllPath);
     }
 
-    std::wcout << L"\n=== Operation Completed ===" << std::endl;
+    CloseHandle(hProcess);
 }
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile)
@@ -182,36 +180,19 @@ bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFi
         CloseHandle(hMapFile);
         return false;
     }
-    
-    std::wcout << L"Shared memory created successfully." << std::endl;
+
     return true;
 }
 
 DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    DWORD offset = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
     
-    DWORD offset = PatternScanner::ScanPatternInModuleMultiThreaded(hProcess, moduleName, pattern, 16);
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    std::cout << name << " Offset= 0x" << std::hex << offset << std::dec 
-              << " (Time: " << duration.count() << "ms)" << std::endl;
-    return offset;
-}
-
-DWORD ScanOffsetMultiThreaded(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name, int threadCount = 16)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    DWORD offset = PatternScanner::ScanPatternInModuleMultiThreaded(hProcess, moduleName, pattern, threadCount);
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    std::cout << name << " Offset= 0x" << std::hex << offset << std::dec 
-              << " (Time: " << duration.count() << "ms)" << std::endl;
+    if (offset != 0) {
+        std::cout << name << " Offset = 0x" << offset << std::hex << std::endl;
+    } else {
+        std::cout << name << " Offset not found" << std::endl;
+    }
     return offset;
 }
 
@@ -226,75 +207,61 @@ void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, 
     pEnv->LastError = 0;
     pEnv->Uid = 123456; // 示例UID
     
-    pEnv->EnableSetFov = FALSE;
+    pEnv->EnableSetFov = TRUE;
     pEnv->FieldOfView = 90.0f;
     pEnv->FixLowFov = FALSE;
-    pEnv->DisableFog = FALSE;
-    pEnv->EnableSetFps = FALSE;
-    pEnv->TargetFps = 120;
+    pEnv->DisableFog = TRUE;
+    pEnv->EnableSetFps = TRUE;
+    pEnv->TargetFps = 240;
     pEnv->RemoveTeamProgress = TRUE;
-    pEnv->HideQuestBanner = FALSE;
+    pEnv->HideQuestBanner = TRUE;
     pEnv->DisableCameraMove = FALSE;
-    pEnv->DisableDamageText = FALSE;
-    pEnv->TouchMode = TRUE;
-    pEnv->RedirectCombine = FALSE;
+    pEnv->DisableDamageText = TRUE;
+    pEnv->TouchMode = FALSE;
+    pEnv->RedirectCombine = TRUE;
     pEnv->ResinItem000106 = FALSE;
     pEnv->ResinItem000201 = FALSE;
     pEnv->ResinItem107009 = FALSE;
     pEnv->ResinItem107012 = FALSE;
     pEnv->ResinItem220007 = FALSE;
 
-    pEnv->Offsets.MickeyWonderMethod = 0x5e0d680; //
-    pEnv->Offsets.MickeyWonderMethodPartner = 0x3e87b0; //
-    pEnv->Offsets.MickeyWonderMethodPartner2 = 0x7728b90; //
-    pEnv->Offsets.SetFieldOfView = 0x10407c0; //
-    pEnv->Offsets.SetEnableFogRendering = 0x14f2cb90; //
-    pEnv->Offsets.SetTargetFrameRate = 0x14f18ea0; //
-    pEnv->Offsets.OpenTeam = ScanOffset(hProcess, moduleName, OpenTeamPattern, "OpenTeam"); //
-    pEnv->Offsets.OpenTeamPageAccordingly = ScanOffset(hProcess, moduleName, OpenTeamPageAccordinglyPattern, "OpenTeamPageAccordingly");
-    pEnv->Offsets.CheckCanEnter = 0x954f230; //
-    pEnv->Offsets.SetupQuestBanner = 0xdbb1320; //
-    pEnv->Offsets.FindGameObject = 0x14f1bf20; //
-    pEnv->Offsets.SetActive = 0x14f1bc60; //
-    pEnv->Offsets.EventCameraMove = 0xe076e80; //
-    pEnv->Offsets.ShowOneDamageTextEx = 0xfea2160; //
-    //pEnv->Offsets.SwitchInputDeviceToTouchScreen = 0xab06670;
-    pEnv->Offsets.SwitchInputDeviceToTouchScreen = ScanOffset(hProcess, moduleName, SwitchInputDeviceToTouchScreenPattern, "SwitchInputDeviceToTouchScreen"); //
-    pEnv->Offsets.MickeyWonderCombineEntryMethod = 0xa0a2d00; //
-    pEnv->Offsets.MickeyWonderCombineEntryMethodPartner = 0x84fb720; //
-    pEnv->Offsets.GetTargetFrameRate = 0x125a050; //
-    pEnv->Offsets.GameManagerAwake = 0xc4007c0; //
-    //pEnv->Offsets.SetupResinList = 0xd03a400; //!!!!!!!!!!
-    //pEnv->Offsets.ResinListRemove = 0x13CDA8C0;
-    //pEnv->Offsets.ResinList = 0x1F0;
-    //pEnv->Offsets.ResinListGetItem = 0x13CD8FF0;
-    //pEnv->Offsets.ResinListGetCount = 0x13CD8F90;
-    //pEnv->Offsets.SetLastUid = 0x0F43BA90;
+    // 扫描所有需要的函数偏移量
+    std::cout << "=== 开始扫描函数偏移量 ===" << std::endl;
     
-    std::wcout << L"HookEnvironment initialized with configuration." << std::endl;
-}
-
-// 清理共享内存
-void CleanupSharedMemory(HookEnvironment* pEnv, HANDLE hMapFile)
-{
-    if (pEnv != nullptr)
-    {
-        UnmapViewOfFile(pEnv);
-    }
+    pEnv->Offsets.GameManagerAwake = 0;
+    pEnv->Offsets.MainEntryPoint = 0;
+    pEnv->Offsets.MainEntryPartner1 = 0;
+    pEnv->Offsets.MainEntryPartner2 = 0;
+    pEnv->Offsets.SetUid = 0;
+    pEnv->Offsets.SetFov = ScanOffset(hProcess, moduleName, SetFovPattern, "SetFov");
+    pEnv->Offsets.SetFog = ScanOffset(hProcess, moduleName, DisplayFogPattern, "SetFog");
+    pEnv->Offsets.GetFps = ScanOffset(hProcess, moduleName, GetFrameCountPattern, "GetFps");
+    pEnv->Offsets.SetFps = ScanOffset(hProcess, moduleName, SetFrameCountPattern, "SetFps");
+    pEnv->Offsets.OpenTeam = ScanOffset(hProcess, moduleName, OpenTeamPattern, "OpenTeam");
+    pEnv->Offsets.OpenTeamAdvanced = ScanOffset(hProcess, moduleName, OpenTeamPageAccordinglyPattern, "OpenTeamAdvanced");
+    pEnv->Offsets.CheckEnter = ScanOffset(hProcess, moduleName, CheckCanEnterPattern, "CheckEnter");
+    pEnv->Offsets.QuestBanner = ScanOffset(hProcess, moduleName, SetupQuestBannerPattern, "QuestBanner");
+    pEnv->Offsets.FindObject = ScanOffset(hProcess, moduleName, FindGameObjectPattern, "FindObject");
+    pEnv->Offsets.ObjectActive = ScanOffset(hProcess, moduleName, SetActivePattern, "ObjectActive");
+    pEnv->Offsets.CameraMove = ScanOffset(hProcess, moduleName, EventCameraMovePattern, "CameraMove");
+    pEnv->Offsets.DamageText = ScanOffset(hProcess, moduleName, ShowOneDamageTextExPattern, "DamageText");
+    pEnv->Offsets.TouchInput = ScanOffset(hProcess, moduleName, SwitchInputDeviceToTouchScreenPattern, "TouchInput");
+    pEnv->Offsets.CombineEntry = ScanOffset(hProcess, moduleName, CraftEntryPattern, "CombineEntry");
+    pEnv->Offsets.CombineEntryPartner = ScanOffset(hProcess, moduleName, CraftEntryPartnerPattern, "CombineEntryPartner");
+    pEnv->Offsets.SetupResin = 0;
+    pEnv->Offsets.ResinList = 0;
+    pEnv->Offsets.ResinCount = 0;
+    pEnv->Offsets.ResinItem = 0;
+    pEnv->Offsets.ResinRemove = 0;
+    pEnv->Offsets.FindString = ScanOffset(hProcess, moduleName, FindStringPattern, "FindString");
+    pEnv->Offsets.PlayerPerspective = ScanOffset(hProcess, moduleName, PlayerPerspectivePattern, "PlayerPerspective");
     
-    if (hMapFile != NULL)
-    {
-        CloseHandle(hMapFile);
-    }
-    
-    std::wcout << L"Shared memory cleaned up." << std::endl;
+    std::cout << "=== 扫描完成 ===" << std::endl;
 }
 
 int main()
 {
     init_apartment();
-    
-    std::wcout << L"=== Pattern Scanner and DLL Injector ===" << std::endl;
 
     Inject();
     

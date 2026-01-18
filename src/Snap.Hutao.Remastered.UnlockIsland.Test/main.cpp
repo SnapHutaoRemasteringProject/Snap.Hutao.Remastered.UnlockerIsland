@@ -69,50 +69,17 @@ uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 
 std::wstring GetDLLPath()
 {
-    // 尝试多个可能的DLL位置
-    std::vector<std::filesystem::path> possiblePaths;
-    
-    // 1. 当前目录
-    wchar_t currentDir[MAX_PATH];
-    GetCurrentDirectoryW(MAX_PATH, currentDir);
-    possiblePaths.push_back(std::filesystem::path(currentDir) / L"Snap.Hutao.Remastered.UnlockIsland.dll");
-    
-    // 2. 当前目录的父目录的x64/Debug（对于注入器在Test项目的Debug目录中）
-    std::filesystem::path path1(currentDir);
-    path1 = path1.parent_path().parent_path().parent_path(); // 回到src目录
-    path1 /= L"x64";
-    path1 /= L"Debug";
-    path1 /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
-    possiblePaths.push_back(path1);
-    
-    // 3. 绝对路径到主项目的x64/Debug
-    std::filesystem::path path2 = L"e:\\SnapHutaoRemasteringProject\\Snap.Hutao.Remastered.UnlockIsland\\src\\x64\\Debug\\Snap.Hutao.Remastered.UnlockIsland.dll";
-    possiblePaths.push_back(path2);
-    
-    // 4. 相对路径：../../x64/Debug（从Test项目的Debug目录）
-    std::filesystem::path path3(currentDir);
-    path3 = path3.parent_path().parent_path(); // 回到Test目录
-    path3 = path3.parent_path(); // 回到src目录
-    path3 /= L"x64";
-    path3 /= L"Debug";
-    path3 /= L"Snap.Hutao.Remastered.UnlockIsland.dll";
-    possiblePaths.push_back(path3);
-    
-    for (const auto& path : possiblePaths)
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Snap.Hutao.Remastered.UnlockIsland.dll";
+
+    if (std::filesystem::exists(dllPath))
     {
-        if (std::filesystem::exists(path))
-        {
-            return path.wstring();
-        }
+        return dllPath.wstring();
     }
-    
-    // 如果都没找到，显示错误信息
-    std::wcerr << L"DLL not found in any of the following locations:" << std::endl;
-    for (const auto& path : possiblePaths)
-    {
-        std::wcerr << L"  " << path.wstring() << std::endl;
-    }
-    std::wcerr << L"Please build the main project first." << std::endl;
+
+    std::wcerr << L"DLL not found in current directory: " << dllPath.wstring() << std::endl;
+    std::wcerr << L"Please place Snap.Hutao.Remastered.UnlockIsland.dll in the current directory." << std::endl;
     return L"";
 }
 

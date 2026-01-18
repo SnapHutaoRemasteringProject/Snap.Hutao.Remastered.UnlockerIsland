@@ -3,8 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <future>
-#include <iomanip>
 
 HANDLE PatternScanner::OpenProcessHandle(const std::wstring& processName)
 {
@@ -144,21 +142,49 @@ DWORD PatternScanner::ScanPatternInModule(HANDLE hProcess, const std::wstring& m
     uintptr_t baseAddress = reinterpret_cast<uintptr_t>(me.modBaseAddr);
     DWORD moduleSize = me.modBaseSize;
 
-    const size_t chunkSize = 4096;
-    std::vector<uint8_t> buffer(chunkSize);
+    // Use larger buffer to reduce system calls
+    const size_t bufferSize = 1024 * 1024; // 1MB buffer
+    std::vector<uint8_t> buffer(bufferSize);
+    size_t patternSize = patternBytes.size();
 
-    for (uintptr_t offset = 0; offset < moduleSize; offset += chunkSize - patternBytes.size())
+    // Optimization: for small modules, read entire module at once
+    if (moduleSize <= bufferSize)
     {
-        size_t readSize = min(chunkSize, static_cast<size_t>(moduleSize - offset));
+        if (ReadProcessMemorySafe(hProcess, baseAddress, buffer.data(), moduleSize))
+        {
+            for (size_t i = 0; i <= moduleSize - patternSize; ++i)
+            {
+                bool match = true;
+                for (size_t j = 0; j < patternSize; ++j)
+                {
+                    if (patternMask[j] && buffer[i + j] != patternBytes[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    return static_cast<DWORD>(i);
+                }
+            }
+        }
+        return 0;
+    }
+
+    // For large modules, read in chunks
+    for (uintptr_t offset = 0; offset < moduleSize; offset += bufferSize - patternSize)
+    {
+        size_t readSize = min(bufferSize, static_cast<size_t>(moduleSize - offset));
         if (!ReadProcessMemorySafe(hProcess, baseAddress + offset, buffer.data(), readSize))
         {
             continue;
         }
 
-        for (size_t i = 0; i <= readSize - patternBytes.size(); ++i)
+        for (size_t i = 0; i <= readSize - patternSize; ++i)
         {
             bool match = true;
-            for (size_t j = 0; j < patternBytes.size(); ++j)
+            for (size_t j = 0; j < patternSize; ++j)
             {
                 if (patternMask[j] && buffer[i + j] != patternBytes[j])
                 {
@@ -168,7 +194,7 @@ DWORD PatternScanner::ScanPatternInModule(HANDLE hProcess, const std::wstring& m
             }
             if (match)
             {
-                return offset + i;
+                return static_cast<DWORD>(offset + i);
             }
         }
     }
@@ -210,7 +236,6 @@ bool PatternScanner::IsDLLAlreadyInjected(HANDLE hProcess, const std::wstring& d
     return false;
 }
 
-// Inject DLL into target process
 bool PatternScanner::InjectDLL(HANDLE hProcess, const std::wstring& dllPath)
 {
     // First check if DLL is already injected
@@ -271,289 +296,4 @@ bool PatternScanner::InjectDLL(HANDLE hProcess, const std::wstring& dllPath)
 
     std::wcout << L"DLL injected successfully: " << dllName << std::endl;
     return true;
-}
-
-// Boyer-Moore-Horspool算法预处理函数
-static void BuildBadCharTable(const std::vector<uint8_t>& pattern, const std::vector<bool>& mask, 
-                             std::vector<size_t>& badCharShift, size_t& patternSize)
-{
-    patternSize = pattern.size();
-    badCharShift.resize(256, patternSize);
-    
-    for (size_t i = 0; i < patternSize - 1; ++i)
-    {
-        if (mask[i])
-        {
-            badCharShift[pattern[i]] = patternSize - 1 - i;
-        }
-    }
-}
-
-// 优化的扫描函数，使用Boyer-Moore-Horspool算法
-static bool PatternMatchBMH(const uint8_t* data, const std::vector<uint8_t>& pattern, 
-                           const std::vector<bool>& mask, size_t patternSize)
-{
-    // 对于短模式，使用朴素算法
-    if (patternSize <= 4)
-    {
-        for (size_t j = 0; j < patternSize; ++j)
-        {
-            if (mask[j] && data[j] != pattern[j])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    // 检查第一个和最后一个固定字节（如果存在）以快速排除
-    size_t firstFixed = 0;
-    while (firstFixed < patternSize && !mask[firstFixed]) firstFixed++;
-    
-    size_t lastFixed = patternSize - 1;
-    while (lastFixed > firstFixed && !mask[lastFixed]) lastFixed--;
-    
-    if (firstFixed < patternSize && data[firstFixed] != pattern[firstFixed])
-        return false;
-    
-    if (lastFixed > firstFixed && data[lastFixed] != pattern[lastFixed])
-        return false;
-    
-    // 完整比较
-    for (size_t j = 0; j < patternSize; ++j)
-    {
-        if (mask[j] && data[j] != pattern[j])
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Multi-threaded scanning implementation
-DWORD PatternScanner::ScanChunk(HANDLE hProcess, uintptr_t baseAddress, uintptr_t startOffset, 
-                               uintptr_t endOffset, const std::vector<uint8_t>& patternBytes, 
-                               const std::vector<bool>& patternMask, std::atomic<bool>* shouldStop)
-{
-    // 安全检查：确保参数有效
-    if (!hProcess || hProcess == INVALID_HANDLE_VALUE || patternBytes.empty() || startOffset >= endOffset)
-    {
-        return 0;
-    }
-
-    // 大幅增加读取缓冲区大小，减少系统调用次数
-    const size_t chunkSize = 4 * 1024 * 1024; // 1MB缓冲区，显著减少ReadProcessMemory调用
-    std::vector<uint8_t> buffer(chunkSize);
-    size_t patternSize = patternBytes.size();
-    
-    // 预处理Boyer-Moore-Horspool表
-    std::vector<size_t> badCharShift;
-    size_t actualPatternSize;
-    BuildBadCharTable(patternBytes, patternMask, badCharShift, actualPatternSize);
-    
-    // 确保badCharShift表有效
-    if (badCharShift.empty() || actualPatternSize == 0)
-    {
-        return 0;
-    }
-
-    // 计算实际需要扫描的范围
-    uintptr_t actualEndOffset = endOffset;
-
-    for (uintptr_t offset = startOffset; offset < actualEndOffset; )
-    {
-        // 检查是否需要提前终止
-        if (shouldStop && shouldStop->load(std::memory_order_relaxed))
-        {
-            return 0;
-        }
-
-        // 确保读取大小有效
-        if (actualEndOffset - offset == 0)
-        {
-            break;
-        }
-
-        size_t readSize = min(chunkSize, static_cast<size_t>(actualEndOffset - offset));
-        
-        // 确保readSize至少为patternSize，否则无法匹配
-        if (readSize < patternSize)
-        {
-            break;
-        }
-
-        if (!ReadProcessMemorySafe(hProcess, baseAddress + offset, buffer.data(), readSize))
-        {
-            // 读取失败，跳过这个区域
-            offset += chunkSize;
-            continue;
-        }
-
-        // 使用Boyer-Moore-Horspool算法进行扫描
-        size_t i = 0;
-        while (i <= readSize - patternSize)
-        {
-            // 定期检查是否需要提前终止（每扫描4096字节检查一次）
-            if (shouldStop && (i & 0xFFF) == 0 && shouldStop->load(std::memory_order_relaxed))
-            {
-                return 0;
-            }
-            
-            // 检查最后一个字节（如果它是固定字节）
-            size_t lastByteIdx = patternSize - 1;
-            bool lastByteIsFixed = patternMask[lastByteIdx];
-            
-            if (!lastByteIsFixed || buffer[i + lastByteIdx] == patternBytes[lastByteIdx])
-            {
-                // 如果最后一个字节匹配或者是通配符，检查整个模式
-                if (PatternMatchBMH(&buffer[i], patternBytes, patternMask, patternSize))
-                {
-                    return offset + i;
-                }
-            }
-            
-            // 根据坏字符表计算跳转距离，确保不会越界
-            if (i + patternSize - 1 < readSize)
-            {
-                uint8_t badChar = buffer[i + patternSize - 1];
-                size_t shift = badCharShift[badChar];
-                
-                // 确保shift至少为1，避免无限循环
-                if (shift == 0)
-                {
-                    shift = 1;
-                }
-                
-                i += shift;
-            }
-            else
-            {
-                // 如果越界，跳出循环
-                break;
-            }
-        }
-
-        // 确保偏移量向前移动，避免无限循环
-        size_t advance = readSize - patternSize + 1;
-        if (advance == 0)
-        {
-            advance = 1;
-        }
-        offset += advance;
-    }
-
-    return 0;
-}
-
-void PatternScanner::ScanWorker(const ScanTask& task)
-{
-    DWORD localResult = ScanChunk(task.hProcess, task.baseAddress, 
-                                 task.startOffset, task.endOffset,
-                                 *task.patternBytes, *task.patternMask, nullptr);
-    
-    if (localResult != 0)
-    {
-        std::lock_guard<std::mutex> lock(*task.resultMutex);
-        DWORD expected = 0;
-        if (task.result->compare_exchange_strong(expected, localResult))
-        {
-            // Signal that we found a result
-            task.cv->notify_all();
-        }
-    }
-    
-    // Decrement active thread count
-    (*task.activeThreads)--;
-    if (*task.activeThreads == 0)
-    {
-        task.cv->notify_all();
-    }
-}
-
-DWORD PatternScanner::ScanPatternInModuleMultiThreaded(HANDLE hProcess, const std::wstring& moduleName, 
-                                                      const std::string& pattern, int threadCount)
-{
-    MODULEENTRY32W me = GetModuleEntry(hProcess, moduleName);
-    if (me.modBaseAddr == 0)
-    {
-        std::wcerr << L"Module not found: " << moduleName << std::endl;
-        return 0;
-    }
-
-    std::vector<uint8_t> patternBytes;
-    std::vector<bool> patternMask;
-    ParsePattern(pattern, patternBytes, patternMask);
-
-    if (patternBytes.empty())
-    {
-        std::cerr << "Pattern parsing failed or pattern is empty" << std::endl;
-        return 0;
-    }
-
-    uintptr_t baseAddress = reinterpret_cast<uintptr_t>(me.modBaseAddr);
-    DWORD moduleSize = me.modBaseSize;
-
-    // 优化：对于小模块，使用单线程
-    if (moduleSize < 1024 * 1024) // 小于1MB的模块
-    {
-        std::cout << "Using single-threaded scan for small module" << std::endl;
-        return ScanPatternInModule(hProcess, moduleName, pattern);
-    }
-
-    if (threadCount <= 0)
-    {
-        SYSTEM_INFO sysInfo;
-        GetSystemInfo(&sysInfo);
-        threadCount = sysInfo.dwNumberOfProcessors;
-    }
-    
-    if (threadCount > 32) threadCount = 32;
-    
-    uintptr_t minChunkSize = 4 * 1024 * 1024; // 最小4MB每个线程，减少线程间切换
-    uintptr_t chunkSize = moduleSize / threadCount;
-    
-    if (chunkSize < minChunkSize)
-    {
-        chunkSize = minChunkSize;
-        threadCount = static_cast<int>(moduleSize / chunkSize);
-        if (threadCount < 1) threadCount = 1;
-        if (threadCount > 32) threadCount = 32; // 重新限制
-    }
-
-    std::atomic<bool> shouldStop(false);
-    std::atomic<DWORD> finalResult(0);
-    std::vector<std::thread> threads;
-    
-    for (int i = 0; i < threadCount; ++i)
-    {
-        uintptr_t startOffset = i * chunkSize;
-        uintptr_t endOffset = (i == threadCount - 1) ? moduleSize : (i + 1) * chunkSize;
-        
-        threads.emplace_back([hProcess, baseAddress, startOffset, endOffset, 
-                             &patternBytes, &patternMask, &shouldStop, &finalResult]() {
-            DWORD localResult = ScanChunk(hProcess, baseAddress, startOffset, endOffset, 
-                                         patternBytes, patternMask, &shouldStop);
-            
-            if (localResult != 0)
-            {
-                DWORD expected = 0;
-                if (finalResult.compare_exchange_strong(expected, localResult, 
-                                                       std::memory_order_relaxed, 
-                                                       std::memory_order_relaxed))
-                {
-                    shouldStop.store(true, std::memory_order_relaxed);
-                }
-            }
-        });
-    }
-
-    for (auto& thread : threads)
-    {
-        if (thread.joinable())
-        {
-            thread.join();
-        }
-    }
-
-    return finalResult.load();
 }

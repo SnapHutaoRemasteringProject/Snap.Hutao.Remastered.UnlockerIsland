@@ -4,8 +4,4 @@
 #include "MemoryUtils.h"
 
 void SetupHooks();
-void SetupOpenTeamHook();
-
-void NewOpenTeam();
-
-extern VoidFunc originalOpenTeamFunction;
+void RequestOpenCraft();

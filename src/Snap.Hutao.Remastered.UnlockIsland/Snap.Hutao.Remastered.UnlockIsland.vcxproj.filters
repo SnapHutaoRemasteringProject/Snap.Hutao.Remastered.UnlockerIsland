@@ -19,13 +19,16 @@
     <Filter Include="头文件\utils">
       <UniqueIdentifier>{b28c6b2e-e866-4140-a7ab-0eff31254535}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\hook">
+      <UniqueIdentifier>{017b0496-4dbb-468b-b41d-3ef86d0cd6a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\hook">
+      <UniqueIdentifier>{3b289402-6289-4720-9279-9c129e2030d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\MinHook.h">
       <Filter>头文件\include</Filter>
-    </ClInclude>
-    <ClInclude Include="Hooks.h">
-      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="dllmain.h">
       <Filter>头文件</Filter>
@@ -39,16 +42,25 @@
     <ClInclude Include="MemoryUtils.h">
       <Filter>头文件\utils</Filter>
     </ClInclude>
+    <ClInclude Include="Hooks.h">
+      <Filter>头文件\hook</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiAntiDebug.h">
+      <Filter>头文件\hook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Hooks.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MemoryUtils.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooks.cpp">
+      <Filter>源文件\hook</Filter>
+    </ClCompile>
+    <ClCompile Include="AntiAntiDebug.cpp">
+      <Filter>源文件\hook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

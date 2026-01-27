@@ -48,6 +48,9 @@
     <ClInclude Include="AntiAntiDebug.h">
       <Filter>头文件\hook</Filter>
     </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -61,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="AntiAntiDebug.cpp">
       <Filter>源文件\hook</Filter>
+    </ClCompile>
+    <ClCompile Include="Constants.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

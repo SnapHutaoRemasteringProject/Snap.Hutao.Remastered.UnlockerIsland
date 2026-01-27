@@ -2,9 +2,11 @@
 #include "HookEnvironment.h"
 #include "HookFunctionOffsets.h"
 #include "MemoryUtils.h"
+#include "Constants.h"
 #include "include/MinHook.h"
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 
 // Get_FrameCount
 static LPVOID originalGetFrameCount = nullptr;
@@ -40,6 +42,8 @@ static LPVOID checkCanEnter = nullptr;
 static LPVOID openTeamPageAccordingly = nullptr;
 static LPVOID originalOpenTeam = nullptr;
 
+static LPVOID originalGameUpdate = nullptr;
+
 // Global State
 static bool gameUpdateInit = false;
 static bool touchScreenInit = false;
@@ -52,61 +56,140 @@ struct FakeFogStruct {
 };
 static FakeFogStruct fakeFogStruct;
 
+// Paimon Display
+static LPVOID getActive = nullptr;
+
 
 // typedef int(*HookGet_FrameCount_t)();
-typedef int(__stdcall* GetFrameCountFn)();
+typedef int(* GetFrameCountFn)();
 
 // typedef int(*Set_FrameCount_t)(int value);
-typedef int(__stdcall* SetFrameCountFn)(int);
+typedef int(* SetFrameCountFn)(int);
 
 // typedef int(*HookChangeFOV_t)(__int64 a1, float a2);
-typedef int(__stdcall* SetFovFn)(void*, float);
+typedef int(* SetFovFn)(void*, float);
 
 // typedef void (*SwitchInputDeviceToTouchScreen_t)(void*);
-typedef void(__stdcall* SwitchInputDeviceToTouchScreenFn)(void*);
+typedef void(* SwitchInputDeviceToTouchScreenFn)(void*);
 
 // Quest Banner Types
 // typedef void (*SetupQuestBanner_t)(void*);
-typedef void(__stdcall* SetupQuestBannerFn)(void*);
+typedef void(* SetupQuestBannerFn)(void*);
 // typedef void* (*FindGameObject_t)(Il2CppString*);
-typedef void*(__stdcall* FindGameObjectFn)(void*);
+typedef void*(* FindGameObjectFn)(void*);
 // typedef void (*SetActive_t)(void*, bool);
-typedef void(__stdcall* SetActiveFn)(void*, bool);
+typedef void(* SetActiveFn)(void*, bool);
+// typedef bool (*GetActive_t)(void*);
+typedef bool(*GetActiveFn)(void*);
 
 // Event Camera Types
 // typedef bool (*EventCameraMove_t)(void*, void*);
-typedef bool(__stdcall* EventCameraMoveFn)(void*, void*);
+typedef bool(* EventCameraMoveFn)(void*, void*);
 
 // Damage Text Types
 // typedef void (*ShowOneDamageTextEx_t)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
-typedef void(__stdcall* ShowOneDamageTextExFn)(void*, int, int, int, float, void*, void*, void*, int);
+typedef void(* ShowOneDamageTextExFn)(void*, int, int, int, float, void*, void*, void*, int);
 
 // typedef int(*HookDisplayFog_t)(__int64 a1, __int64 a2);
-typedef int(__stdcall* DisplayFogFn)(void*, void*);
+typedef int(* DisplayFogFn)(void*, void*);
 
 // typedef void* (*HookPlayer_Perspective_t)(void* RCX, float Display, void* R8);
-typedef void*(__stdcall* PlayerPerspectiveFn)(void*, float, void*);
+typedef void*(* PlayerPerspectiveFn)(void*, float, void*);
 
 // Craft Redirect Types
 // typedef Il2CppString* (*FindString_t)(const char*);
-typedef void*(__stdcall* FindStringFn)(const char*);
+typedef void*(* FindStringFn)(const char*);
 
 // typedef void (*CraftEntry_t)(void*);
-typedef void(__stdcall* CraftEntryFn)(void*);
+typedef void(* CraftEntryFn)(void*);
 
 // typedef bool (*CraftEntryPartner_t)(Il2CppString*, void*, void*, void*, void*);
-typedef bool(__stdcall* CraftEntryPartnerFn)(void*, void*, void*, void*, void*);
+typedef bool(* CraftEntryPartnerFn)(void*, void*, void*, void*, void*);
 
 // Team Anime Types
 // typedef bool(*CheckCanEnter_t)();
-typedef bool(__stdcall* CheckCanEnterFn)();
+typedef bool(* CheckCanEnterFn)();
 
 // typedef void(*OpenTeam_t)();
-typedef void(__stdcall* OpenTeamFn)();
+typedef void(* OpenTeamFn)();
 
 // typedef void(*OpenTeamPageAccordingly_t)(bool);
-typedef void(__stdcall* OpenTeamPageAccordinglyFn)(bool);
+typedef void(* OpenTeamPageAccordinglyFn)(bool);
 
+typedef void(* UpdateFn)(void*);
+
+void HandlePaimon() {
+    if (!findString || !findGameObject || !setActive || !getActive)
+    {
+        return;
+    }
+
+    FindStringFn findStringFunc = (FindStringFn)findString;
+    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+
+    if (g_pEnv->DisplayPaimon)
+    {
+        void* paimonStrObj = findStringFunc(PAIMON_PATH);
+		void* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
+
+        if (paimonStrObj && profileLayerStrObj)
+        {
+            void* paimonObj = findGameObjectFunc(paimonStrObj);
+			void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
+
+            if (paimonObj && profileLayerObj)
+            {
+				bool profileOpen = getActiveFunc(profileLayerObj);
+
+                if (profileOpen) {
+                    setActiveFunc(paimonObj, false);
+                }
+                else {
+                    setActiveFunc(paimonObj, true);
+                }
+            }
+        }
+    }
+}
+
+void HandleUID() {
+
+    if (!findString || !findGameObject || !setActive) {
+        return;
+    }
+
+    FindStringFn findStringFunc = (FindStringFn)findString;
+    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+
+    void* strObj = findStringFunc(UID_PATH);
+    if (strObj)
+    {
+        void* uidObj = findGameObjectFunc(strObj);
+        if (uidObj)
+        {
+            setActiveFunc(uidObj, false);
+        }
+    }
+}
+
+void HandleTouchMode() {
+    if (!gameUpdateInit && !touchScreenInit && g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
+    {
+        touchScreenInit = true;
+        SwitchInputDeviceToTouchScreenFn switchInput = (SwitchInputDeviceToTouchScreenFn)switchInputDeviceToTouchScreen;
+        __try
+        {
+            switchInput(nullptr);
+        }
+        __except (0)
+        {
+            // Ignore exceptions
+        }
+	}
+}
 
 void RequestOpenCraft()
 {
@@ -123,9 +206,7 @@ static bool DoOpenCraftMenu()
     FindStringFn findStringFunc = (FindStringFn)findString;
     CraftEntryPartnerFn craftEntryPartnerFunc = (CraftEntryPartnerFn)craftEntryPartner;
 
-    // path to the global combine page
-    const char* path = "SynthesisPage";
-    void* strObj = findStringFunc(path);
+    void* strObj = findStringFunc(SYNTHESIS_PAGE_NAME);
 
     if (strObj)
     {
@@ -137,7 +218,7 @@ static bool DoOpenCraftMenu()
     return false;
 }
 
-static int __stdcall HookGetFrameCount()
+static int HookGetFrameCount()
 {
     if (originalGetFrameCount)
     {
@@ -163,39 +244,8 @@ static int __stdcall HookGetFrameCount()
     return 60;
 }
 
-static int __stdcall HookSetFov(void* a1, float changeFovValue)
+static int HookSetFrameCount(void* a1, float changeFrameCountValue)
 {
-    if (!gameUpdateInit)
-    {
-        gameUpdateInit = true;
-    }
-
-    // Check for craft menu request (Main Thread Execution)
-    if (requestOpenCraft)
-    {
-        requestOpenCraft = false;
-        // We don't care about the return value here, just do it
-        DoOpenCraftMenu();
-    }
-
-    // Touch screen initialization (once)
-    if (!touchScreenInit)
-    {
-        touchScreenInit = true;
-        if (g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
-        {
-            SwitchInputDeviceToTouchScreenFn switchInput = (SwitchInputDeviceToTouchScreenFn)switchInputDeviceToTouchScreen;
-            __try
-            {
-                switchInput(nullptr);
-            }
-            __except (0)
-            {
-                // Ignore exceptions
-            }
-        }
-    }
-
     // FPS override
     if (g_pEnv->EnableSetFps && originalSetFrameCount)
     {
@@ -203,6 +253,11 @@ static int __stdcall HookSetFov(void* a1, float changeFovValue)
         setFrameCount(g_pEnv->TargetFps);
     }
 
+    return 0;
+}
+
+static int HookSetFov(void* a1, float changeFovValue)
+{
     // FOV override
     if (changeFovValue > 30.0f && g_pEnv->EnableSetFov)
     {
@@ -217,7 +272,7 @@ static int __stdcall HookSetFov(void* a1, float changeFovValue)
     return 0;
 }
 
-static int __stdcall HookDisplayFog(void* a1, void* a2)
+static int HookDisplayFog(void* a1, void* a2)
 {
     if (g_pEnv->DisableFog && a2)
     {
@@ -241,7 +296,7 @@ static int __stdcall HookDisplayFog(void* a1, void* a2)
     return 0;
 }
 
-static void* __stdcall HookPlayerPerspective(void* rcx, float display, void* r8)
+static void* HookPlayerPerspective(void* rcx, float display, void* r8)
 {
     if (g_pEnv->FixLowFov)
     {
@@ -256,8 +311,7 @@ static void* __stdcall HookPlayerPerspective(void* rcx, float display, void* r8)
     return nullptr;
 }
 
-// SetupQuestBanner hook (hides UID and quest banner)
-static void __stdcall HookSetupQuestBanner(void* pThis)
+static void HookSetupQuestBanner(void* pThis)
 {
     if (findString && findGameObject && setActive)
     {
@@ -265,26 +319,10 @@ static void __stdcall HookSetupQuestBanner(void* pThis)
         FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
         SetActiveFn setActiveFunc = (SetActiveFn)setActive;
 
-        // Hide UID Logic
-        if (g_pEnv->Uid != 0)
-        {
-            const char* uidPath = "/BetaWatermarkCanvas(Clone)/Panel/TxtUID";
-            void* strObj = findStringFunc(uidPath);
-            if (strObj)
-            {
-                void* uidObj = findGameObjectFunc(strObj);
-                if (uidObj)
-                {
-                    setActiveFunc(uidObj, false);
-                }
-            }
-        }
-
         // Hide Quest Banner Logic
         if (g_pEnv->HideQuestBanner)
         {
-            const char* bannerPath = "Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner";
-            void* strObj = findStringFunc(bannerPath);
+            void* strObj = findStringFunc(QUEST_BANNER_PATH);
             if (strObj)
             {
                 void* banner = findGameObjectFunc(strObj);
@@ -304,7 +342,7 @@ static void __stdcall HookSetupQuestBanner(void* pThis)
     }
 }
 
-static bool __stdcall HookEventCameraMove(void* pThis, void* event)
+static bool HookEventCameraMove(void* pThis, void* event)
 {
     if (g_pEnv->DisableCameraMove)
     {
@@ -319,7 +357,7 @@ static bool __stdcall HookEventCameraMove(void* pThis, void* event)
     return true;
 }
 
-static void __stdcall HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, void* showText, void* worldPos, void* attackee, int elementReactionType)
+static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, void* showText, void* worldPos, void* attackee, int elementReactionType)
 {
     if (g_pEnv->DisableDamageText)
     {
@@ -333,7 +371,7 @@ static void __stdcall HookShowOneDamageTextEx(void* pThis, int type_, int damage
     }
 }
 
-static void __stdcall HookCraftEntry(void* pThis)
+static void HookCraftEntry(void* pThis)
 {
     // If redirect is enabled AND we successfully opened the menu via our helper
     if (g_pEnv->RedirectCombine && DoOpenCraftMenu())
@@ -349,7 +387,7 @@ static void __stdcall HookCraftEntry(void* pThis)
     }
 }
 
-static void __stdcall HookOpenTeam()
+static void HookOpenTeam()
 {
     if (g_pEnv->RemoveTeamProgress && checkCanEnter)
     {
@@ -372,6 +410,27 @@ static void __stdcall HookOpenTeam()
     }
 }
 
+static void HookGameUpdate(void* pThis)
+{
+    if (!gameUpdateInit)
+    {
+        gameUpdateInit = true;
+    }
+
+    HandleTouchMode();
+    HandlePaimon();
+    HandleUID();
+
+    if (requestOpenCraft)
+    {
+        requestOpenCraft = false;
+        DoOpenCraftMenu();
+    }
+
+    UpdateFn original = (UpdateFn)originalGameUpdate;
+    original(pThis);
+}
+
 void SetupHooks()
 {
     if (g_pEnv->Offsets.GetFps)
@@ -385,7 +444,11 @@ void SetupHooks()
 
     if (g_pEnv->Offsets.SetFps)
     {
-        originalSetFrameCount = GetFunctionAddress(g_pEnv->Offsets.SetFps);
+        LPVOID setFrameCount = GetFunctionAddress(g_pEnv->Offsets.SetFps);
+        if (setFrameCount)
+        {
+            MH_CreateHook(setFrameCount, nullptr, &originalSetFrameCount);
+		}
     }
 
     if (g_pEnv->Offsets.SetFov)
@@ -453,7 +516,7 @@ void SetupHooks()
         LPVOID playerPerspectiveAddr = GetFunctionAddress(g_pEnv->Offsets.PlayerPerspective);
         if (playerPerspectiveAddr)
         {
-            MH_CreateHook(playerPerspectiveAddr, HookPlayerPerspective, &originalPlayerPerspective);
+            //MH_CreateHook(playerPerspectiveAddr, HookPlayerPerspective, &originalPlayerPerspective);
         }
     }
 
@@ -494,4 +557,18 @@ void SetupHooks()
             MH_CreateHook(openTeamAddr, HookOpenTeam, &originalOpenTeam);
         }
     }
+
+	if (g_pEnv->Offsets.IsObjectActive)
+    {
+        getActive = GetFunctionAddress(g_pEnv->Offsets.IsObjectActive);
+    }
+
+    if (g_pEnv->Offsets.GameUpdate)
+    {
+        LPVOID gameUpdateAddr = GetFunctionAddress(g_pEnv->Offsets.GameUpdate);
+        if (gameUpdateAddr)
+        {
+            MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
+        }
+	}
 }

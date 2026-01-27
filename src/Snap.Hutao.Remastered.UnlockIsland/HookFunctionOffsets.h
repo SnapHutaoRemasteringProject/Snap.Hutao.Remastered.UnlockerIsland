@@ -39,4 +39,7 @@ struct HookFunctionOffsets
     
     DWORD FindString;
     DWORD PlayerPerspective;
+
+    DWORD IsObjectActive;
+	DWORD GameUpdate;
 };

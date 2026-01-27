@@ -116,6 +116,38 @@ std::wstring GetDLLPath()
     return L"";
 }
 
+bool StartGameAndSuspend(const std::wstring& gamePath, HANDLE& hProcess, HANDLE& hMainThread, DWORD& pid)
+{
+    // 启动游戏
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi = { 0 };
+    
+    std::wstring commandLine = L"\"" + gamePath + L"\"";
+    
+    if (!CreateProcessW(
+        gamePath.c_str(),
+        &commandLine[0],
+        nullptr,
+        nullptr,
+        FALSE,
+        CREATE_SUSPENDED, // 创建时挂起
+        0,
+        nullptr,
+        &si,
+        &pi))
+    {
+        std::wcerr << L"Failed to start game: " << GetLastError() << std::endl;
+        return false;
+    }
+    
+    hProcess = pi.hProcess;
+    hMainThread = pi.hThread; // 保存主线程句柄
+    pid = pi.dwProcessId;
+    
+    std::wcout << L"Game started with PID: " << pid << L" (suspended)" << std::endl;
+    return true;
+}
+
 void Inject()
 {
     std::wstring dllPath = GetDLLPath();
@@ -124,28 +156,131 @@ void Inject()
         return;
     }
 
-    HANDLE hProcess = PatternScanner::OpenProcessHandle(L"YuanShen.exe");
-
-    if (hProcess == nullptr)
+    // 总是启动新游戏实例
+    std::wstring gamePath;
+    
+    // 尝试查找游戏路径
+    std::vector<std::wstring> possiblePaths = {
+        L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\YuanShen.exe",
+        L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\GenshinImpact.exe",
+        L"E:\\Genshin Impact Game\\YuanShen.exe"
+    };
+    
+    for (const auto& path : possiblePaths)
     {
-        hProcess = PatternScanner::OpenProcessHandle(L"GenshinImpact.exe");
+        if (std::filesystem::exists(path))
+        {
+            gamePath = path;
+            break;
+        }
     }
-
-    if (hProcess == nullptr)
+    
+    if (gamePath.empty())
+    {
+        std::wcerr << L"Game executable not found. Please specify the game path." << std::endl;
+        return;
+    }
+    
+    HANDLE hProcess = nullptr;
+    HANDLE hMainThread = nullptr;
+    DWORD pid = 0;
+    if (!StartGameAndSuspend(gamePath, hProcess, hMainThread, pid))
     {
         return;
     }
+    
     HookEnvironment* pEnv = nullptr;
     HANDLE hMapFile = NULL;
 
     if (CreateSharedMemoryForHookEnvironment(pEnv, hMapFile))
     {
-        InitializeHookEnvironment(hProcess, L"YuanShen.exe", pEnv);
+        if (pEnv)
+        {
+            ZeroMemory(pEnv, sizeof(HookEnvironment));
+            pEnv->Size = sizeof(HookEnvironment);
+            pEnv->State = TRUE;
+            pEnv->LastError = 0;
+            pEnv->Uid = 123456;
+            
+            // 设置默认值
+            pEnv->EnableSetFov = TRUE;
+            pEnv->FieldOfView = 90.0f;
+            pEnv->FixLowFov = TRUE;
+            pEnv->DisableFog = TRUE;
+            pEnv->EnableSetFps = TRUE;
+            pEnv->TargetFps = 240;
+            pEnv->RemoveTeamProgress = TRUE;
+            pEnv->HideQuestBanner = TRUE;
+            pEnv->DisableCameraMove = FALSE;
+            pEnv->DisableDamageText = TRUE;
+            pEnv->TouchMode = TRUE;
+            pEnv->RedirectCombine = TRUE;
+			pEnv->DisplayPaimon = TRUE;
+            
+            ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
-        PatternScanner::InjectDLL(hProcess, dllPath);
+            pEnv->Offsets.GameManagerAwake = 0xC835B70;  //GameManager.Awake
+            pEnv->Offsets.MainEntryPoint = 0;  //need't any more
+            pEnv->Offsets.MainEntryPartner1 = 0;
+            pEnv->Offsets.MainEntryPartner2 = 0;
+            pEnv->Offsets.SetUid = 0;
+            pEnv->Offsets.SetFov = 0x15B71A20;  //Camera.set_fieldOfView
+            pEnv->Offsets.SetFog = 0x15B73330;  //Camera.set_enableFogRendering
+            pEnv->Offsets.GetFps = 0x15B5F530;  //Application.get_targetFrameRate
+            pEnv->Offsets.SetFps = 0x15B5F540;
+            pEnv->Offsets.OpenTeam = 0xe47e1b0;  //JGDDADKMLDL.DDFODLGCHGM  need pattern scan
+            pEnv->Offsets.OpenTeamAdvanced = 0xe4851e0;  //JGDDADKMLDL.LBLECKJEGOI  need pattern scan
+            pEnv->Offsets.CheckEnter = 0xfeafc10;  //need pattern scan
+            pEnv->Offsets.QuestBanner = 0xa98f410;
+            pEnv->Offsets.FindObject = 0x15B625B0;  //GameObject.Find
+            pEnv->Offsets.ObjectActive = 0x15B62300;  //GameObject.set_active
+			pEnv->Offsets.IsObjectActive = 0x15B622E0;  //GameObject.get_active
+            pEnv->Offsets.CameraMove = 0xfa87490;  //BOFBPKLPKOK.DNIJOJKIOIF need pattern scan
+            pEnv->Offsets.DamageText = 0x10850AD0;  //MonoParticleDamageTextContainer.ShowOneDamageText
+            pEnv->Offsets.TouchInput = 0x105c2c10;  //CNGPNBOAIKK.FGKNOKNIIPL need pattern scan
+            pEnv->Offsets.CombineEntry = 0x69ea500;  //NBJLAEKBCIM.DNJNIKDKECD need pattern scan
+            pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
+            pEnv->Offsets.SetupResin = 0;
+            pEnv->Offsets.ResinList = 0;
+            pEnv->Offsets.ResinCount = 0;
+            pEnv->Offsets.ResinItem = 0;
+            pEnv->Offsets.ResinRemove = 0;
+            pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
+            pEnv->Offsets.PlayerPerspective = 0xfa78e00;  //is it corrent???
+			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
+        }
+
+        // 注入DLL
+        if (PatternScanner::InjectDLL(hProcess, dllPath))
+        {
+            std::wcout << L"DLL injected successfully. Waiting for module initialization..." << std::endl;
+            
+            // 等待DLL初始化完成
+            Sleep(2000);
+            
+            // 恢复游戏进程（使用保存的主线程句柄）
+            if (hMainThread)
+            {
+                ResumeThread(hMainThread);
+                CloseHandle(hMainThread);
+                std::wcout << L"Game process resumed." << std::endl;
+            }
+            else
+            {
+                std::wcerr << L"Failed to resume game: main thread handle is null." << std::endl;
+            }
+        }
+        else
+        {
+            std::wcerr << L"Failed to inject DLL." << std::endl;
+        }
     }
 
-    CloseHandle(hProcess);
+    // 关闭进程句柄
+    if (hProcess)
+    {
+        CloseHandle(hProcess);
+    }
 }
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile)

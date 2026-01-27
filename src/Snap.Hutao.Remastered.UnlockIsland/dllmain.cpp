@@ -3,11 +3,19 @@
 #include "Hooks.h"
 #include "AntiAntiDebug.h"
 #include <Windows.h>
+#include <cstdio>
 
-// 全局变量
 HookEnvironment* g_pEnv = nullptr;
 
-// 工作线程函数声明
+void CreateConsole() {
+    if (AllocConsole()) {
+        FILE* f;
+        freopen_s(&f, "CONOUT$", "w", stdout);
+        freopen_s(&f, "CONOUT$", "w", stderr);
+        freopen_s(&f, "CONIN$", "r", stdin);
+    }
+}
+
 DWORD WINAPI WorkerThread(LPVOID lpParam);
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -18,10 +26,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        // 禁用线程库调用以优化
         DisableThreadLibraryCalls(hModule);
         
-        // 创建工作线程来处理hook初始化
         CreateThread(NULL, 0, WorkerThread, hModule, 0, NULL);
         break;
         
@@ -48,30 +54,23 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
     HMODULE hModule = (HMODULE)lpParam;
     
-    // 初始化MinHook
     if (MH_Initialize() != MH_OK) {
         return 0;
     }
     
-    // 初始化共享内存环境
     InitializeHookEnvironment();
+    CreateConsole();
     
-    // 设置hook
     SetupHooks();
     //SetupAntiAntiDebugHooks(); // 添加反反调试hook
     
-    // 启用所有hook
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
         MH_Uninitialize();
         return 0;
     }
     
-    // 主循环（类似于hutao-minhook-ng的热键监控）
     while (true)
     {
-        // 这里可以添加热键监控逻辑
-        // 例如：检查配置重新加载热键等
-        
         Sleep(100);
     }
     

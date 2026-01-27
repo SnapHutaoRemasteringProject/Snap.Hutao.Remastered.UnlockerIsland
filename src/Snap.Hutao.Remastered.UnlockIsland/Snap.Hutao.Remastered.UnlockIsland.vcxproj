@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AntiAntiDebug.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AntiAntiDebug.cpp" />
+    <ClCompile Include="Constants.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="MemoryUtils.cpp" />

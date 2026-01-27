@@ -27,4 +27,5 @@ struct HookEnvironment
     BOOL  ResinItem107009;
     BOOL  ResinItem107012;
     BOOL  ResinItem220007;
+	BOOL  DisplayPaimon;
 };

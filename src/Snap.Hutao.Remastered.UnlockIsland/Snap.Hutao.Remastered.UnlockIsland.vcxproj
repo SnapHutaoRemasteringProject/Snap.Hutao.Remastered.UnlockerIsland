@@ -152,6 +152,7 @@
     <ClInclude Include="AntiAntiDebug.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="framework.h" />
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
     <ClInclude Include="Hooks.h" />

@@ -1,8 +1,6 @@
 ﻿#include "dllmain.h"
-#include "include/MinHook.h"
 #include "Hooks.h"
 #include "AntiAntiDebug.h"
-#include <Windows.h>
 #include <cstdio>
 
 HookEnvironment* g_pEnv = nullptr;
@@ -59,19 +57,17 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
     }
     
     InitializeHookEnvironment();
-    CreateConsole();
+
+    if (g_pEnv->DebugMode) {
+        CreateConsole();
+        //SetupAntiAntiDebugHooks(); // 添加反反调试hook
+	}
     
     SetupHooks();
-    //SetupAntiAntiDebugHooks(); // 添加反反调试hook
     
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
         MH_Uninitialize();
         return 0;
-    }
-    
-    while (true)
-    {
-        Sleep(100);
     }
     
     return 0;

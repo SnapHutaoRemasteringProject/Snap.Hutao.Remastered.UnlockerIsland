@@ -8,7 +8,7 @@
 // Get_FrameCount
 static LPVOID originalGetFrameCount = nullptr;
 // Set_FrameCount (Not hooked, just called)
-static LPVOID originalSetFrameCount = nullptr;
+static LPVOID setFrameCount = nullptr;
 // ChangeFOV
 static LPVOID originalSetFov = nullptr;
 // DisplayFog
@@ -227,7 +227,7 @@ void HandleTouchMode() {
         {
             switchInput(nullptr);
         }
-        __except (0)
+        __except (EXCEPTION_EXECUTE_HANDLER)
         {
             // Ignore exceptions
         }
@@ -287,24 +287,25 @@ static int HookGetFrameCount()
     return 60;
 }
 
-static int HookSetFrameCount(void* a1, float changeFrameCountValue)
-{
-    // FPS override
-    if (g_pEnv->EnableSetFps && originalSetFrameCount)
-    {
-        SetFrameCountFn setFrameCount = (SetFrameCountFn)originalSetFrameCount;
-        setFrameCount(g_pEnv->TargetFps);
-    }
-
-    return 0;
-}
-
 static int HookSetFov(void* a1, float changeFovValue)
 {
+    if (!gameUpdateInit)
+    {
+        gameUpdateInit = true;
+    }
+
+    HandleTouchMode();
+
     // FOV override
     if (changeFovValue > 30.0f && g_pEnv->EnableSetFov)
     {
         changeFovValue = g_pEnv->FieldOfView;
+    }
+
+    // FPS override
+    if (setFrameCount && g_pEnv->EnableSetFps) {
+        SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
+        setFrameCountFunc(g_pEnv->TargetFps);
     }
 
     if (originalSetFov)
@@ -463,12 +464,6 @@ static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
 
 static void HookGameUpdate(void* pThis)
 {
-    if (!gameUpdateInit)
-    {
-        gameUpdateInit = true;
-    }
-
-    //HandleTouchMode();
     HandlePaimon();
     HandlePlayerInfo();
 
@@ -495,11 +490,7 @@ void SetupHooks()
 
     if (g_pEnv->Offsets.SetFps)
     {
-        LPVOID setFrameCount = GetFunctionAddress(g_pEnv->Offsets.SetFps);
-        if (setFrameCount)
-        {
-            MH_CreateHook(setFrameCount, nullptr, &originalSetFrameCount);
-		}
+        setFrameCount = GetFunctionAddress(g_pEnv->Offsets.SetFps);
     }
 
     if (g_pEnv->Offsets.SetFov)

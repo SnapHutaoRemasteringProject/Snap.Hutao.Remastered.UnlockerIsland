@@ -47,7 +47,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
-// 工作线程函数实现
 DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
     HMODULE hModule = (HMODULE)lpParam;

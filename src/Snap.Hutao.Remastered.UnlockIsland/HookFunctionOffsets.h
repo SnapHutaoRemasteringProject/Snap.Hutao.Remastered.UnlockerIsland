@@ -42,4 +42,9 @@ struct HookFunctionOffsets
 
     DWORD IsObjectActive;
 	DWORD GameUpdate;
+    DWORD PtrToStringAnsi;
+    DWORD GetPlayerID;
+    DWORD SetText;
+    DWORD MonoInLevelPlayerProfilePageV3Ctor;
+    DWORD GetPlayerName;
 };

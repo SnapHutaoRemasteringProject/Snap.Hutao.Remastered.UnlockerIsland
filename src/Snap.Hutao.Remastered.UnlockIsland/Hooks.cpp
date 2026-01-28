@@ -1,9 +1,6 @@
 #include "Hooks.h"
-#include "HookEnvironment.h"
-#include "HookFunctionOffsets.h"
+#include "framework.h"
 #include "MemoryUtils.h"
-#include "Constants.h"
-#include "include/MinHook.h"
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -34,6 +31,7 @@ static LPVOID originalShowOneDamageTextEx = nullptr;
 
 // Craft Redirect
 static LPVOID findString = nullptr;
+static LPVOID ptrToStringAnsi = nullptr;
 static LPVOID craftEntryPartner = nullptr;
 static LPVOID originalCraftEntry = nullptr;
 
@@ -59,6 +57,12 @@ static FakeFogStruct fakeFogStruct;
 // Paimon Display
 static LPVOID getActive = nullptr;
 
+// Hide PlayerProfile
+static LPVOID getPlayerID = nullptr;
+static LPVOID setText = nullptr;
+static void* monoInLevelPlayerProfilePageV3 = nullptr;
+static LPVOID originalMonoInLevelPlayerProfilePageV3Ctor = nullptr;
+static LPVOID getPlayerName = nullptr;
 
 // typedef int(*HookGet_FrameCount_t)();
 typedef int(* GetFrameCountFn)();
@@ -88,7 +92,7 @@ typedef bool(* EventCameraMoveFn)(void*, void*);
 
 // Damage Text Types
 // typedef void (*ShowOneDamageTextEx_t)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
-typedef void(* ShowOneDamageTextExFn)(void*, int, int, int, float, void*, void*, void*, int);
+typedef void(* ShowOneDamageTextExFn)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
 
 // typedef int(*HookDisplayFog_t)(__int64 a1, __int64 a2);
 typedef int(* DisplayFogFn)(void*, void*);
@@ -98,13 +102,14 @@ typedef void*(* PlayerPerspectiveFn)(void*, float, void*);
 
 // Craft Redirect Types
 // typedef Il2CppString* (*FindString_t)(const char*);
-typedef void*(* FindStringFn)(const char*);
+typedef Il2CppString*(* FindStringFn)(const char*);
+typedef Il2CppString* (*PtrToStringAnsiFn)(const char*);
 
 // typedef void (*CraftEntry_t)(void*);
 typedef void(* CraftEntryFn)(void*);
 
 // typedef bool (*CraftEntryPartner_t)(Il2CppString*, void*, void*, void*, void*);
-typedef bool(* CraftEntryPartnerFn)(void*, void*, void*, void*, void*);
+typedef bool(* CraftEntryPartnerFn)(Il2CppString*, void*, void*, void*, void*);
 
 // Team Anime Types
 // typedef bool(*CheckCanEnter_t)();
@@ -117,6 +122,10 @@ typedef void(* OpenTeamFn)();
 typedef void(* OpenTeamPageAccordinglyFn)(bool);
 
 typedef void(* UpdateFn)(void*);
+typedef void(* SetTextFn)(void*, Il2CppString*);
+typedef void*(* GetPlayerIDFn)(void*);
+typedef void*(* GetPlayerNameFn)(void*);
+typedef void(* CtorFn)(void*);
 
 void HandlePaimon() {
     if (!findString || !findGameObject || !setActive || !getActive)
@@ -131,8 +140,8 @@ void HandlePaimon() {
 
     if (g_pEnv->DisplayPaimon)
     {
-        void* paimonStrObj = findStringFunc(PAIMON_PATH);
-		void* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
+        Il2CppString* paimonStrObj = findStringFunc(PAIMON_PATH);
+        Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
 
         if (paimonStrObj && profileLayerStrObj)
         {
@@ -154,29 +163,63 @@ void HandlePaimon() {
     }
 }
 
-void HandleUID() {
+void HandlePlayerInfo() {
+    if (!g_pEnv->HidePlayerInfo) {
+        return;
+    }
 
-    if (!findString || !findGameObject || !setActive) {
+    if (!findString || !findGameObject || !setActive || !getActive || !setText ||!ptrToStringAnsi || !getPlayerName) {
         return;
     }
 
     FindStringFn findStringFunc = (FindStringFn)findString;
     FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
     SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+    SetTextFn setTextFunc = (SetTextFn)setText;
+    PtrToStringAnsiFn ptrToStringAnsiFunc = (PtrToStringAnsiFn)ptrToStringAnsi;
+    GetPlayerNameFn getPlayerNameFunc = (GetPlayerNameFn)getPlayerName;
 
-    void* strObj = findStringFunc(UID_PATH);
-    if (strObj)
+    Il2CppString* uidStrObj = findStringFunc(UID_PATH);
+    if (uidStrObj)
     {
-        void* uidObj = findGameObjectFunc(strObj);
+        void* uidObj = findGameObjectFunc(uidStrObj);
         if (uidObj)
         {
             setActiveFunc(uidObj, false);
         }
     }
+
+	// Hide Player Profile UID
+
+    Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
+    if (!profileLayerStrObj) {
+        return;
+    }
+    void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
+    if (!profileLayerObj || !getPlayerID) {
+        return;
+	}
+
+    if (!getActiveFunc(profileLayerObj)) {
+        return;
+    }
+
+	GetPlayerIDFn getPlayerIDFunc = (GetPlayerIDFn)getPlayerID;
+	void* playerIDText = getPlayerIDFunc(monoInLevelPlayerProfilePageV3);
+    void* playerNameText = getPlayerNameFunc(monoInLevelPlayerProfilePageV3);
+
+    if (playerIDText) {
+        setTextFunc(playerIDText, nullptr);
+	}
+
+    if (playerNameText) {
+        setTextFunc(playerNameText, nullptr);
+    }
 }
 
 void HandleTouchMode() {
-    if (!gameUpdateInit && !touchScreenInit && g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
+    if (gameUpdateInit && !touchScreenInit && g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
     {
         touchScreenInit = true;
         SwitchInputDeviceToTouchScreenFn switchInput = (SwitchInputDeviceToTouchScreenFn)switchInputDeviceToTouchScreen;
@@ -206,7 +249,7 @@ static bool DoOpenCraftMenu()
     FindStringFn findStringFunc = (FindStringFn)findString;
     CraftEntryPartnerFn craftEntryPartnerFunc = (CraftEntryPartnerFn)craftEntryPartner;
 
-    void* strObj = findStringFunc(SYNTHESIS_PAGE_NAME);
+    Il2CppString* strObj = findStringFunc(SYNTHESIS_PAGE_NAME);
 
     if (strObj)
     {
@@ -357,7 +400,7 @@ static bool HookEventCameraMove(void* pThis, void* event)
     return true;
 }
 
-static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, void* showText, void* worldPos, void* attackee, int elementReactionType)
+static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, Il2CppString* showText, void* worldPos, void* attackee, int elementReactionType)
 {
     if (g_pEnv->DisableDamageText)
     {
@@ -410,6 +453,14 @@ static void HookOpenTeam()
     }
 }
 
+static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
+{
+    monoInLevelPlayerProfilePageV3 = pThis;
+
+    CtorFn original = (CtorFn)originalMonoInLevelPlayerProfilePageV3Ctor;
+    original(pThis);
+}
+
 static void HookGameUpdate(void* pThis)
 {
     if (!gameUpdateInit)
@@ -417,9 +468,9 @@ static void HookGameUpdate(void* pThis)
         gameUpdateInit = true;
     }
 
-    HandleTouchMode();
+    //HandleTouchMode();
     HandlePaimon();
-    HandleUID();
+    HandlePlayerInfo();
 
     if (requestOpenCraft)
     {
@@ -571,4 +622,30 @@ void SetupHooks()
             MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
         }
 	}
+
+	if (g_pEnv->Offsets.PtrToStringAnsi)
+    {
+		ptrToStringAnsi = GetFunctionAddress(g_pEnv->Offsets.PtrToStringAnsi);
+    }
+
+	if (g_pEnv->Offsets.GetPlayerID)
+    {
+        getPlayerID = GetFunctionAddress(g_pEnv->Offsets.GetPlayerID);
+    }
+
+    if (g_pEnv->Offsets.SetText) {
+        setText = GetFunctionAddress(g_pEnv->Offsets.SetText);
+    }
+
+    if (g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor) {
+        LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor);
+        if (monoInLevelPlayerProfilePageV3Addr) {
+            MH_CreateHook(monoInLevelPlayerProfilePageV3Addr, HookMonoInLevelPlayerProfilePageV3Ctor, &originalMonoInLevelPlayerProfilePageV3Ctor);
+        }
+    }
+
+    if (g_pEnv->Offsets.GetPlayerName)
+    {
+        getPlayerName = GetFunctionAddress(g_pEnv->Offsets.GetPlayerName);
+    }
 }

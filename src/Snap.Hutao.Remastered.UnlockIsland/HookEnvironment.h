@@ -28,4 +28,6 @@ struct HookEnvironment
     BOOL  ResinItem107012;
     BOOL  ResinItem220007;
 	BOOL  DisplayPaimon;
+	BOOL  DebugMode;
+    BOOL  HidePlayerInfo;
 };

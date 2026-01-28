@@ -170,8 +170,9 @@ void Inject()
             pEnv->Uid = 123456;
             
             // 设置默认值
+			pEnv->DebugMode = TRUE;
             pEnv->EnableSetFov = TRUE;
-            pEnv->FieldOfView = 90.0f;
+            pEnv->FieldOfView = 180.0f;
             pEnv->FixLowFov = TRUE;
             pEnv->DisableFog = TRUE;
             pEnv->EnableSetFps = TRUE;
@@ -183,6 +184,7 @@ void Inject()
             pEnv->TouchMode = TRUE;
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
+            pEnv->HidePlayerInfo = TRUE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
@@ -215,6 +217,11 @@ void Inject()
             pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
             pEnv->Offsets.PlayerPerspective = 0xfa78e00;  //is it corrent???
 			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
+			pEnv->Offsets.PtrToStringAnsi = 0x15565F40;  //Marshal.PtrToStringAnsi
+            pEnv->Offsets.GetPlayerID = 0x1082F640;  //MonoInLevelPlayerProfilePageV3.get_playerID
+            pEnv->Offsets.SetText = 0x15C451A0; //Text.set_text
+            pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor = 0x1082F8E0;  //MonoInLevelPlayerProfilePageV3..ctor
+            pEnv->Offsets.GetPlayerName = 0x1082F730;  //MonoInLevelPlayerProfilePageV3.get_playerName
         }
 
         // 注入DLL

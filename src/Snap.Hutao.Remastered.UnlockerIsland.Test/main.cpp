@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 
-#include "../Snap.Hutao.Remastered.UnlockIsland/HookEnvironment.h"
+#include "../Snap.Hutao.Remastered.UnlockerIsland/HookEnvironment.h"
 
 
 const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
@@ -49,7 +49,7 @@ std::wstring GetDLLPath()
 {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Snap.Hutao.Remastered.UnlockIsland.dll";
+    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Snap.Hutao.Remastered.UnlockerIsland.dll";
 
     if (std::filesystem::exists(dllPath))
     {
@@ -57,7 +57,7 @@ std::wstring GetDLLPath()
     }
 
     std::wcerr << L"DLL not found in current directory: " << dllPath.wstring() << std::endl;
-    std::wcerr << L"Please place Snap.Hutao.Remastered.UnlockIsland.dll in the current directory." << std::endl;
+    std::wcerr << L"Please place Snap.Hutao.Remastered.UnlockerIsland.dll in the current directory." << std::endl;
     return L"";
 }
 

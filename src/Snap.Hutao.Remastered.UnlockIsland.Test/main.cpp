@@ -1,40 +1,17 @@
 ﻿#include "pch.h"
-#include "PatternScanner.h"
 #include <iostream>
 #include <iomanip>
 #include <filesystem>
 #include <Windows.h>
-#include <ShellAPI.h>
-#include <chrono>
+#include <TlHelp32.h>
 
 #include "../Snap.Hutao.Remastered.UnlockIsland/HookEnvironment.h"
 
-using namespace winrt;
-using namespace Windows::Foundation;
 
 const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
-std::string GetFrameCountPattern = "E8 ? ? ? ? 85 C0 7E 0E E8 ? ? ? ? 0F 57 C0 F3 0F 2A C0 EB 08";
-std::string SetFrameCountPattern = "E8 ? ? ? ? E8 ? ? ? ? 83 F8 1F 0F 9C 05 ? ? ? ? 48 8B 05";
-std::string SetFovPattern = "40 53 48 83 EC 60 0F 29 74 24 ? 48 8B D9 0F 28 F1 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B C8";
-std::string SwitchInputDeviceToTouchScreenPattern = "56 57 48 83 EC ? 48 89 CE 80 3D ? ? ? ? 00 48 8B 05 ? ? ? ? 0F 85 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 48 8B 15 ? ? ? ? E8 ? ? ? ? 48 89 C7 48 8B 05 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 31 D2";
-std::string SetupQuestBannerPattern = "41 57 41 56 56 57 55 53 48 81 EC ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 48 8B 96";
-std::string FindGameObjectPattern = "E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? 48 83 EC ? C7 44 24 ? 00 00 00 00 48 8D 54 24";
-std::string SetActivePattern = "E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? 45 31 C9";
-std::string EventCameraMovePattern = "41 57 41 56 56 57 55 53 48 83 EC ? 48 89 D7 49 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 80 3D ? ? ? ? 00";
-std::string ShowOneDamageTextExPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 44 0F 29 9C 24 ? ? ? ? 44 0F 29 94 24 ? ? ? ? 44 0F 29 8C 24 ? ? ? ? 44 0F 29 84 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 44 89 CF 45 89 C4";
-std::string DisplayFogPattern = "0F B6 02 88 01 8B 42 04 89 41 04 F3 0F 10 52 ? F3 0F 10 4A ? F3 0F 10 42 ? 8B 42 08 ";
-std::string PlayerPerspectivePattern = "E8 ? ? ? ? 48 8B BE ? ? ? ? 80 3D ? ? ? ? ? 0F 85 ? ? ? ? 80 BE ? ? ? ? ? 74 11";
-std::string FindStringPattern = "56 48 83 ec 20 48 89 ce e8 ? ? ? ? 48 89 f1 89 c2 48 83 c4 20 5e e9 ? ? ? ? cc cc cc cc";
-std::string CraftEntryPartnerPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 4D 89 ? 4C 89 C6 49 89 D4 49 89 CE";
-std::string CraftEntryPattern = "41 56 56 57 53 48 83 EC 58 49 89 CE 80 3D ? ? ? ? 00 0F 84 ? ? ? ? 80 3D ? ? ? ? 00 48 8B 0D ? ? ? ? 0F 85";
-std::string CheckCanEnterPattern = "56 48 81 ec 80 00 00 00 80 3d ? ? ? ? 00 0f 84 ? ? ? ? 80 3d ? ? ? ? 00";
-std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 ec 20 89 cb 80 3d ? ? ? ? 00 74 7a 80 3d ? ? ? ? 00 48 8b 05";
-std::string OpenTeamPattern = "48 83 EC ? 80 3D ? ? ? ? 00 75 ? 48 8B 0D ? ? ? ? 80 B9 ? ? ? ? 00 0F 84 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 84 C0 75";
-
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
-void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
-DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name);
+static bool InjectDLL(HANDLE hProcess, const std::wstring& dllPath);
 
 uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 {
@@ -170,10 +147,6 @@ void Inject()
             pEnv->State = TRUE;
             pEnv->LastError = 0;
             pEnv->Uid = 123456;
-            
-   //         ResumeThread(hMainThread);
-			//Sleep(1000); // 等待游戏初始化模块
-   //         pEnv->Offsets.SetFov = ScanOffset(hProcess, moduleName, SetFrameCountPattern, "SetFrameCountPattern");
 
             // 设置默认值
 			pEnv->DebugMode = TRUE;
@@ -185,9 +158,9 @@ void Inject()
             pEnv->TargetFps = 240;
             pEnv->RemoveTeamProgress = TRUE;
             pEnv->HideQuestBanner = TRUE;
-            pEnv->DisableCameraMove = FALSE;
-            pEnv->DisableDamageText = TRUE;
-            pEnv->TouchMode = TRUE;
+            pEnv->DisableCameraMove = TRUE;
+            pEnv->DisableDamageText = FALSE;
+            pEnv->TouchMode = FALSE;
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
             pEnv->HidePlayerInfo = TRUE;
@@ -211,7 +184,7 @@ void Inject()
             pEnv->Offsets.ObjectActive = 0x15B62300;  //GameObject.set_active
 			pEnv->Offsets.IsObjectActive = 0x15B622E0;  //GameObject.get_active
             pEnv->Offsets.CameraMove = 0xfa87490;  //BOFBPKLPKOK.DNIJOJKIOIF need pattern scan
-            pEnv->Offsets.DamageText = 0x10850AD0;  //MonoParticleDamageTextContainer.ShowOneDamageText
+            pEnv->Offsets.DamageText = 0x1084e9e0;  //MonoParticleDamageTextContainer.ShowOneDamageText
             pEnv->Offsets.TouchInput = 0x105c2c10;  //CNGPNBOAIKK.FGKNOKNIIPL need pattern scan
             pEnv->Offsets.CombineEntry = 0x69ea500;  //NBJLAEKBCIM.DNJNIKDKECD need pattern scan
             pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
@@ -221,7 +194,7 @@ void Inject()
             pEnv->Offsets.ResinItem = 0;
             pEnv->Offsets.ResinRemove = 0;
             pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
-            pEnv->Offsets.PlayerPerspective = 0xfa78e00;  //is it corrent???
+            pEnv->Offsets.PlayerPerspective = 0xd80fb50;
 			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
 			pEnv->Offsets.PtrToStringAnsi = 0x15565F40;  //Marshal.PtrToStringAnsi
             pEnv->Offsets.GetPlayerID = 0x1082F640;  //MonoInLevelPlayerProfilePageV3.get_playerID
@@ -231,7 +204,7 @@ void Inject()
         }
 
         // 注入DLL
-        if (PatternScanner::InjectDLL(hProcess, dllPath))
+        if (InjectDLL(hProcess, dllPath))
         {
             std::wcout << L"DLL injected successfully. Waiting for module initialization..." << std::endl;
             
@@ -299,85 +272,65 @@ bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFi
     return true;
 }
 
-DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name)
+bool InjectDLL(HANDLE hProcess, const std::wstring& dllPath)
 {
-    DWORD offset = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
-    
-    if (offset != 0) {
-        std::cout << name << " Offset = 0x" << std::hex << offset << std::hex << std::endl;
-    } else {
-        std::cout << name << " Offset not found" << std::endl;
+    // First check if DLL is already injected
+    std::wstring dllName = dllPath.substr(dllPath.find_last_of(L"\\/") + 1);
+
+    // Get LoadLibraryW function address
+    LPVOID loadLibraryAddr = reinterpret_cast<LPVOID>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW"));
+    if (loadLibraryAddr == nullptr)
+    {
+        std::wcerr << L"Failed to get LoadLibraryW address: " << GetLastError() << std::endl;
+        return false;
     }
-    return offset;
-}
 
-void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv)
-{
-    if (pEnv == nullptr)
-        return;
-    
-    ZeroMemory(pEnv, sizeof(HookEnvironment));
-    pEnv->Size = sizeof(HookEnvironment);
-    pEnv->State = TRUE;
-    pEnv->LastError = 0;
-    pEnv->Uid = 123456; // 示例UID
-    
-    pEnv->EnableSetFov = TRUE;
-    pEnv->FieldOfView = 90.0f;
-    pEnv->FixLowFov = FALSE;
-    pEnv->DisableFog = TRUE;
-    pEnv->EnableSetFps = TRUE;
-    pEnv->TargetFps = 240;
-    pEnv->RemoveTeamProgress = TRUE;
-    pEnv->HideQuestBanner = TRUE;
-    pEnv->DisableCameraMove = FALSE;
-    pEnv->DisableDamageText = TRUE;
-    pEnv->TouchMode = FALSE;
-    pEnv->RedirectCombine = TRUE;
-    pEnv->ResinItem000106 = FALSE;
-    pEnv->ResinItem000201 = FALSE;
-    pEnv->ResinItem107009 = FALSE;
-    pEnv->ResinItem107012 = FALSE;
-    pEnv->ResinItem220007 = FALSE;
+    // Allocate memory in target process for DLL path
+    size_t pathSize = (dllPath.length() + 1) * sizeof(wchar_t);
+    LPVOID remoteMemory = VirtualAllocEx(hProcess, nullptr, pathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (remoteMemory == nullptr)
+    {
+        std::wcerr << L"Failed to allocate memory in target process: " << GetLastError() << std::endl;
+        return false;
+    }
 
-    // 扫描所有需要的函数偏移量
-    std::cout << "=== 开始扫描函数偏移量 ===" << std::endl;
-    
-    pEnv->Offsets.GameManagerAwake = 0;
-    pEnv->Offsets.MainEntryPoint = 0;
-    pEnv->Offsets.MainEntryPartner1 = 0;
-    pEnv->Offsets.MainEntryPartner2 = 0;
-    pEnv->Offsets.SetUid = 0;
-    pEnv->Offsets.SetFov = ScanOffset(hProcess, moduleName, SetFovPattern, "SetFov");
-    pEnv->Offsets.SetFog = ScanOffset(hProcess, moduleName, DisplayFogPattern, "SetFog");
-    pEnv->Offsets.GetFps = ScanOffset(hProcess, moduleName, GetFrameCountPattern, "GetFps");
-    pEnv->Offsets.SetFps = ScanOffset(hProcess, moduleName, SetFrameCountPattern, "SetFps");
-    pEnv->Offsets.OpenTeam = ScanOffset(hProcess, moduleName, OpenTeamPattern, "OpenTeam");
-    pEnv->Offsets.OpenTeamAdvanced = ScanOffset(hProcess, moduleName, OpenTeamPageAccordinglyPattern, "OpenTeamAdvanced");
-    pEnv->Offsets.CheckEnter = ScanOffset(hProcess, moduleName, CheckCanEnterPattern, "CheckEnter");
-    pEnv->Offsets.QuestBanner = ScanOffset(hProcess, moduleName, SetupQuestBannerPattern, "QuestBanner");
-    pEnv->Offsets.FindObject = ScanOffset(hProcess, moduleName, FindGameObjectPattern, "FindObject");
-    pEnv->Offsets.ObjectActive = ScanOffset(hProcess, moduleName, SetActivePattern, "ObjectActive");
-    pEnv->Offsets.CameraMove = ScanOffset(hProcess, moduleName, EventCameraMovePattern, "CameraMove");
-    pEnv->Offsets.DamageText = ScanOffset(hProcess, moduleName, ShowOneDamageTextExPattern, "DamageText");
-    pEnv->Offsets.TouchInput = ScanOffset(hProcess, moduleName, SwitchInputDeviceToTouchScreenPattern, "TouchInput");
-    pEnv->Offsets.CombineEntry = ScanOffset(hProcess, moduleName, CraftEntryPattern, "CombineEntry");
-    pEnv->Offsets.CombineEntryPartner = ScanOffset(hProcess, moduleName, CraftEntryPartnerPattern, "CombineEntryPartner");
-    pEnv->Offsets.SetupResin = 0;
-    pEnv->Offsets.ResinList = 0;
-    pEnv->Offsets.ResinCount = 0;
-    pEnv->Offsets.ResinItem = 0;
-    pEnv->Offsets.ResinRemove = 0;
-    pEnv->Offsets.FindString = ScanOffset(hProcess, moduleName, FindStringPattern, "FindString");
-    pEnv->Offsets.PlayerPerspective = ScanOffset(hProcess, moduleName, PlayerPerspectivePattern, "PlayerPerspective");
-    
-    std::cout << "=== 扫描完成 ===" << std::endl;
+    // Write DLL path to target process
+    if (!WriteProcessMemory(hProcess, remoteMemory, dllPath.c_str(), pathSize, nullptr))
+    {
+        std::wcerr << L"Failed to write DLL path to target process: " << GetLastError() << std::endl;
+        VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
+        return false;
+    }
+
+    // Create remote thread to call LoadLibraryW
+    HANDLE hThread = CreateRemoteThread(hProcess, nullptr, 0,
+        reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibraryAddr),
+        remoteMemory, 0, nullptr);
+
+    if (hThread == nullptr)
+    {
+        std::wcerr << L"Failed to create remote thread: " << GetLastError() << std::endl;
+        VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
+        return false;
+    }
+    WaitForSingleObject(hThread, INFINITE);
+    DWORD exitCode = 0;
+    GetExitCodeThread(hThread, &exitCode);
+    CloseHandle(hThread);
+    VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
+
+    if (exitCode == 0)
+    {
+        std::wcerr << L"LoadLibraryW failed in target process" << std::endl;
+        return false;
+    }
+
+    std::wcout << L"DLL injected successfully: " << dllName << std::endl;
+    return true;
 }
 
 int main()
 {
-    init_apartment();
-
     Inject();
     
     return 0;

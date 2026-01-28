@@ -9,13 +9,13 @@ VoidFunc GetFunctionAddress(DWORD offset)
 	return (VoidFunc)((DWORD_PTR)g_hModule + offset);
 }
 
-INT64 GetRealAddress(INT64 offset)
+INT64 GetVirtualAddress(INT64 realAddress)
 {
 	if (g_hModule == NULL) {
 		InitializeModuleHandle();
 	}
 
-	return (INT64)((DWORD_PTR)g_hModule + offset);
+	return (INT64)(realAddress - (DWORD_PTR)g_hModule);
 }
 
 void InitializeModuleHandle()

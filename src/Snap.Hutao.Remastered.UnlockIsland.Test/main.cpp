@@ -16,7 +16,7 @@ const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
 std::string GetFrameCountPattern = "E8 ? ? ? ? 85 C0 7E 0E E8 ? ? ? ? 0F 57 C0 F3 0F 2A C0 EB 08";
 std::string SetFrameCountPattern = "E8 ? ? ? ? E8 ? ? ? ? 83 F8 1F 0F 9C 05 ? ? ? ? 48 8B 05";
-std::string SetFovPattern = "40 53 48 83 EC 60 0F 29 74 24 ? 48 8B D9 0F 28 F1 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B C8 ";
+std::string SetFovPattern = "40 53 48 83 EC 60 0F 29 74 24 ? 48 8B D9 0F 28 F1 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? E8 ? ? ? ? 48 8B C8";
 std::string SwitchInputDeviceToTouchScreenPattern = "56 57 48 83 EC ? 48 89 CE 80 3D ? ? ? ? 00 48 8B 05 ? ? ? ? 0F 85 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 48 8B 15 ? ? ? ? E8 ? ? ? ? 48 89 C7 48 8B 05 ? ? ? ? 48 8B 88 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 31 D2";
 std::string SetupQuestBannerPattern = "41 57 41 56 56 57 55 53 48 81 EC ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 48 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 48 8B 96";
 std::string FindGameObjectPattern = "E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? E9 ? ? ? ? 66 66 2E 0F 1F 84 00 ? ? ? ? 48 83 EC ? C7 44 24 ? 00 00 00 00 48 8D 54 24";
@@ -34,6 +34,7 @@ std::string OpenTeamPattern = "48 83 EC ? 80 3D ? ? ? ? 00 75 ? 48 8B 0D ? ? ? ?
 
 bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
 void InitializeHookEnvironment(HANDLE hProcess, const std::wstring& moduleName, HookEnvironment* pEnv);
+DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::string& pattern, const std::string& name);
 
 uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
 {
@@ -117,6 +118,7 @@ bool StartGameAndSuspend(const std::wstring& gamePath, HANDLE& hProcess, HANDLE&
 
 void Inject()
 {
+	std::wstring moduleName = L"YuanShen.exe";
     std::wstring dllPath = GetDLLPath();
     if (dllPath.empty())
     {
@@ -169,10 +171,14 @@ void Inject()
             pEnv->LastError = 0;
             pEnv->Uid = 123456;
             
+   //         ResumeThread(hMainThread);
+			//Sleep(1000); // 等待游戏初始化模块
+   //         pEnv->Offsets.SetFov = ScanOffset(hProcess, moduleName, SetFrameCountPattern, "SetFrameCountPattern");
+
             // 设置默认值
 			pEnv->DebugMode = TRUE;
             pEnv->EnableSetFov = TRUE;
-            pEnv->FieldOfView = 180.0f;
+            pEnv->FieldOfView = 90.0f;
             pEnv->FixLowFov = TRUE;
             pEnv->DisableFog = TRUE;
             pEnv->EnableSetFps = TRUE;
@@ -193,10 +199,10 @@ void Inject()
             pEnv->Offsets.MainEntryPartner1 = 0;
             pEnv->Offsets.MainEntryPartner2 = 0;
             pEnv->Offsets.SetUid = 0;
-            pEnv->Offsets.SetFov = 0x15B71A20;  //Camera.set_fieldOfView
-            pEnv->Offsets.SetFog = 0x15B73330;  //Camera.set_enableFogRendering
-            pEnv->Offsets.GetFps = 0x15B5F530;  //Application.get_targetFrameRate
-            pEnv->Offsets.SetFps = 0x15B5F540;
+			pEnv->Offsets.SetFov = 0x1560ec0;  //need pattern scan
+            pEnv->Offsets.SetFog = 0x1573060;  //
+            pEnv->Offsets.GetFps = 0x106a3b0;  //
+            pEnv->Offsets.SetFps = 0x106a3c0;  //双层跳板, 高 实在是高
             pEnv->Offsets.OpenTeam = 0xe47e1b0;  //JGDDADKMLDL.DDFODLGCHGM  need pattern scan
             pEnv->Offsets.OpenTeamAdvanced = 0xe4851e0;  //JGDDADKMLDL.LBLECKJEGOI  need pattern scan
             pEnv->Offsets.CheckEnter = 0xfeafc10;  //need pattern scan
@@ -298,7 +304,7 @@ DWORD ScanOffset(HANDLE hProcess, const std::wstring& moduleName, const std::str
     DWORD offset = PatternScanner::ScanPatternInModule(hProcess, moduleName, pattern);
     
     if (offset != 0) {
-        std::cout << name << " Offset = 0x" << offset << std::hex << std::endl;
+        std::cout << name << " Offset = 0x" << std::hex << offset << std::hex << std::endl;
     } else {
         std::cout << name << " Offset not found" << std::endl;
     }
@@ -373,10 +379,6 @@ int main()
     init_apartment();
 
     Inject();
-    
-    std::wcout << L"\nPress any key to exit..." << std::endl;
-    std::cin.ignore();
-    std::cin.get();
     
     return 0;
 }

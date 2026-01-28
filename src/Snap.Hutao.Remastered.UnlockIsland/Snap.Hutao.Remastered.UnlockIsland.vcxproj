@@ -157,6 +157,7 @@
     <ClInclude Include="HookFunctionOffsets.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="MemoryUtils.h" />
+    <ClInclude Include="Scanner.h" />
     <ClInclude Include="include\MinHook.h" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="MemoryUtils.cpp" />
+    <ClCompile Include="Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\libMinHook.x64.lib" />

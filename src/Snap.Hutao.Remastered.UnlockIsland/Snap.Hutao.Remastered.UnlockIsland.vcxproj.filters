@@ -54,6 +54,9 @@
     <ClInclude Include="framework.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Scanner.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -69,6 +72,9 @@
       <Filter>源文件\hook</Filter>
     </ClCompile>
     <ClCompile Include="Constants.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Scanner.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

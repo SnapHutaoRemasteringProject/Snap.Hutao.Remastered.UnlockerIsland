@@ -68,6 +68,8 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         MH_Uninitialize();
         return 0;
     }
+
+    g_pEnv->State = 2;
     
     return 0;
 }

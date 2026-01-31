@@ -61,6 +61,22 @@ std::wstring GetDLLPath()
     return L"";
 }
 
+std::wstring GetDumpDLLPath()
+{
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Dumper.dll";
+
+    if (std::filesystem::exists(dllPath))
+    {
+        return dllPath.wstring();
+    }
+
+    std::wcerr << L"DLL not found in current directory: " << dllPath.wstring() << std::endl;
+    std::wcerr << L"Please place Dumper.dll in the current directory." << std::endl;
+    return L"";
+}
+
 bool StartGameAndSuspend(const std::wstring& gamePath, HANDLE& hProcess, HANDLE& hMainThread, DWORD& pid)
 {
     // 启动游戏
@@ -109,6 +125,7 @@ void Inject()
     std::vector<std::wstring> possiblePaths = {
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\YuanShen.exe",
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\GenshinImpact.exe",
+        L"D:\\Genshin Impact Game\\YuanShen.exe",
         L"E:\\Genshin Impact Game\\YuanShen.exe"
     };
     
@@ -188,7 +205,7 @@ void Inject()
             pEnv->Offsets.TouchInput = 0x105c2c10;  //CNGPNBOAIKK.FGKNOKNIIPL need pattern scan
             pEnv->Offsets.CombineEntry = 0x69ea500;  //NBJLAEKBCIM.DNJNIKDKECD need pattern scan
             pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
-            pEnv->Offsets.SetupResin = 0;
+            pEnv->Offsets.SetupResinList = 0;
             pEnv->Offsets.ResinList = 0;
             pEnv->Offsets.ResinCount = 0;
             pEnv->Offsets.ResinItem = 0;
@@ -201,11 +218,16 @@ void Inject()
             pEnv->Offsets.SetText = 0x15C451A0; //Text.set_text
             pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor = 0x1082F8E0;  //MonoInLevelPlayerProfilePageV3..ctor
             pEnv->Offsets.GetPlayerName = 0x1082F730;  //MonoInLevelPlayerProfilePageV3.get_playerName
+			pEnv->Offsets.ActorManagerCtor = 0xD2D4EF0;  //ActorManager..ctor
+			pEnv->Offsets.GetGlobalActor = 0xD2CC9E0;  //ActorManager.GetGlobalActor
+			pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll
+			pEnv->Offsets.AvatarPaimonAppear = 0x107BAC60;  //GlobalActor.AvatarPaimonAppear
         }
 
         // 注入DLL
         if (InjectDLL(hProcess, dllPath))
         {
+            //InjectDLL(hProcess, GetDumpDLLPath());
             std::wcout << L"DLL injected successfully. Waiting for module initialization..." << std::endl;
             
             // 等待DLL初始化完成

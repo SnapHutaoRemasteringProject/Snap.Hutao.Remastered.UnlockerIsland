@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include <Windows.h>
 
+#pragma pack(push, 4)
 struct Il2CppObject {
     void* klass;
     void* monitor;
@@ -13,7 +14,7 @@ struct Il2CppObject {
 struct Il2CppString {
     Il2CppObject object;
     long length;
-    wchar_t chars[1];
+    wchar_t* chars;
 };
 
 struct Color {

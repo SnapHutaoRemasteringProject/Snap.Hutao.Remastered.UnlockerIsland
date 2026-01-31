@@ -3,6 +3,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="Dumper/Dumper.vcxproj" Id="b2f24546-ef0b-484a-ad59-ca5cf862f78a" />
   <Project Path="Snap.Hutao.Remastered.UnlockerIsland.Test/Snap.Hutao.Remastered.UnlockerIsland.Test.vcxproj" Id="42e4e7cf-f1eb-4d6b-815a-c21d02b9f4d4" />
   <Project Path="Snap.Hutao.Remastered.UnlockerIsland/Snap.Hutao.Remastered.UnlockerIsland.vcxproj" Id="c99e2c8c-bf78-442f-a47b-0e177b51e3f8" />
 </Solution>

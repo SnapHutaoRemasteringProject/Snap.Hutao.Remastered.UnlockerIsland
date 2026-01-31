@@ -31,7 +31,7 @@ struct HookFunctionOffsets
     DWORD CombineEntry;
     DWORD CombineEntryPartner;
     
-    DWORD SetupResin;
+    DWORD SetupResinList;
     DWORD ResinList;
     DWORD ResinCount;
     DWORD ResinItem;
@@ -47,4 +47,8 @@ struct HookFunctionOffsets
     DWORD SetText;
     DWORD MonoInLevelPlayerProfilePageV3Ctor;
     DWORD GetPlayerName;
+    DWORD ActorManagerCtor;
+    DWORD GetGlobalActor;
+    DWORD ResumePaimonInProfilePageAll;
+    DWORD AvatarPaimonAppear;
 };

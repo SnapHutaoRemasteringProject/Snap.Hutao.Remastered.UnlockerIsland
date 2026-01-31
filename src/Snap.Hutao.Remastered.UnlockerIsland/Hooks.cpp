@@ -1,7 +1,6 @@
 #include "Hooks.h"
 #include "framework.h"
 #include "MemoryUtils.h"
-#include <cstdint>
 #include <cstring>
 #include <iostream>
 
@@ -63,6 +62,16 @@ static LPVOID setText = nullptr;
 static void* monoInLevelPlayerProfilePageV3 = nullptr;
 static LPVOID originalMonoInLevelPlayerProfilePageV3Ctor = nullptr;
 static LPVOID getPlayerName = nullptr;
+
+// Resin
+static LPVOID originalSetupResinList = nullptr;
+
+// Paimon Display
+static LPVOID originalActorManagerCtor = nullptr;
+static void* actorManager = nullptr;
+static LPVOID getGlobalActor = nullptr;
+static LPVOID resumePaimonInProfilePageAll = nullptr;
+static LPVOID avatarPaimonAppear = nullptr;
 
 // typedef int(*HookGet_FrameCount_t)();
 typedef int(* GetFrameCountFn)();
@@ -127,6 +136,11 @@ typedef void*(* GetPlayerIDFn)(void*);
 typedef void*(* GetPlayerNameFn)(void*);
 typedef void(* CtorFn)(void*);
 
+// Paimon Display
+typedef void*(*GetGlobalActorFn)(void*);
+typedef void(*ResumePaimonInProfilePageAll)(void*);
+typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
+
 void HandlePaimon() {
     if (!findString || !findGameObject || !setActive || !getActive)
     {
@@ -161,6 +175,49 @@ void HandlePaimon() {
             }
         }
     }
+}
+
+void HandlePaimonV2() {
+    if (!g_pEnv->DisplayPaimon) {
+        return;
+    }
+
+    if (!getGlobalActor || !resumePaimonInProfilePageAll || !getActive || !findString || !findGameObject || !avatarPaimonAppear) {
+        return;
+    }
+
+    if (!actorManager) {
+        return;
+    }
+
+    GetGlobalActorFn getGlobalActorFunc = (GetGlobalActorFn)getGlobalActor;
+    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+    FindStringFn findStringFunc = (FindStringFn)findString;
+    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+    Il2CppString* paimonStrObj = findStringFunc(PAIMON_PATH);
+    Il2CppString* beydPaimonStrObj = findStringFunc(BEYD_PAIMON_PATH);
+
+	if (!paimonStrObj || !beydPaimonStrObj) {
+        return;
+    }
+
+	void* paimonObj = findGameObjectFunc(paimonStrObj);
+	void* beydPaimonObj = findGameObjectFunc(beydPaimonStrObj);
+
+    if (!paimonObj && !beydPaimonObj) {
+        return;
+	}
+
+    if (getActiveFunc(paimonObj) || getActiveFunc(beydPaimonObj)) {
+        return;
+    }
+
+    void* globalActor = getGlobalActorFunc(actorManager);
+
+    if (globalActor) {
+        AvatarPaimonAppearFn avatarPaimonAppearFunc = (AvatarPaimonAppearFn)avatarPaimonAppear;
+        avatarPaimonAppearFunc(globalActor, nullptr, true);
+	}
 }
 
 void HandlePlayerInfo() {
@@ -462,9 +519,17 @@ static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
     original(pThis);
 }
 
+static void HoolActorManagerCtor(void* pThis) {
+    CtorFn original = (CtorFn)originalActorManagerCtor;
+
+    actorManager = pThis;
+
+    original(pThis);
+}
+
 static void HookGameUpdate(void* pThis)
 {
-    HandlePaimon();
+    HandlePaimonV2();
     HandlePlayerInfo();
 
     if (requestOpenCraft)
@@ -638,5 +703,29 @@ void SetupHooks()
     if (g_pEnv->Offsets.GetPlayerName)
     {
         getPlayerName = GetFunctionAddress(g_pEnv->Offsets.GetPlayerName);
+    }
+
+	if (g_pEnv->Offsets.ActorManagerCtor)
+    {
+        LPVOID actorManagerCtorAddr = GetFunctionAddress(g_pEnv->Offsets.ActorManagerCtor);
+        if (actorManagerCtorAddr)
+        {
+            MH_CreateHook(actorManagerCtorAddr, HoolActorManagerCtor, &originalActorManagerCtor);
+        }
+	}
+
+    if (g_pEnv->Offsets.GetGlobalActor)
+    {
+        getGlobalActor = GetFunctionAddress(g_pEnv->Offsets.GetGlobalActor);
+    }
+
+    if (g_pEnv->Offsets.ResumePaimonInProfilePageAll)
+    {
+        resumePaimonInProfilePageAll = GetFunctionAddress(g_pEnv->Offsets.ResumePaimonInProfilePageAll);
+    }
+
+    if (g_pEnv->Offsets.AvatarPaimonAppear)
+    {
+        avatarPaimonAppear = GetFunctionAddress(g_pEnv->Offsets.AvatarPaimonAppear);
     }
 }

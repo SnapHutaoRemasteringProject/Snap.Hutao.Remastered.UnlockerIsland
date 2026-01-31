@@ -164,6 +164,7 @@
     <ClCompile Include="AntiAntiDebug.cpp" />
     <ClCompile Include="Constants.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="framework.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="MemoryUtils.cpp" />
     <ClCompile Include="Scanner.cpp" />

@@ -161,9 +161,10 @@ void Inject()
         {
             ZeroMemory(pEnv, sizeof(HookEnvironment));
             pEnv->Size = sizeof(HookEnvironment);
-            pEnv->State = TRUE;
+            pEnv->State = IslandState::None;
             pEnv->LastError = 0;
-            pEnv->Uid = 123456;
+            pEnv->Uid = 0;
+            pEnv->ProvideOffsets = TRUE;
 
             // 设置默认值
 			pEnv->DebugMode = TRUE;
@@ -184,11 +185,7 @@ void Inject()
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
-            pEnv->Offsets.GameManagerAwake = 0xC835B70;  //GameManager.Awake
-            pEnv->Offsets.MainEntryPoint = 0;  //need't any more
-            pEnv->Offsets.MainEntryPartner1 = 0;
-            pEnv->Offsets.MainEntryPartner2 = 0;
-            pEnv->Offsets.SetUid = 0;
+            pEnv->Offsets.SetUid = 0xAC68570;  //MonoUIWaterMask.SetUID
 			pEnv->Offsets.SetFov = 0x1560ec0;  //need pattern scan
             pEnv->Offsets.SetFog = 0x1573060;  //
             pEnv->Offsets.GetFps = 0x106a3b0;  //

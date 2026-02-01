@@ -2,6 +2,7 @@
 #include "Hooks.h"
 #include "AntiAntiDebug.h"
 #include <cstdio>
+#include <iostream>
 
 HookEnvironment* g_pEnv = nullptr;
 
@@ -40,6 +41,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         MH_Uninitialize();
         
         if (g_pEnv) {
+            g_pEnv->State = IslandState::Stopped;
             UnmapViewOfFile(g_pEnv);
         }
         break;
@@ -60,6 +62,41 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
     if (g_pEnv->DebugMode) {
         CreateConsole();
         //SetupAntiAntiDebugHooks(); // 添加反反调试hook
+        std::cout << "Snap.Hutao.Remastered.UnlockerIsland loaded in debug mode." << std::endl;
+        std::cout << "Offset SetUid = 0x" << std::hex << g_pEnv->Offsets.SetUid << std::endl;
+        std::cout << "Offset SetFov = 0x" << std::hex << g_pEnv->Offsets.SetFov << std::endl;
+        std::cout << "Offset SetFog = 0x" << std::hex << g_pEnv->Offsets.SetFog << std::endl;
+        std::cout << "Offset GetFps = 0x" << std::hex << g_pEnv->Offsets.GetFps << std::endl;
+        std::cout << "Offset SetFps = 0x" << std::hex << g_pEnv->Offsets.SetFps << std::endl;
+        std::cout << "Offset OpenTeam = 0x" << std::hex << g_pEnv->Offsets.OpenTeam << std::endl;
+        std::cout << "Offset OpenTeamAdvanced = 0x" << std::hex << g_pEnv->Offsets.OpenTeamAdvanced << std::endl;
+        std::cout << "Offset CheckEnter = 0x" << std::hex << g_pEnv->Offsets.CheckEnter << std::endl;
+        std::cout << "Offset QuestBanner = 0x" << std::hex << g_pEnv->Offsets.QuestBanner << std::endl;
+        std::cout << "Offset FindObject = 0x" << std::hex << g_pEnv->Offsets.FindObject << std::endl;
+        std::cout << "Offset ObjectActive = 0x" << std::hex << g_pEnv->Offsets.ObjectActive << std::endl;
+        std::cout << "Offset CameraMove = 0x" << std::hex << g_pEnv->Offsets.CameraMove << std::endl;
+        std::cout << "Offset DamageText = 0x" << std::hex << g_pEnv->Offsets.DamageText << std::endl;
+        std::cout << "Offset TouchInput = 0x" << std::hex << g_pEnv->Offsets.TouchInput << std::endl;
+        std::cout << "Offset CombineEntry = 0x" << std::hex << g_pEnv->Offsets.CombineEntry << std::endl;
+        std::cout << "Offset CombineEntryPartner = 0x" << std::hex << g_pEnv->Offsets.CombineEntryPartner << std::endl;
+        std::cout << "Offset SetupResinList = 0x" << std::hex << g_pEnv->Offsets.SetupResinList << std::endl;
+        std::cout << "Offset ResinList = 0x" << std::hex << g_pEnv->Offsets.ResinList << std::endl;
+        std::cout << "Offset ResinCount = 0x" << std::hex << g_pEnv->Offsets.ResinCount << std::endl;
+        std::cout << "Offset ResinItem = 0x" << std::hex << g_pEnv->Offsets.ResinItem << std::endl;
+        std::cout << "Offset ResinRemove = 0x" << std::hex << g_pEnv->Offsets.ResinRemove << std::endl;
+        std::cout << "Offset FindString = 0x" << std::hex << g_pEnv->Offsets.FindString << std::endl;
+        std::cout << "Offset PlayerPerspective = 0x" << std::hex << g_pEnv->Offsets.PlayerPerspective << std::endl;
+        std::cout << "Offset IsObjectActive = 0x" << std::hex << g_pEnv->Offsets.IsObjectActive << std::endl;
+        std::cout << "Offset GameUpdate = 0x" << std::hex << g_pEnv->Offsets.GameUpdate << std::endl;
+        std::cout << "Offset PtrToStringAnsi = 0x" << std::hex << g_pEnv->Offsets.PtrToStringAnsi << std::endl;
+        std::cout << "Offset GetPlayerID = 0x" << std::hex << g_pEnv->Offsets.GetPlayerID << std::endl;
+        std::cout << "Offset SetText = 0x" << std::hex << g_pEnv->Offsets.SetText << std::endl;
+        std::cout << "Offset MonoInLevelPlayerProfilePageV3Ctor = 0x" << std::hex << g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor << std::endl;
+        std::cout << "Offset GetPlayerName = 0x" << std::hex << g_pEnv->Offsets.GetPlayerName << std::endl;
+        std::cout << "Offset ActorManagerCtor = 0x" << std::hex << g_pEnv->Offsets.ActorManagerCtor << std::endl;
+        std::cout << "Offset GetGlobalActor = 0x" << std::hex << g_pEnv->Offsets.GetGlobalActor << std::endl;
+        std::cout << "Offset ResumePaimonInProfilePageAll = 0x" << std::hex << g_pEnv->Offsets.ResumePaimonInProfilePageAll << std::endl;
+        std::cout << "Offset AvatarPaimonAppear = 0x" << std::hex << g_pEnv->Offsets.AvatarPaimonAppear << std::endl;
 	}
     
     SetupHooks();
@@ -69,7 +106,8 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         return 0;
     }
 
-    g_pEnv->State = 2;
+    g_pEnv->State = IslandState::Started;
+    g_pEnv->Size = sizeof(HookEnvironment);
     
     return 0;
 }

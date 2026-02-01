@@ -1,15 +1,18 @@
 #pragma once
 
 #include "HookFunctionOffsets.h"
+#include "IslandState.h"
 #include <Windows.h>
 
 struct HookEnvironment
 {
     DWORD Size;
-    DWORD State;
+    IslandState State;
     DWORD LastError;
     DWORD Uid;
-    HookFunctionOffsets Offsets;
+    BOOL IsOversea;
+    BOOL ProvideOffsets;
+    
     BOOL  EnableSetFov;
     FLOAT FieldOfView;
     BOOL  FixLowFov;
@@ -30,4 +33,6 @@ struct HookEnvironment
 	BOOL  DisplayPaimon;
 	BOOL  DebugMode;
     BOOL  HidePlayerInfo;
+
+    HookFunctionOffsets Offsets;
 };

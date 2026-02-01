@@ -156,6 +156,7 @@
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
     <ClInclude Include="Hooks.h" />
+    <ClInclude Include="IslandState.h" />
     <ClInclude Include="MemoryUtils.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="include\MinHook.h" />

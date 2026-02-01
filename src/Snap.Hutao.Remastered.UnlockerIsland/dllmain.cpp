@@ -63,6 +63,9 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         CreateConsole();
         //SetupAntiAntiDebugHooks(); // 添加反反调试hook
         std::cout << "Snap.Hutao.Remastered.UnlockerIsland loaded in debug mode." << std::endl;
+        std::cout << "ProvideOffsets = " << g_pEnv->ProvideOffsets << std::endl;
+
+
         std::cout << "Offset SetUid = 0x" << std::hex << g_pEnv->Offsets.SetUid << std::endl;
         std::cout << "Offset SetFov = 0x" << std::hex << g_pEnv->Offsets.SetFov << std::endl;
         std::cout << "Offset SetFog = 0x" << std::hex << g_pEnv->Offsets.SetFog << std::endl;

@@ -4,12 +4,6 @@
 
 struct HookFunctionOffsets
 {
-    DWORD GameManagerAwake;
-    
-    DWORD MainEntryPoint;
-    DWORD MainEntryPartner1;
-    DWORD MainEntryPartner2;
-    
     DWORD SetUid;
     DWORD SetFov;
     DWORD SetFog;

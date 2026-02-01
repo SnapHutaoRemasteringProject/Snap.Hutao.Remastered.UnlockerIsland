@@ -4,6 +4,44 @@
 #include <cstring>
 #include <iostream>
 
+// Hardcoded offsets (used when ProvideOffsets is FALSE)
+static HookFunctionOffsets g_HardcodedOffsets = {
+    /* SetUid */ 0xAC68570,
+    /* SetFov */ 0x1560ec0,
+    /* SetFog */ 0x1573060,
+    /* GetFps */ 0x106a3b0,
+    /* SetFps */ 0x106a3c0,
+    /* OpenTeam */ 0xe47e1b0,
+    /* OpenTeamAdvanced */ 0xe4851e0,
+    /* CheckEnter */ 0xfeafc10,
+    /* QuestBanner */ 0xa98f410,
+    /* FindObject */ 0x15B625B0,
+    /* ObjectActive */ 0x15B62300,
+    /* CameraMove */ 0xfa87490,
+    /* DamageText */ 0x1084e9e0,
+    /* TouchInput */ 0x105c2c10,
+    /* CombineEntry */ 0x69ea500,
+    /* CombineEntryPartner */ 0x9199950,
+    /* SetupResinList */ 0,
+    /* ResinList */ 0,
+    /* ResinCount */ 0,
+    /* ResinItem */ 0,
+    /* ResinRemove */ 0,
+    /* FindString */ 0x406330,
+    /* PlayerPerspective */ 0xd80fb50,
+    /* IsObjectActive */ 0x15B622E0,
+    /* GameUpdate */ 0x15394C70,
+    /* PtrToStringAnsi */ 0x15565F40,
+    /* GetPlayerID */ 0x1082F640,
+    /* SetText */ 0x15C451A0,
+    /* MonoInLevelPlayerProfilePageV3Ctor */ 0x1082F8E0,
+    /* GetPlayerName */ 0x1082F730,
+    /* ActorManagerCtor */ 0xD2D4EF0,
+    /* GetGlobalActor */ 0xD2CC9E0,
+    /* ResumePaimonInProfilePageAll */ 0xD2FA560,
+    /* AvatarPaimonAppear */ 0x107BAC60
+};
+
 // Get_FrameCount
 static LPVOID originalGetFrameCount = nullptr;
 // Set_FrameCount (Not hooked, just called)
@@ -73,6 +111,8 @@ static LPVOID getGlobalActor = nullptr;
 static LPVOID resumePaimonInProfilePageAll = nullptr;
 static LPVOID avatarPaimonAppear = nullptr;
 
+static LPVOID originalSetUID = nullptr;
+
 // typedef int(*HookGet_FrameCount_t)();
 typedef int(* GetFrameCountFn)();
 
@@ -140,6 +180,8 @@ typedef void(* CtorFn)(void*);
 typedef void*(*GetGlobalActorFn)(void*);
 typedef void(*ResumePaimonInProfilePageAll)(void*);
 typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
+
+typedef void (*SetUidFn)(void*, uint32_t);
 
 void HandlePaimon() {
     if (!findString || !findGameObject || !setActive || !getActive)
@@ -519,12 +561,18 @@ static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
     original(pThis);
 }
 
-static void HoolActorManagerCtor(void* pThis) {
+static void HookActorManagerCtor(void* pThis) {
     CtorFn original = (CtorFn)originalActorManagerCtor;
 
     actorManager = pThis;
 
     original(pThis);
+}
+
+static void HookSetUID(void* pThis, uint32_t uid) {
+    g_pEnv->Uid = uid;
+    SetUidFn original = (SetUidFn)originalSetUID;
+	original(pThis, uid);
 }
 
 static void HookGameUpdate(void* pThis)
@@ -544,188 +592,204 @@ static void HookGameUpdate(void* pThis)
 
 void SetupHooks()
 {
-    if (g_pEnv->Offsets.GetFps)
+    // Choose which offsets to use based on ProvideOffsets flag
+    HookFunctionOffsets* offsets = &g_pEnv->Offsets;
+    if (!g_pEnv->ProvideOffsets) {
+        // Use hardcoded offsets when ProvideOffsets is FALSE
+        offsets = &g_HardcodedOffsets;
+    }
+
+    if (offsets->GetFps)
     {
-        LPVOID getFrameCountAddr = GetFunctionAddress(g_pEnv->Offsets.GetFps);
+        LPVOID getFrameCountAddr = GetFunctionAddress(offsets->GetFps);
         if (getFrameCountAddr)
         {
             MH_CreateHook(getFrameCountAddr, HookGetFrameCount, &originalGetFrameCount);
         }
     }
 
-    if (g_pEnv->Offsets.SetFps)
+    if (offsets->SetFps)
     {
-        setFrameCount = GetFunctionAddress(g_pEnv->Offsets.SetFps);
+        setFrameCount = GetFunctionAddress(offsets->SetFps);
     }
 
-    if (g_pEnv->Offsets.SetFov)
+    if (offsets->SetFov)
     {
-        LPVOID changeFovAddr = GetFunctionAddress(g_pEnv->Offsets.SetFov);
+        LPVOID changeFovAddr = GetFunctionAddress(offsets->SetFov);
         if (changeFovAddr)
         {
             MH_CreateHook(changeFovAddr, HookSetFov, &originalSetFov);
         }
     }
 
-    if (g_pEnv->Offsets.TouchInput)
+    if (offsets->TouchInput)
     {
-        switchInputDeviceToTouchScreen = GetFunctionAddress(g_pEnv->Offsets.TouchInput);
+        switchInputDeviceToTouchScreen = GetFunctionAddress(offsets->TouchInput);
     }
 
-    if (g_pEnv->Offsets.QuestBanner)
+    if (offsets->QuestBanner)
     {
-        LPVOID setupQuestBannerAddr = GetFunctionAddress(g_pEnv->Offsets.QuestBanner);
+        LPVOID setupQuestBannerAddr = GetFunctionAddress(offsets->QuestBanner);
         if (setupQuestBannerAddr)
         {
             MH_CreateHook(setupQuestBannerAddr, HookSetupQuestBanner, &originalSetupQuestBanner);
         }
     }
 
-    if (g_pEnv->Offsets.FindObject)
+    if (offsets->FindObject)
     {
-        findGameObject = GetFunctionAddress(g_pEnv->Offsets.FindObject);
+        findGameObject = GetFunctionAddress(offsets->FindObject);
     }
 
-    if (g_pEnv->Offsets.ObjectActive)
+    if (offsets->ObjectActive)
     {
-        setActive = GetFunctionAddress(g_pEnv->Offsets.ObjectActive);
+        setActive = GetFunctionAddress(offsets->ObjectActive);
     }
 
-    if (g_pEnv->Offsets.CameraMove)
+    if (offsets->CameraMove)
     {
-        LPVOID eventCameraMoveAddr = GetFunctionAddress(g_pEnv->Offsets.CameraMove);
+        LPVOID eventCameraMoveAddr = GetFunctionAddress(offsets->CameraMove);
         if (eventCameraMoveAddr)
         {
             MH_CreateHook(eventCameraMoveAddr, HookEventCameraMove, &originalEventCameraMove);
         }
     }
 
-    if (g_pEnv->Offsets.DamageText)
+    if (offsets->DamageText)
     {
-        LPVOID showOneDamageTextExAddr = GetFunctionAddress(g_pEnv->Offsets.DamageText);
+        LPVOID showOneDamageTextExAddr = GetFunctionAddress(offsets->DamageText);
         if (showOneDamageTextExAddr)
         {
             MH_CreateHook(showOneDamageTextExAddr, HookShowOneDamageTextEx, &originalShowOneDamageTextEx);
         }
     }
 
-    if (g_pEnv->Offsets.SetFog)
+    if (offsets->SetFog)
     {
-        LPVOID displayFogAddr = GetFunctionAddress(g_pEnv->Offsets.SetFog);
+        LPVOID displayFogAddr = GetFunctionAddress(offsets->SetFog);
         if (displayFogAddr)
         {
             MH_CreateHook(displayFogAddr, HookDisplayFog, &originalDisplayFog);
         }
     }
 
-    if (g_pEnv->Offsets.PlayerPerspective)
+    if (offsets->PlayerPerspective)
     {
-        LPVOID playerPerspectiveAddr = GetFunctionAddress(g_pEnv->Offsets.PlayerPerspective);
+        LPVOID playerPerspectiveAddr = GetFunctionAddress(offsets->PlayerPerspective);
         if (playerPerspectiveAddr)
         {
             MH_CreateHook(playerPerspectiveAddr, HookPlayerPerspective, &originalPlayerPerspective);
         }
     }
 
-    if (g_pEnv->Offsets.FindString)
+    if (offsets->FindString)
     {
-        findString = GetFunctionAddress(g_pEnv->Offsets.FindString);
+        findString = GetFunctionAddress(offsets->FindString);
     }
 
-    if (g_pEnv->Offsets.CombineEntryPartner)
+    if (offsets->CombineEntryPartner)
     {
-        craftEntryPartner = GetFunctionAddress(g_pEnv->Offsets.CombineEntryPartner);
+        craftEntryPartner = GetFunctionAddress(offsets->CombineEntryPartner);
     }
 
-    if (g_pEnv->Offsets.CombineEntry)
+    if (offsets->CombineEntry)
     {
-        LPVOID craftEntryAddr = GetFunctionAddress(g_pEnv->Offsets.CombineEntry);
+        LPVOID craftEntryAddr = GetFunctionAddress(offsets->CombineEntry);
         if (craftEntryAddr)
         {
             MH_CreateHook(craftEntryAddr, HookCraftEntry, &originalCraftEntry);
         }
     }
 
-    if (g_pEnv->Offsets.CheckEnter)
+    if (offsets->CheckEnter)
     {
-        checkCanEnter = GetFunctionAddress(g_pEnv->Offsets.CheckEnter);
+        checkCanEnter = GetFunctionAddress(offsets->CheckEnter);
     }
 
-    if (g_pEnv->Offsets.OpenTeamAdvanced)
+    if (offsets->OpenTeamAdvanced)
     {
-        openTeamPageAccordingly = GetFunctionAddress(g_pEnv->Offsets.OpenTeamAdvanced);
+        openTeamPageAccordingly = GetFunctionAddress(offsets->OpenTeamAdvanced);
     }
 
-    if (g_pEnv->Offsets.OpenTeam)
+    if (offsets->OpenTeam)
     {
-        LPVOID openTeamAddr = GetFunctionAddress(g_pEnv->Offsets.OpenTeam);
+        LPVOID openTeamAddr = GetFunctionAddress(offsets->OpenTeam);
         if (openTeamAddr)
         {
             MH_CreateHook(openTeamAddr, HookOpenTeam, &originalOpenTeam);
         }
     }
 
-	if (g_pEnv->Offsets.IsObjectActive)
+	if (offsets->IsObjectActive)
     {
-        getActive = GetFunctionAddress(g_pEnv->Offsets.IsObjectActive);
+        getActive = GetFunctionAddress(offsets->IsObjectActive);
     }
 
-    if (g_pEnv->Offsets.GameUpdate)
+    if (offsets->GameUpdate)
     {
-        LPVOID gameUpdateAddr = GetFunctionAddress(g_pEnv->Offsets.GameUpdate);
+        LPVOID gameUpdateAddr = GetFunctionAddress(offsets->GameUpdate);
         if (gameUpdateAddr)
         {
             MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
         }
 	}
 
-	if (g_pEnv->Offsets.PtrToStringAnsi)
+	if (offsets->PtrToStringAnsi)
     {
-		ptrToStringAnsi = GetFunctionAddress(g_pEnv->Offsets.PtrToStringAnsi);
+		ptrToStringAnsi = GetFunctionAddress(offsets->PtrToStringAnsi);
     }
 
-	if (g_pEnv->Offsets.GetPlayerID)
+	if (offsets->GetPlayerID)
     {
-        getPlayerID = GetFunctionAddress(g_pEnv->Offsets.GetPlayerID);
+        getPlayerID = GetFunctionAddress(offsets->GetPlayerID);
     }
 
-    if (g_pEnv->Offsets.SetText) {
-        setText = GetFunctionAddress(g_pEnv->Offsets.SetText);
+    if (offsets->SetText) {
+        setText = GetFunctionAddress(offsets->SetText);
     }
 
-    if (g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor) {
-        LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor);
+    if (offsets->MonoInLevelPlayerProfilePageV3Ctor) {
+        LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(offsets->MonoInLevelPlayerProfilePageV3Ctor);
         if (monoInLevelPlayerProfilePageV3Addr) {
             MH_CreateHook(monoInLevelPlayerProfilePageV3Addr, HookMonoInLevelPlayerProfilePageV3Ctor, &originalMonoInLevelPlayerProfilePageV3Ctor);
         }
     }
 
-    if (g_pEnv->Offsets.GetPlayerName)
+    if (offsets->GetPlayerName)
     {
-        getPlayerName = GetFunctionAddress(g_pEnv->Offsets.GetPlayerName);
+        getPlayerName = GetFunctionAddress(offsets->GetPlayerName);
     }
 
-	if (g_pEnv->Offsets.ActorManagerCtor)
+	if (offsets->ActorManagerCtor)
     {
-        LPVOID actorManagerCtorAddr = GetFunctionAddress(g_pEnv->Offsets.ActorManagerCtor);
+        LPVOID actorManagerCtorAddr = GetFunctionAddress(offsets->ActorManagerCtor);
         if (actorManagerCtorAddr)
         {
-            MH_CreateHook(actorManagerCtorAddr, HoolActorManagerCtor, &originalActorManagerCtor);
+            MH_CreateHook(actorManagerCtorAddr, HookActorManagerCtor, &originalActorManagerCtor);
         }
 	}
 
-    if (g_pEnv->Offsets.GetGlobalActor)
+    if (offsets->GetGlobalActor)
     {
-        getGlobalActor = GetFunctionAddress(g_pEnv->Offsets.GetGlobalActor);
+        getGlobalActor = GetFunctionAddress(offsets->GetGlobalActor);
     }
 
-    if (g_pEnv->Offsets.ResumePaimonInProfilePageAll)
+    if (offsets->ResumePaimonInProfilePageAll)
     {
-        resumePaimonInProfilePageAll = GetFunctionAddress(g_pEnv->Offsets.ResumePaimonInProfilePageAll);
+        resumePaimonInProfilePageAll = GetFunctionAddress(offsets->ResumePaimonInProfilePageAll);
     }
 
-    if (g_pEnv->Offsets.AvatarPaimonAppear)
+    if (offsets->AvatarPaimonAppear)
     {
-        avatarPaimonAppear = GetFunctionAddress(g_pEnv->Offsets.AvatarPaimonAppear);
+        avatarPaimonAppear = GetFunctionAddress(offsets->AvatarPaimonAppear);
     }
+
+    if (offsets->SetUid)
+    {
+        LPVOID setUIDAddr = GetFunctionAddress(offsets->SetUid);
+        if (setUIDAddr)
+        {
+            MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
+        }
+	}
 }

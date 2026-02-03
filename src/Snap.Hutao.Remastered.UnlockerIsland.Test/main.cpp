@@ -219,6 +219,8 @@ void Inject()
 			pEnv->Offsets.GetGlobalActor = 0xD2CC9E0;  //ActorManager.GetGlobalActor
 			pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll
 			pEnv->Offsets.AvatarPaimonAppear = 0x107BAC60;  //GlobalActor.AvatarPaimonAppear
+			pEnv->Offsets.GetComponent = 0x15B61F60;  //GameObject.GetComponent(String type)
+			pEnv->Offsets.GetText = 0x15C45190;  //Text.get_text
         }
 
         // 注入DLL

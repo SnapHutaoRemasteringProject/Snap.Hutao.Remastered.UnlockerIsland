@@ -335,6 +335,32 @@ void HandleTouchMode() {
 	}
 }
 
+bool CheckResistInBeyd() {
+    if (!findString || !findGameObject || !setActive || !getActive)
+    {
+        return false;
+    }
+
+    FindStringFn findStringFunc = (FindStringFn)findString;
+    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+
+    Il2CppString* BtnReportStrObj = findStringFunc(BTN_REPORT);
+    if (BtnReportStrObj)
+    {
+        void* BtnReportObj = findGameObjectFunc(BtnReportStrObj);
+        if (BtnReportObj)
+        {
+            return !getActiveFunc(BtnReportObj);
+        }
+
+        return false;
+	}
+
+    return false;
+}
+
 void RequestOpenCraft()
 {
     requestOpenCraft = true;
@@ -404,9 +430,13 @@ static int HookSetFov(void* a1, float changeFovValue)
     }
 
     // FPS override
-    if (setFrameCount && g_pEnv->EnableSetFps) {
+    if (setFrameCount && g_pEnv->EnableSetFps && !CheckResistInBeyd()) {
         SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
         setFrameCountFunc(g_pEnv->TargetFps);
+
+        if (g_pEnv->DebugMode) {
+            std::cout << "FPS not limited" << std::endl;
+        }
     }
 
     if (originalSetFov)
@@ -588,6 +618,16 @@ static void HookGameUpdate(void* pThis)
     
     HandlePaimonV2();
     HandlePlayerInfo();
+
+    // FPS limit
+    if (CheckResistInBeyd()) {
+        SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
+        setFrameCountFunc(60);
+
+        if (g_pEnv->DebugMode) {
+            std::cout << "FPS limited" << std::endl;
+        }
+    }
 
     if (requestOpenCraft)
     {

@@ -20,7 +20,7 @@ static LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 MacroDetector::MacroDetector() 
     : m_hUnityWindow(nullptr)
 {
-    InitializeCriticalSection(&m_cs);
+
 }
 
 MacroDetector::~MacroDetector()
@@ -31,8 +31,6 @@ MacroDetector::~MacroDetector()
         UnhookWindowsHookEx(g_mouseHook);
         g_mouseHook = nullptr;
     }
-    
-    DeleteCriticalSection(&m_cs);
 }
 
 MacroDetector& MacroDetector::GetInstance()
@@ -66,8 +64,6 @@ void MacroDetector::Initialize()
 
 void MacroDetector::RecordClick()
 {
-    EnterCriticalSection(&m_cs);
-    
     auto now = std::chrono::steady_clock::now();
     m_clickTimes.push(now);
     
@@ -76,14 +72,10 @@ void MacroDetector::RecordClick()
     {
         m_clickTimes.pop();
     }
-    
-    LeaveCriticalSection(&m_cs);
 }
 
 bool MacroDetector::IsOverCpsLimit() const
 {
-    EnterCriticalSection(&m_cs);
-    
     auto now = std::chrono::steady_clock::now();
     auto cutoff = now - m_timeWindow;
     
@@ -95,15 +87,11 @@ bool MacroDetector::IsOverCpsLimit() const
     
     bool overLimit = tempQueue.size() >= m_maxClicksPerSecond;
     
-    LeaveCriticalSection(&m_cs);
-    
     return overLimit;
 }
 
 double MacroDetector::GetCurrentCps() const
 {
-    EnterCriticalSection(&m_cs);
-    
     auto now = std::chrono::steady_clock::now();
     auto cutoff = now - m_timeWindow;
     
@@ -114,9 +102,7 @@ double MacroDetector::GetCurrentCps() const
     }
     
     double cps = static_cast<double>(tempQueue.size());
-    
-    LeaveCriticalSection(&m_cs);
-    
+
     return cps;
 }
 
@@ -183,8 +169,6 @@ HWND MacroDetector::FindUnityMainWindow()
 
 void MacroDetector::Update()
 {
-    EnterCriticalSection(&m_cs);
-    
     if (!m_clickTimes.empty())
     {
         auto now = std::chrono::steady_clock::now();
@@ -195,8 +179,6 @@ void MacroDetector::Update()
             m_clickTimes.pop();
         }
     }
-    
-    LeaveCriticalSection(&m_cs);
     
     if (!m_hUnityWindow)
     {

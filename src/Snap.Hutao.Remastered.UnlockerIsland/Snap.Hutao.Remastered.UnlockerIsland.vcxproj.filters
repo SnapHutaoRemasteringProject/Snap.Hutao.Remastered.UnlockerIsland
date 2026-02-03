@@ -60,6 +60,9 @@
     <ClInclude Include="IslandState.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MacroDetector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="framework.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MacroDetector.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

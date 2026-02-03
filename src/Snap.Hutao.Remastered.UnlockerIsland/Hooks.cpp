@@ -1,6 +1,7 @@
 #include "Hooks.h"
 #include "framework.h"
 #include "MemoryUtils.h"
+#include "MacroDetector.h"
 #include <cstring>
 #include <iostream>
 
@@ -82,6 +83,7 @@ static LPVOID originalGameUpdate = nullptr;
 // Global State
 static bool gameUpdateInit = false;
 static bool touchScreenInit = false;
+static bool macroDetectorInitialized = false;
 // Flag to request opening the craft menu from the main thread
 static bool requestOpenCraft = false;
 
@@ -577,6 +579,13 @@ static void HookSetUID(void* pThis, uint32_t uid) {
 
 static void HookGameUpdate(void* pThis)
 {
+    if (!macroDetectorInitialized)
+    {
+        MacroDetector::GetInstance().Initialize();
+        macroDetectorInitialized = true;
+        std::cout << "[MacroDetector] Initialized on first GameUpdate" << std::endl;
+    }
+    
     HandlePaimonV2();
     HandlePlayerInfo();
 
@@ -585,6 +594,8 @@ static void HookGameUpdate(void* pThis)
         requestOpenCraft = false;
         DoOpenCraftMenu();
     }
+
+    MacroDetector::GetInstance().Update();
 
     UpdateFn original = (UpdateFn)originalGameUpdate;
     original(pThis);

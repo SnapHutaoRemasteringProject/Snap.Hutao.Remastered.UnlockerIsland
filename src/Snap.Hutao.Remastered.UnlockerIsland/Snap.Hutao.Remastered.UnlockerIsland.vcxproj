@@ -157,6 +157,7 @@
     <ClInclude Include="HookFunctionOffsets.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="IslandState.h" />
+    <ClInclude Include="MacroDetector.h" />
     <ClInclude Include="MemoryUtils.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="include\MinHook.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="framework.cpp" />
     <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="MacroDetector.cpp" />
     <ClCompile Include="MemoryUtils.cpp" />
     <ClCompile Include="Scanner.cpp" />
   </ItemGroup>

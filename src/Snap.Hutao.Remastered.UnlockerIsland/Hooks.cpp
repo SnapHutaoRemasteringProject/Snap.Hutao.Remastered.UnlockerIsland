@@ -40,7 +40,9 @@ static HookFunctionOffsets g_HardcodedOffsets = {
     /* ActorManagerCtor */ 0xD2D4EF0,
     /* GetGlobalActor */ 0xD2CC9E0,
     /* ResumePaimonInProfilePageAll */ 0xD2FA560,
-    /* AvatarPaimonAppear */ 0x107BAC60
+    /* AvatarPaimonAppear */ 0x107BAC60,
+    /* GetComponent */ 0x15B61F60,
+    /* GetText */ 0x15C45190
 };
 
 // Get_FrameCount
@@ -184,6 +186,12 @@ typedef void(*ResumePaimonInProfilePageAll)(void*);
 typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
 
 typedef void (*SetUidFn)(void*, uint32_t);
+
+// Beyd Limit
+static LPVOID getComponent = nullptr;
+static LPVOID getText = nullptr;
+typedef void* (*GetComponentFn)(void*, Il2CppString*);
+typedef Il2CppString* (*GetTextFn)(void*);
 
 void HandlePaimon() {
     if (!findString || !findGameObject || !setActive || !getActive)
@@ -336,27 +344,38 @@ void HandleTouchMode() {
 }
 
 bool CheckResistInBeyd() {
-    if (!findString || !findGameObject || !setActive || !getActive)
+    if (!findString || !findGameObject || !getComponent || !getText)
     {
         return false;
     }
 
     FindStringFn findStringFunc = (FindStringFn)findString;
     FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
-    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+    GetComponentFn getComponentFunc = (GetComponentFn)getComponent;
+    GetTextFn getTextFunc = (GetTextFn)getText;
 
-    Il2CppString* BtnReportStrObj = findStringFunc(BTN_REPORT);
-    if (BtnReportStrObj)
+    Il2CppString* uidStrObj = findStringFunc(UID_PATH);
+    Il2CppString* textStrObj = findStringFunc("Text");
+    if (uidStrObj)
     {
-        void* BtnReportObj = findGameObjectFunc(BtnReportStrObj);
-        if (BtnReportObj)
+        void* uidObj = findGameObjectFunc(uidStrObj);
+        if (uidObj)
         {
-            return !getActiveFunc(BtnReportObj);
+            void* textComponent = getComponentFunc(uidObj, textStrObj);
+            if (textComponent)
+            {
+                Il2CppString* textValue = getTextFunc(textComponent);
+                if (textValue)
+                {
+                    const wchar_t* textChars = textValue->chars;
+                    const wchar_t* resistText = L"GUID";
+                    return wcsstr(textChars, resistText) != nullptr;
+                }
+            }
         }
 
         return false;
-	}
+    }
 
     return false;
 }
@@ -842,5 +861,15 @@ void SetupHooks()
         {
             MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
         }
+	}
+
+	if (offsets->GetComponent)
+    {
+        getComponent = GetFunctionAddress(offsets->GetComponent);
+    }
+
+    if (offsets->GetText)
+    {
+        getText = GetFunctionAddress(offsets->GetText);
 	}
 }

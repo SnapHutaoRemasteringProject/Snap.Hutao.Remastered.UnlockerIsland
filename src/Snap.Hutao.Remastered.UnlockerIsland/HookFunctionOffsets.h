@@ -45,4 +45,7 @@ struct HookFunctionOffsets
     DWORD GetGlobalActor;
     DWORD ResumePaimonInProfilePageAll;
     DWORD AvatarPaimonAppear;
+
+	DWORD GetComponent;
+    DWORD GetText;
 };

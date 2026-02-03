@@ -14,7 +14,7 @@ struct Il2CppObject {
 struct Il2CppString {
     Il2CppObject object;
     long length;
-    wchar_t* chars;
+    wchar_t chars[];
 };
 
 struct Color {

@@ -1,20 +1,22 @@
 ﻿#include "MacroDetector.h"
 #include <iostream>
+#include <commctrl.h>
 
 static MacroDetector g_macroDetector;
-static HHOOK g_mouseHook = nullptr;
 
-static LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MacroDetector::WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (nCode >= 0)
+    MacroDetector* pDetector = reinterpret_cast<MacroDetector*>(dwRefData);
+    
+    if (uMsg == WM_LBUTTONDOWN || uMsg == WM_RBUTTONDOWN)
     {
-        if (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN)
+        if (pDetector)
         {
-            MacroDetector::GetInstance().RecordClick();
+            pDetector->RecordClick();
         }
     }
-    
-    return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
+
+    return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
 
 MacroDetector::MacroDetector() 
@@ -25,12 +27,7 @@ MacroDetector::MacroDetector()
 
 MacroDetector::~MacroDetector()
 {
-    // 卸载鼠标钩子
-    if (g_mouseHook)
-    {
-        UnhookWindowsHookEx(g_mouseHook);
-        g_mouseHook = nullptr;
-    }
+    RemoveWindowSubclass();
 }
 
 MacroDetector& MacroDetector::GetInstance()
@@ -40,25 +37,24 @@ MacroDetector& MacroDetector::GetInstance()
 
 void MacroDetector::Initialize()
 {
-    g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, GetModuleHandle(NULL), 0);
-    if (g_mouseHook)
-    {
-        std::cout << "[MacroDetector] Mouse hook installed successfully" << std::endl;
-    }
-    else
-    {
-        std::cout << "[MacroDetector] Failed to install mouse hook: " << GetLastError() << std::endl;
-    }
-    
     FindUnityMainWindow();
     
     if (m_hUnityWindow)
     {
         std::cout << "[MacroDetector] Found Unity main window: " << m_hUnityWindow << std::endl;
+        
+        if (InstallWindowSubclass())
+        {
+            std::cout << "[MacroDetector] Window subclass installed successfully" << std::endl;
+        }
+        else
+        {
+            std::cout << "[MacroDetector] Failed to install window subclass" << std::endl;
+        }
     }
     else
     {
-        std::cout << "[MacroDetector] Unity main window not found" << std::endl;
+        std::cout << "[MacroDetector] Unity main window not found, will retry in Update()" << std::endl;
     }
 }
 
@@ -183,6 +179,14 @@ void MacroDetector::Update()
     if (!m_hUnityWindow)
     {
         FindUnityMainWindow();
+        
+        if (m_hUnityWindow && !m_subclassInstalled)
+        {
+            if (InstallWindowSubclass())
+            {
+                std::cout << "[MacroDetector] Window subclass installed in Update()" << std::endl;
+            }
+        }
     }
     
     if (!warned && IsOverCpsLimit())
@@ -190,4 +194,39 @@ void MacroDetector::Update()
         warned = true;
         CreateThread(NULL, 0, ShowMessageThread, 0, 0, NULL);
     }
+}
+
+bool MacroDetector::InstallWindowSubclass()
+{
+    if (!m_hUnityWindow || m_subclassInstalled)
+    {
+        return false;
+    }
+    
+    // Use SetWindowSubclass for safer subclassing
+    if (SetWindowSubclass(m_hUnityWindow, WindowSubclassProc, m_subclassId, reinterpret_cast<DWORD_PTR>(this)))
+    {
+        m_subclassInstalled = true;
+        return true;
+    }
+    
+    std::cout << "[MacroDetector] Failed to install window subclass: " << GetLastError() << std::endl;
+    return false;
+}
+
+bool MacroDetector::RemoveWindowSubclass()
+{
+    if (!m_hUnityWindow || !m_subclassInstalled)
+    {
+        return false;
+    }
+    
+    if (::RemoveWindowSubclass(m_hUnityWindow, WindowSubclassProc, m_subclassId))
+    {
+        m_subclassInstalled = false;
+        return true;
+    }
+    
+    std::cout << "[MacroDetector] Failed to remove window subclass: " << GetLastError() << std::endl;
+    return false;
 }

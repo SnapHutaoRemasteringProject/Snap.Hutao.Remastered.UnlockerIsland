@@ -32,7 +32,6 @@ private:
 private:
     HWND m_hUnityWindow;
     std::queue<std::chrono::steady_clock::time_point> m_clickTimes;
-    mutable CRITICAL_SECTION m_cs;
     const size_t m_maxClicksPerSecond = 20;
     const std::chrono::seconds m_timeWindow{1};
     bool warned = false;

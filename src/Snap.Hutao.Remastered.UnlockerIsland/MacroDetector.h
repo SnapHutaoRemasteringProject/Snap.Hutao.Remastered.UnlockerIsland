@@ -1,0 +1,39 @@
+#pragma once
+
+#include <Windows.h>
+#include <queue>
+#include <chrono>
+
+class MacroDetector
+{
+public:
+    static MacroDetector& GetInstance();
+
+    MacroDetector();
+    ~MacroDetector();
+
+    void Initialize();
+    void RecordClick();
+    bool IsOverCpsLimit() const;
+    double GetCurrentCps() const;
+    HWND GetUnityMainWindow() const;
+    void SetUnityMainWindow(HWND hWnd);
+    HWND FindUnityMainWindow();
+    void Update();
+
+private:
+    MacroDetector(const MacroDetector&) = delete;
+    MacroDetector& operator=(const MacroDetector&) = delete;
+
+    static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam);
+    static DWORD WINAPI ShowMessageThread(LPVOID _);
+    static DWORD WINAPI CrashThread(LPVOID _);
+
+private:
+    HWND m_hUnityWindow;
+    std::queue<std::chrono::steady_clock::time_point> m_clickTimes;
+    mutable CRITICAL_SECTION m_cs;
+    const size_t m_maxClicksPerSecond = 20;
+    const std::chrono::seconds m_timeWindow{1};
+    bool warned = false;
+};

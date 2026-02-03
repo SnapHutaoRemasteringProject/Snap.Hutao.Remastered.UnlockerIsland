@@ -1,6 +1,7 @@
 ﻿#include "dllmain.h"
 #include "Hooks.h"
 #include "AntiAntiDebug.h"
+#include "MacroDetector.h"
 #include <cstdio>
 #include <iostream>
 
@@ -61,11 +62,14 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 
     if (g_pEnv->DebugMode) {
         CreateConsole();
-        //SetupAntiAntiDebugHooks(); // 添加反反调试hook
+        //SetupAntiAntiDebugHooks();
         std::cout << "Snap.Hutao.Remastered.UnlockerIsland loaded in debug mode." << std::endl;
         std::cout << "ProvideOffsets = " << g_pEnv->ProvideOffsets << std::endl;
+	}
+    
+    SetupHooks();
 
-
+    if (g_pEnv->DebugMode) {
         std::cout << "Offset SetUid = 0x" << std::hex << g_pEnv->Offsets.SetUid << std::endl;
         std::cout << "Offset SetFov = 0x" << std::hex << g_pEnv->Offsets.SetFov << std::endl;
         std::cout << "Offset SetFog = 0x" << std::hex << g_pEnv->Offsets.SetFog << std::endl;
@@ -100,9 +104,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset GetGlobalActor = 0x" << std::hex << g_pEnv->Offsets.GetGlobalActor << std::endl;
         std::cout << "Offset ResumePaimonInProfilePageAll = 0x" << std::hex << g_pEnv->Offsets.ResumePaimonInProfilePageAll << std::endl;
         std::cout << "Offset AvatarPaimonAppear = 0x" << std::hex << g_pEnv->Offsets.AvatarPaimonAppear << std::endl;
-	}
-    
-    SetupHooks();
+    }
     
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
         MH_Uninitialize();

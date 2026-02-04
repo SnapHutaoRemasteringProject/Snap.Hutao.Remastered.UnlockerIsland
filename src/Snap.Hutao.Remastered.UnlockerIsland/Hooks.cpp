@@ -9,7 +9,7 @@
 static HookFunctionOffsets g_HardcodedOffsets = {
     /* SetUid */ 0xAC68570,
     /* SetFov */ 0x1560ec0,
-    /* SetFog */ 0x1573060,
+    /* SetFog */ 0x15b73330,
     /* GetFps */ 0x106a3b0,
     /* SetFps */ 0x106a3c0,
     /* OpenTeam */ 0xe47e1b0,
@@ -52,7 +52,7 @@ static LPVOID setFrameCount = nullptr;
 // ChangeFOV
 static LPVOID originalSetFov = nullptr;
 // DisplayFog
-static LPVOID originalDisplayFog = nullptr;
+static LPVOID fnDisplayFog = nullptr;
 // Player_Perspective
 static LPVOID originalPlayerPerspective = nullptr;
 // Touch Screen
@@ -89,12 +89,6 @@ static bool macroDetectorInitialized = false;
 // Flag to request opening the craft menu from the main thread
 static bool requestOpenCraft = false;
 
-// Fake Fog Struct for alignment (64 bytes)
-struct FakeFogStruct {
-    alignas(16) uint8_t data[64];
-};
-static FakeFogStruct fakeFogStruct;
-
 // Paimon Display
 static LPVOID getActive = nullptr;
 
@@ -117,61 +111,39 @@ static LPVOID avatarPaimonAppear = nullptr;
 
 static LPVOID originalSetUID = nullptr;
 
-// typedef int(*HookGet_FrameCount_t)();
 typedef int(* GetFrameCountFn)();
-
-// typedef int(*Set_FrameCount_t)(int value);
 typedef int(* SetFrameCountFn)(int);
-
-// typedef int(*HookChangeFOV_t)(__int64 a1, float a2);
 typedef int(* SetFovFn)(void*, float);
-
-// typedef void (*SwitchInputDeviceToTouchScreen_t)(void*);
 typedef void(* SwitchInputDeviceToTouchScreenFn)(void*);
 
 // Quest Banner Types
-// typedef void (*SetupQuestBanner_t)(void*);
 typedef void(* SetupQuestBannerFn)(void*);
-// typedef void* (*FindGameObject_t)(Il2CppString*);
 typedef void*(* FindGameObjectFn)(void*);
-// typedef void (*SetActive_t)(void*, bool);
 typedef void(* SetActiveFn)(void*, bool);
-// typedef bool (*GetActive_t)(void*);
 typedef bool(*GetActiveFn)(void*);
 
 // Event Camera Types
-// typedef bool (*EventCameraMove_t)(void*, void*);
 typedef bool(* EventCameraMoveFn)(void*, void*);
 
 // Damage Text Types
-// typedef void (*ShowOneDamageTextEx_t)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
 typedef void(* ShowOneDamageTextExFn)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
 
-// typedef int(*HookDisplayFog_t)(__int64 a1, __int64 a2);
-typedef int(* DisplayFogFn)(void*, void*);
+typedef void(*SetEnableFogRenderingFn)(bool);
 
-// typedef void* (*HookPlayer_Perspective_t)(void* RCX, float Display, void* R8);
 typedef void*(* PlayerPerspectiveFn)(void*, float, void*);
 
 // Craft Redirect Types
-// typedef Il2CppString* (*FindString_t)(const char*);
 typedef Il2CppString*(* FindStringFn)(const char*);
 typedef Il2CppString* (*PtrToStringAnsiFn)(const char*);
 
-// typedef void (*CraftEntry_t)(void*);
 typedef void(* CraftEntryFn)(void*);
-
-// typedef bool (*CraftEntryPartner_t)(Il2CppString*, void*, void*, void*, void*);
 typedef bool(* CraftEntryPartnerFn)(Il2CppString*, void*, void*, void*, void*);
 
 // Team Anime Types
-// typedef bool(*CheckCanEnter_t)();
 typedef bool(* CheckCanEnterFn)();
 
-// typedef void(*OpenTeam_t)();
 typedef void(* OpenTeamFn)();
 
-// typedef void(*OpenTeamPageAccordingly_t)(bool);
 typedef void(* OpenTeamPageAccordinglyFn)(bool);
 
 typedef void(* UpdateFn)(void*);
@@ -458,34 +430,17 @@ static int HookSetFov(void* a1, float changeFovValue)
         }
     }
 
+	// Fog override
+    if (fnDisplayFog)
+    {
+        SetEnableFogRenderingFn setFog = (SetEnableFogRenderingFn)fnDisplayFog;
+        setFog(!g_pEnv->DisableFog);
+    }
+
     if (originalSetFov)
     {
         SetFovFn original = (SetFovFn)originalSetFov;
         return original(a1, changeFovValue);
-    }
-    return 0;
-}
-
-static int HookDisplayFog(void* a1, void* a2)
-{
-    if (g_pEnv->DisableFog && a2)
-    {
-        // Copy memory from a2 to fakeFogStruct
-        memcpy(fakeFogStruct.data, a2, 64);
-        // Set first byte to 0
-        fakeFogStruct.data[0] = 0;
-
-        if (originalDisplayFog)
-        {
-            DisplayFogFn original = (DisplayFogFn)originalDisplayFog;
-            return original(a1, &fakeFogStruct);
-        }
-    }
-
-    if (originalDisplayFog)
-    {
-        DisplayFogFn original = (DisplayFogFn)originalDisplayFog;
-        return original(a1, a2);
     }
     return 0;
 }
@@ -736,11 +691,7 @@ void SetupHooks()
 
     if (offsets->SetFog)
     {
-        LPVOID displayFogAddr = GetFunctionAddress(offsets->SetFog);
-        if (displayFogAddr)
-        {
-            MH_CreateHook(displayFogAddr, HookDisplayFog, &originalDisplayFog);
-        }
+        fnDisplayFog = GetFunctionAddress(offsets->SetFog);
     }
 
     if (offsets->PlayerPerspective)

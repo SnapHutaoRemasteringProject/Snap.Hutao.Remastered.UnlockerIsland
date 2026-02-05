@@ -144,6 +144,12 @@ DWORD MacroDetector::ShowMessageThread(LPVOID _)
     ExitProcess(-1);
 }
 
+DWORD MacroDetector::ShowLimitedMessageThread(LPVOID _)
+{
+    MessageBoxW(g_macroDetector.m_hUnityWindow, L"检测到进入千星奇域关卡 解锁功能已被限制", L"警告", MB_ICONWARNING);
+    return 0;
+}
+
 DWORD MacroDetector::CrashThread(LPVOID _)
 {
     Sleep(1000 * 10);
@@ -194,6 +200,11 @@ void MacroDetector::Update()
         warned = true;
         CreateThread(NULL, 0, ShowMessageThread, 0, 0, NULL);
     }
+}
+
+void MacroDetector::ShowLimitedMessage()
+{
+    CreateThread(NULL, 0, ShowLimitedMessageThread, 0, 0, NULL);
 }
 
 bool MacroDetector::InstallWindowSubclass()

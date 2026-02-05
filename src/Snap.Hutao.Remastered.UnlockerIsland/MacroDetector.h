@@ -21,12 +21,15 @@ public:
     HWND FindUnityMainWindow();
     void Update();
 
+    static void ShowLimitedMessage();
+
 private:
     MacroDetector(const MacroDetector&) = delete;
     MacroDetector& operator=(const MacroDetector&) = delete;
 
     static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam);
     static DWORD WINAPI ShowMessageThread(LPVOID _);
+    static DWORD WINAPI ShowLimitedMessageThread(LPVOID _);
     static DWORD WINAPI CrashThread(LPVOID _);
     
     // Window subclassing methods

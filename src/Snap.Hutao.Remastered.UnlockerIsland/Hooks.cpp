@@ -193,6 +193,8 @@ static LPVOID getText = nullptr;
 typedef void* (*GetComponentFn)(void*, Il2CppString*);
 typedef Il2CppString* (*GetTextFn)(void*);
 
+static bool isResistedLastFrame = false;
+
 void HandlePaimon() {
     if (!findString || !findGameObject || !setActive || !getActive)
     {
@@ -435,27 +437,36 @@ static int HookGetFrameCount()
 
 static int HookSetFov(void* a1, float changeFovValue)
 {
+    bool isResisted = CheckResistInBeyd();
     if (!gameUpdateInit)
     {
         gameUpdateInit = true;
     }
 
+    if (g_pEnv->DebugMode && !isResisted) {
+        std::cout << "Function not limited" << std::endl;
+    }
+
+    if (isResisted && !isResistedLastFrame) {
+        MacroDetector::GetInstance().ShowLimitedMessage();
+    }
+
+    isResistedLastFrame = isResisted;
+
     HandleTouchMode();
 
     // FOV override
-    if (changeFovValue > 30.0f && g_pEnv->EnableSetFov)
+    if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
     {
         changeFovValue = g_pEnv->FieldOfView;
+    } else {
+        changeFovValue = 45.0f;
     }
 
     // FPS override
-    if (setFrameCount && g_pEnv->EnableSetFps && !CheckResistInBeyd()) {
+    if (setFrameCount && g_pEnv->EnableSetFps && !isResisted) {
         SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
         setFrameCountFunc(g_pEnv->TargetFps);
-
-        if (g_pEnv->DebugMode) {
-            std::cout << "FPS not limited" << std::endl;
-        }
     }
 
     if (originalSetFov)
@@ -468,7 +479,7 @@ static int HookSetFov(void* a1, float changeFovValue)
 
 static int HookDisplayFog(void* a1, void* a2)
 {
-    if (g_pEnv->DisableFog && a2)
+    if (g_pEnv->DisableFog && a2 && !CheckResistInBeyd())
     {
         // Copy memory from a2 to fakeFogStruct
         memcpy(fakeFogStruct.data, a2, 64);
@@ -492,7 +503,7 @@ static int HookDisplayFog(void* a1, void* a2)
 
 static void* HookPlayerPerspective(void* rcx, float display, void* r8)
 {
-    if (g_pEnv->FixLowFov)
+    if (g_pEnv->FixLowFov && !CheckResistInBeyd())
     {
         display = 1.0f;
     }
@@ -538,7 +549,7 @@ static void HookSetupQuestBanner(void* pThis)
 
 static bool HookEventCameraMove(void* pThis, void* event)
 {
-    if (g_pEnv->DisableCameraMove)
+    if (g_pEnv->DisableCameraMove && !CheckResistInBeyd())
     {
         return true;
     }
@@ -553,7 +564,7 @@ static bool HookEventCameraMove(void* pThis, void* event)
 
 static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, Il2CppString* showText, void* worldPos, void* attackee, int elementReactionType)
 {
-    if (g_pEnv->DisableDamageText)
+    if (g_pEnv->DisableDamageText && !CheckResistInBeyd())
     {
         return;
     }
@@ -568,7 +579,7 @@ static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int 
 static void HookCraftEntry(void* pThis)
 {
     // If redirect is enabled AND we successfully opened the menu via our helper
-    if (g_pEnv->RedirectCombine && DoOpenCraftMenu())
+    if (g_pEnv->RedirectCombine && DoOpenCraftMenu() && !CheckResistInBeyd())
     {
         // Return early, skipping the original tedious dialog
         return;
@@ -583,7 +594,7 @@ static void HookCraftEntry(void* pThis)
 
 static void HookOpenTeam()
 {
-    if (g_pEnv->RemoveTeamProgress && checkCanEnter)
+    if (g_pEnv->RemoveTeamProgress && checkCanEnter && !CheckResistInBeyd())
     {
         CheckCanEnterFn checkCanEnterFunc = (CheckCanEnterFn)checkCanEnter;
         if (checkCanEnterFunc())
@@ -637,16 +648,6 @@ static void HookGameUpdate(void* pThis)
     
     HandlePaimonV2();
     HandlePlayerInfo();
-
-    // FPS limit
-    if (CheckResistInBeyd()) {
-        SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
-        setFrameCountFunc(60);
-
-        if (g_pEnv->DebugMode) {
-            std::cout << "FPS limited" << std::endl;
-        }
-    }
 
     if (requestOpenCraft)
     {

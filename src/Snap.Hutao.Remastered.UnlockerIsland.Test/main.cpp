@@ -187,7 +187,7 @@ void Inject()
 
             pEnv->Offsets.SetUid = 0xAC68570;  //MonoUIWaterMask.SetUID
 			pEnv->Offsets.SetFov = 0x1560ec0;  //need pattern scan
-            pEnv->Offsets.SetFog = 0x1573060;  //
+            pEnv->Offsets.SetFog = 0x15b73330;  //
             pEnv->Offsets.GetFps = 0x106a3b0;  //
             pEnv->Offsets.SetFps = 0x106a3c0;  //双层跳板, 高 实在是高
             pEnv->Offsets.OpenTeam = 0xe47e1b0;  //JGDDADKMLDL.DDFODLGCHGM  need pattern scan

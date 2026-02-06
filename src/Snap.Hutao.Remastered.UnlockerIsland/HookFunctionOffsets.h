@@ -43,7 +43,6 @@ struct HookFunctionOffsets
     DWORD GetPlayerName;
     DWORD ActorManagerCtor;
     DWORD GetGlobalActor;
-    DWORD ResumePaimonInProfilePageAll;
     DWORD AvatarPaimonAppear;
 
 	DWORD GetComponent;

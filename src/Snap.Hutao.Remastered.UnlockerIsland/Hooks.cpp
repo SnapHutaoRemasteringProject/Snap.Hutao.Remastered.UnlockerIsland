@@ -6,7 +6,7 @@
 #include <iostream>
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
-static HookFunctionOffsets g_HardcodedOffsets = {
+static HookFunctionOffsets g_ChinaOffsets = {
     /* SetUid */ 0xAC68570,
     /* SetFov */ 0x1560ec0,
     /* SetFog */ 0x1573060,
@@ -39,10 +39,47 @@ static HookFunctionOffsets g_HardcodedOffsets = {
     /* GetPlayerName */ 0x1082F730,
     /* ActorManagerCtor */ 0xD2D4EF0,
     /* GetGlobalActor */ 0xD2CC9E0,
-    /* ResumePaimonInProfilePageAll */ 0xD2FA560,
     /* AvatarPaimonAppear */ 0x107BAC60,
     /* GetComponent */ 0x15B61F60,
     /* GetText */ 0x15C45190
+};
+
+static HookFunctionOffsets g_OverseaOffsets = {
+    /* SetUid */ 0xac5cf50,
+    /* SetFov */ 0x155fec0,
+    /* SetFog */ 0x1572060,
+    /* GetFps */ 0x10693b0,
+    /* SetFps */ 0x10693c0,
+    /* OpenTeam */ 0xe44b740,
+    /* OpenTeamAdvanced */ 0xe478920,
+    /* CheckEnter */ 0xfeb9610,
+    /* QuestBanner */ 0xa910ef0,
+    /* FindObject */ 0x1062c50,
+    /* ObjectActive */ 0x1062450,
+    /* CameraMove */ 0xfa486c0,
+    /* DamageText */ 0x10836b90,
+    /* TouchInput */ 0x105a6ab0,
+    /* CombineEntry */ 0x69e9630,
+    /* CombineEntryPartner */ 0x91936d0,
+    /* SetupResinList */ 0,
+    /* ResinList */ 0,
+    /* ResinCount */ 0,
+    /* ResinItem */ 0,
+    /* ResinRemove */ 0,
+    /* FindString */ 0x405bc0,
+    /* PlayerPerspective */ 0xd7fdde0,
+    /* IsObjectActive */ 0x15ae6da0,
+    /* GameUpdate */ 0x1531c5a0,
+    /* PtrToStringAnsi */ 0x154ed320,
+    /* GetPlayerID */ 0x10817160,
+    /* SetText */ 0x15bc99a0,
+    /* MonoInLevelPlayerProfilePageV3Ctor */ 0x10816de0,
+    /* GetPlayerName */ 0x10816eb0,
+    /* ActorManagerCtor */ 0xd2bcc80,
+    /* GetGlobalActor */ 0xd2bd8d0,
+    /* AvatarPaimonAppear */ 0x10798cd0,
+    /* GetComponent */ 0x15ae6a20,
+    /* GetText */ 0x15bc9990
 };
 
 // Get_FrameCount
@@ -112,7 +149,6 @@ static LPVOID originalSetupResinList = nullptr;
 static LPVOID originalActorManagerCtor = nullptr;
 static void* actorManager = nullptr;
 static LPVOID getGlobalActor = nullptr;
-static LPVOID resumePaimonInProfilePageAll = nullptr;
 static LPVOID avatarPaimonAppear = nullptr;
 
 static LPVOID originalSetUID = nullptr;
@@ -236,7 +272,7 @@ void HandlePaimonV2() {
         return;
     }
 
-    if (!getGlobalActor || !resumePaimonInProfilePageAll || !getActive || !findString || !findGameObject || !avatarPaimonAppear) {
+    if (!getGlobalActor || !getActive || !findString || !findGameObject || !avatarPaimonAppear) {
         return;
     }
 
@@ -666,8 +702,11 @@ void SetupHooks()
     // Choose which offsets to use based on ProvideOffsets flag
     HookFunctionOffsets* offsets = &g_pEnv->Offsets;
     if (!g_pEnv->ProvideOffsets) {
-        // Use hardcoded offsets when ProvideOffsets is FALSE
-        offsets = &g_HardcodedOffsets;
+        if (!g_pEnv->IsOversea) {
+            offsets = &g_ChinaOffsets;
+        } else {
+            offsets = &g_OverseaOffsets;
+        }
     }
 
     if (offsets->GetFps)
@@ -845,10 +884,6 @@ void SetupHooks()
         getGlobalActor = GetFunctionAddress(offsets->GetGlobalActor);
     }
 
-    if (offsets->ResumePaimonInProfilePageAll)
-    {
-        resumePaimonInProfilePageAll = GetFunctionAddress(offsets->ResumePaimonInProfilePageAll);
-    }
 
     if (offsets->AvatarPaimonAppear)
     {

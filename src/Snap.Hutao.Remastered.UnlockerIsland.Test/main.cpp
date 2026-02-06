@@ -181,7 +181,7 @@ void Inject()
             pEnv->TouchMode = FALSE;
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
-            pEnv->HidePlayerInfo = TRUE;
+            pEnv->HidePlayerInfo = FALSE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
@@ -217,7 +217,7 @@ void Inject()
             pEnv->Offsets.GetPlayerName = 0x1082F730;  //MonoInLevelPlayerProfilePageV3.get_playerName
 			pEnv->Offsets.ActorManagerCtor = 0xD2D4EF0;  //ActorManager..ctor
 			pEnv->Offsets.GetGlobalActor = 0xD2CC9E0;  //ActorManager.GetGlobalActor
-			pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll
+			//pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll
 			pEnv->Offsets.AvatarPaimonAppear = 0x107BAC60;  //GlobalActor.AvatarPaimonAppear
 			pEnv->Offsets.GetComponent = 0x15B61F60;  //GameObject.GetComponent(String type)
 			pEnv->Offsets.GetText = 0x15C45190;  //Text.get_text

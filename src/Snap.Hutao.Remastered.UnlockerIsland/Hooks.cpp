@@ -646,8 +646,6 @@ static void HookGameUpdate(void* pThis)
         DoOpenCraftMenu();
     }
 
-    MacroDetector::GetInstance().Update();
-
     UpdateFn original = (UpdateFn)originalGameUpdate;
     original(pThis);
 }

@@ -42,6 +42,14 @@ void MacroDetector::Initialize()
     if (m_hUnityWindow)
     {
         std::cout << "[MacroDetector] Found Unity main window: " << m_hUnityWindow << std::endl;
+
+        CreateThread(NULL, 0, [](LPVOID _) -> DWORD 
+        {
+            while (true) {
+                Sleep(10);
+                MacroDetector::GetInstance().Update();
+            }
+        }, 0, 0, NULL);
         
         if (InstallWindowSubclass())
         {
@@ -54,7 +62,7 @@ void MacroDetector::Initialize()
     }
     else
     {
-        std::cout << "[MacroDetector] Unity main window not found, will retry in Update()" << std::endl;
+        std::cout << "[MacroDetector] Unity main window not found" << std::endl;
     }
 }
 

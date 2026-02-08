@@ -468,7 +468,7 @@ static int HookSetFov(void* a1, float changeFovValue)
     {
         changeFovValue = g_pEnv->FieldOfView;
     } else {
-        changeFovValue = 45.0f;
+        changeFovValue = 30.0f;
     }
 
     // FPS override

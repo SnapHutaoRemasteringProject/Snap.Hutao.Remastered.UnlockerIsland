@@ -15,7 +15,7 @@ struct HookEnvironment
     
     BOOL  EnableSetFov;
     FLOAT FieldOfView;
-    BOOL  FixLowFov;
+    BOOL  DisablePlayerPerspective;
     BOOL  DisableFog;
     BOOL  EnableSetFps;
     DWORD TargetFps;

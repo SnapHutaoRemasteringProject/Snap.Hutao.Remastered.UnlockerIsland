@@ -40,7 +40,7 @@ private:
 private:
     HWND m_hUnityWindow;
     std::queue<std::chrono::steady_clock::time_point> m_clickTimes;
-    const size_t m_maxClicksPerSecond = 20;
+    const size_t m_maxClicksPerSecond = 30;
     const std::chrono::seconds m_timeWindow{1};
     bool warned = false;
     bool m_subclassInstalled = false;

@@ -46,7 +46,7 @@ void MacroDetector::Initialize()
         CreateThread(NULL, 0, [](LPVOID _) -> DWORD 
         {
             while (true) {
-                Sleep(10);
+                Sleep(1000);
                 MacroDetector::GetInstance().Update();
             }
         }, 0, 0, NULL);

@@ -164,16 +164,16 @@ void Inject()
             pEnv->State = IslandState::None;
             pEnv->LastError = 0;
             pEnv->Uid = 0;
-            pEnv->ProvideOffsets = TRUE;
+            pEnv->ProvideOffsets = FALSE;
 
             // 设置默认值
-			pEnv->DebugMode = TRUE;
+			pEnv->DebugMode = FALSE;
             pEnv->EnableSetFov = TRUE;
             pEnv->FieldOfView = 90.0f;
-            pEnv->FixLowFov = TRUE;
+            pEnv->DisablePlayerPerspective = TRUE;
             pEnv->DisableFog = TRUE;
             pEnv->EnableSetFps = TRUE;
-            pEnv->TargetFps = 240;
+            pEnv->TargetFps = 2000;
             pEnv->RemoveTeamProgress = TRUE;
             pEnv->HideQuestBanner = TRUE;
             pEnv->DisableCameraMove = TRUE;
@@ -181,7 +181,7 @@ void Inject()
             pEnv->TouchMode = FALSE;
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
-            pEnv->HidePlayerInfo = FALSE;
+            pEnv->HidePlayerInfo = TRUE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 

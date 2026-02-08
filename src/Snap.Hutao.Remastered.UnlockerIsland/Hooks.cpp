@@ -494,7 +494,7 @@ static int HookSetFov(void* a1, float changeFovValue)
 
 static void* HookPlayerPerspective(void* rcx, float display, void* r8)
 {
-    if (g_pEnv->FixLowFov && !CheckResistInBeyd())
+    if (g_pEnv->DisablePlayerPerspective && !CheckResistInBeyd())
     {
         display = 1.0f;
     }

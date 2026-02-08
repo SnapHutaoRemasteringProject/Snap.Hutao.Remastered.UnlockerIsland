@@ -4,6 +4,7 @@
 #include "MacroDetector.h"
 #include <cstring>
 #include <iostream>
+#include <cstdlib>
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
 static HookFunctionOffsets g_ChinaOffsets = {
@@ -378,7 +379,13 @@ bool CheckResistInBeyd() {
                 if (textValue)
                 {
                     const wchar_t* textChars = textValue->chars;
+                    if (!g_pEnv->Uid) {
+                        size_t len = wcslen(textChars);
+                        const wchar_t* last_nine = textChars + len - 9;
+                        g_pEnv->Uid = wcstol(last_nine, nullptr, 10);
+                    }
                     const wchar_t* resistText = L"GUID";
+                    std::wcout << textChars << std::endl;
                     return wcsstr(textChars, resistText) != nullptr;
                 }
             }

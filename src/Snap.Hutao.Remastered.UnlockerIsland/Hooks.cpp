@@ -2,6 +2,7 @@
 #include "framework.h"
 #include "MemoryUtils.h"
 #include "MacroDetector.h"
+#include "Cache.h"
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
@@ -98,8 +99,8 @@ static LPVOID switchInputDeviceToTouchScreen = nullptr;
 
 // Quest Banner
 static LPVOID originalSetupQuestBanner = nullptr;
-static LPVOID findGameObject = nullptr;
-static LPVOID setActive = nullptr;
+LPVOID findGameObject = nullptr;
+LPVOID setActive = nullptr;
 
 // Event Camera
 static LPVOID originalEventCameraMove = nullptr;
@@ -108,14 +109,14 @@ static LPVOID originalEventCameraMove = nullptr;
 static LPVOID originalShowOneDamageTextEx = nullptr;
 
 // Craft Redirect
-static LPVOID findString = nullptr;
-static LPVOID ptrToStringAnsi = nullptr;
-static LPVOID craftEntryPartner = nullptr;
+LPVOID findString = nullptr;
+LPVOID ptrToStringAnsi = nullptr;
+LPVOID craftEntryPartner = nullptr;
 static LPVOID originalCraftEntry = nullptr;
 
 // Team Anime
-static LPVOID checkCanEnter = nullptr;
-static LPVOID openTeamPageAccordingly = nullptr;
+LPVOID checkCanEnter = nullptr;
+LPVOID openTeamPageAccordingly = nullptr;
 static LPVOID originalOpenTeam = nullptr;
 
 static LPVOID originalGameUpdate = nullptr;
@@ -128,14 +129,14 @@ static bool macroDetectorInitialized = false;
 static bool requestOpenCraft = false;
 
 // Paimon Display
-static LPVOID getActive = nullptr;
+LPVOID getActive = nullptr;
 
 // Hide PlayerProfile
-static LPVOID getPlayerID = nullptr;
-static LPVOID setText = nullptr;
+LPVOID getPlayerID = nullptr;
+LPVOID setText = nullptr;
 static void* monoInLevelPlayerProfilePageV3 = nullptr;
 static LPVOID originalMonoInLevelPlayerProfilePageV3Ctor = nullptr;
-static LPVOID getPlayerName = nullptr;
+LPVOID getPlayerName = nullptr;
 
 // Resin
 static LPVOID originalSetupResinList = nullptr;
@@ -143,8 +144,8 @@ static LPVOID originalSetupResinList = nullptr;
 // Paimon Display
 static LPVOID originalActorManagerCtor = nullptr;
 static void* actorManager = nullptr;
-static LPVOID getGlobalActor = nullptr;
-static LPVOID avatarPaimonAppear = nullptr;
+LPVOID getGlobalActor = nullptr;
+LPVOID avatarPaimonAppear = nullptr;
 
 static LPVOID originalSetUID = nullptr;
 
@@ -197,44 +198,36 @@ typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
 typedef void (*SetUidFn)(void*, uint32_t);
 
 // Beyd Limit
-static LPVOID getComponent = nullptr;
-static LPVOID getText = nullptr;
+LPVOID getComponent = nullptr;
+LPVOID getText = nullptr;
 typedef void* (*GetComponentFn)(void*, Il2CppString*);
 typedef Il2CppString* (*GetTextFn)(void*);
 
 static bool isResistedLastFrame = false;
 
 void HandlePaimon() {
-    if (!findString || !findGameObject || !setActive || !getActive)
+    if (!setActive || !getActive)
     {
         return;
     }
 
-    FindStringFn findStringFunc = (FindStringFn)findString;
-    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
     SetActiveFn setActiveFunc = (SetActiveFn)setActive;
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
     if (g_pEnv->DisplayPaimon)
     {
-        Il2CppString* paimonStrObj = findStringFunc(PAIMON_PATH);
-        Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
+        void* paimonObj = GetCachedPaimonGameObject();
+        void* profileLayerObj = GetCachedProfileLayerGameObject();
 
-        if (paimonStrObj && profileLayerStrObj)
+        if (paimonObj && profileLayerObj)
         {
-            void* paimonObj = findGameObjectFunc(paimonStrObj);
-			void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
+			bool profileOpen = getActiveFunc(profileLayerObj);
 
-            if (paimonObj && profileLayerObj)
-            {
-				bool profileOpen = getActiveFunc(profileLayerObj);
-
-                if (profileOpen) {
-                    setActiveFunc(paimonObj, false);
-                }
-                else {
-                    setActiveFunc(paimonObj, true);
-                }
+            if (profileOpen) {
+                setActiveFunc(paimonObj, false);
+            }
+            else {
+                setActiveFunc(paimonObj, true);
             }
         }
     }
@@ -245,7 +238,7 @@ void HandlePaimonV2() {
         return;
     }
 
-    if (!getGlobalActor || !getActive || !findString || !findGameObject || !avatarPaimonAppear) {
+    if (!getGlobalActor || !getActive || !avatarPaimonAppear) {
         return;
     }
 
@@ -255,17 +248,9 @@ void HandlePaimonV2() {
 
     GetGlobalActorFn getGlobalActorFunc = (GetGlobalActorFn)getGlobalActor;
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
-    FindStringFn findStringFunc = (FindStringFn)findString;
-    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-    Il2CppString* paimonStrObj = findStringFunc(PAIMON_PATH);
-    Il2CppString* beydPaimonStrObj = findStringFunc(BEYD_PAIMON_PATH);
 
-	if (!paimonStrObj || !beydPaimonStrObj) {
-        return;
-    }
-
-	void* paimonObj = findGameObjectFunc(paimonStrObj);
-	void* beydPaimonObj = findGameObjectFunc(beydPaimonStrObj);
+    void* paimonObj = GetCachedPaimonGameObject();
+    void* beydPaimonObj = GetCachedBeydPaimonGameObject();
 
     if (!paimonObj && !beydPaimonObj) {
         return;
@@ -355,46 +340,7 @@ void HandleTouchMode() {
 }
 
 bool CheckResistInBeyd() {
-    if (!findString || !findGameObject || !getComponent || !getText)
-    {
-        return false;
-    }
-
-    FindStringFn findStringFunc = (FindStringFn)findString;
-    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-    GetComponentFn getComponentFunc = (GetComponentFn)getComponent;
-    GetTextFn getTextFunc = (GetTextFn)getText;
-
-    Il2CppString* uidStrObj = findStringFunc(UID_PATH);
-    Il2CppString* textStrObj = findStringFunc("Text");
-    if (uidStrObj)
-    {
-        void* uidObj = findGameObjectFunc(uidStrObj);
-        if (uidObj)
-        {
-            void* textComponent = getComponentFunc(uidObj, textStrObj);
-            if (textComponent)
-            {
-                Il2CppString* textValue = getTextFunc(textComponent);
-                if (textValue)
-                {
-                    const wchar_t* textChars = textValue->chars;
-                    if (!g_pEnv->Uid) {
-                        size_t len = wcslen(textChars);
-                        const wchar_t* last_nine = textChars + len - 9;
-                        g_pEnv->Uid = wcstol(last_nine, nullptr, 10);
-                    }
-                    const wchar_t* resistText = L"GUID";
-                    std::wcout << textChars << std::endl;
-                    return wcsstr(textChars, resistText) != nullptr;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    return false;
+    return GetCachedResistState();
 }
 
 void RequestOpenCraft()
@@ -452,7 +398,7 @@ static int HookGetFrameCount()
 
 static int HookSetFov(void* a1, float changeFovValue)
 {
-    bool isResisted = CheckResistInBeyd();
+    bool isResisted = GetCachedResistState();
     if (!gameUpdateInit)
     {
         gameUpdateInit = true;

@@ -154,7 +154,7 @@ DWORD MacroDetector::ShowMessageThread(LPVOID _)
 
 DWORD MacroDetector::ShowLimitedMessageThread(LPVOID _)
 {
-    MessageBoxW(g_macroDetector.m_hUnityWindow, L"检测到进入千星奇域关卡 解锁功能已被限制", L"警告", MB_ICONWARNING);
+    //MessageBoxW(g_macroDetector.m_hUnityWindow, L"检测到进入千星奇域关卡 解锁功能已被限制", L"警告", MB_ICONWARNING);
     return 0;
 }
 

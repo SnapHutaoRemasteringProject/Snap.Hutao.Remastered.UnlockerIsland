@@ -474,8 +474,6 @@ static int HookSetFov(void* a1, float changeFovValue)
     if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
     {
         changeFovValue = g_pEnv->FieldOfView;
-    } else {
-        changeFovValue = 30.0f;
     }
 
     // FPS override

@@ -3,6 +3,7 @@
 #include "MemoryUtils.h"
 #include "MacroDetector.h"
 #include "Cache.h"
+#include "Logger.h"
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
@@ -252,7 +253,7 @@ void HandlePaimonV2() {
     void* paimonObj = GetCachedPaimonGameObject();
     void* beydPaimonObj = GetCachedBeydPaimonGameObject();
 
-    if (!paimonObj && !beydPaimonObj) {
+    if (!paimonObj || !beydPaimonObj) {
         return;
 	}
 
@@ -340,7 +341,7 @@ void HandleTouchMode() {
 }
 
 bool CheckResistInBeyd() {
-    return GetCachedResistState();
+    return g_cachedIsResisted;
 }
 
 void RequestOpenCraft()
@@ -398,14 +399,15 @@ static int HookGetFrameCount()
 
 static int HookSetFov(void* a1, float changeFovValue)
 {
-    bool isResisted = GetCachedResistState();
+    bool isResisted = CheckResistInBeyd();
     if (!gameUpdateInit)
     {
+		Cache_Init();
         gameUpdateInit = true;
     }
 
     if (g_pEnv->DebugMode && !isResisted) {
-        std::cout << "Function not limited" << std::endl;
+        Log("Function not limited");
     }
 
     if (isResisted && !isResistedLastFrame) {
@@ -585,7 +587,15 @@ static void HookGameUpdate(void* pThis)
     {
         MacroDetector::GetInstance().Initialize();
         macroDetectorInitialized = true;
-        std::cout << "[MacroDetector] Initialized on first GameUpdate" << std::endl;
+        Log("[MacroDetector] Initialized on first GameUpdate");
+    }
+
+    if (!g_cachedUidGameObject) {
+        GetCachedUidGameObject();
+    }
+
+	if (g_cachedUidGameObject && !g_cachedTextComponent) {
+		GetCachedTextComponent();
     }
     
     HandlePaimonV2();

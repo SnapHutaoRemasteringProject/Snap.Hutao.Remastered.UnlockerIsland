@@ -22,6 +22,7 @@ void* GetCachedTextComponent();
 bool CacheResistState();
 
 void* GetCachedPaimonGameObject();
+void* GetCachedDivePaimonGameObject();
 void* GetCachedBeydPaimonGameObject();
 void* GetCachedProfileLayerGameObject();
 

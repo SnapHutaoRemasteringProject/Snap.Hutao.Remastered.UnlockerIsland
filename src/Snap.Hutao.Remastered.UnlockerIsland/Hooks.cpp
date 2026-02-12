@@ -251,13 +251,14 @@ void HandlePaimonV2() {
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
     void* paimonObj = GetCachedPaimonGameObject();
+	void* divePaimonObj = GetCachedDivePaimonGameObject();
     void* beydPaimonObj = GetCachedBeydPaimonGameObject();
 
-    if (!paimonObj || !beydPaimonObj) {
+    if (!paimonObj || !divePaimonObj || !beydPaimonObj) {
         return;
 	}
 
-    if (getActiveFunc(paimonObj) || getActiveFunc(beydPaimonObj)) {
+    if (getActiveFunc(paimonObj) || getActiveFunc(divePaimonObj) || getActiveFunc(beydPaimonObj)) {
         return;
     }
 

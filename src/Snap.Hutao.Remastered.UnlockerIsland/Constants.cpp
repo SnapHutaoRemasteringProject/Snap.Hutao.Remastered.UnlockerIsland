@@ -2,6 +2,7 @@
 #include <string>
 
 const char* PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon(Clone)";
+const char* DIVE_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon_Dive(Clone)";
 const char* BEYD_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/Beyd_NPC_Kanban_Paimon(Clone)";
 const char* PROFILE_LAYER_PATH = "/Canvas/Pages/PlayerProfilePage";
 const char* UID_PATH = "/BetaWatermarkCanvas(Clone)/Panel/TxtUID";

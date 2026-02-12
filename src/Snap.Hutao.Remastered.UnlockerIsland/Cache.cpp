@@ -8,6 +8,7 @@ bool g_cachedIsResisted = false;
 bool g_cacheInitialized = false;
 
 void* g_cachedPaimonGameObject = nullptr;
+void* g_cachedDivePaimonGameObject = nullptr;
 void* g_cachedBeydPaimonGameObject = nullptr;
 void* g_cachedProfileLayerGameObject = nullptr;
 void* g_cachedTextComponent = nullptr;
@@ -80,6 +81,25 @@ void* GetCachedPaimonGameObject() {
 
 	Log("Cached Paimon GameObject initialized");
     return g_cachedPaimonGameObject;
+}
+
+void* GetCachedDivePaimonGameObject() {
+    if (g_cachedDivePaimonGameObject) {
+        Log("Returning cached Dive Paimon GameObject");
+        return g_cachedPaimonGameObject;
+    }
+
+    if (findGameObject && findString) {
+        FindStringFn findStringFunc = (FindStringFn)findString;
+        void* paimonStr = findStringFunc(DIVE_PAIMON_PATH);
+        if (paimonStr) {
+            FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+            g_cachedDivePaimonGameObject = findGameObjectFunc(paimonStr);
+        }
+    }
+
+    Log("Cached Dive Paimon GameObject initialized");
+    return g_cachedDivePaimonGameObject;
 }
 
 void* GetCachedBeydPaimonGameObject() {

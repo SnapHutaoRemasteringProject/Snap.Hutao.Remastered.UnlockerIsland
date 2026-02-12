@@ -618,11 +618,10 @@ static void HookGameUpdate(void* pThis)
     if (frameCounter >= 100)
     {
         frameCounter = 0;
+        HandlePaimonV2();
+        HandlePlayerInfo();
         CacheResistState();
     }
-    
-    HandlePaimonV2();
-    HandlePlayerInfo();
 
     if (requestOpenCraft)
     {

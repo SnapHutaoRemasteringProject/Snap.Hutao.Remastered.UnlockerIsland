@@ -2,14 +2,11 @@
 
 #include <Windows.h>
 
-extern void* g_cachedUidGameObject;
-extern bool g_cachedIsResisted;
-extern bool g_cacheInitialized;
+// 不再使用缓存变量，所有查找都实时进行
+// 保留线程用于CacheResistState检查
+// 抵抗状态保存在全局变量中供Hooks使用
 
-extern void* g_cachedPaimonGameObject;
-extern void* g_cachedBeydPaimonGameObject;
-extern void* g_cachedProfileLayerGameObject;
-extern void* g_cachedTextComponent;
+extern bool g_cachedIsResisted;
 
 void Cache_Init();
 

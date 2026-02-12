@@ -3,17 +3,9 @@
 #include "Logger.h"
 #include "Constants.h"
 
-void* g_cachedUidGameObject = nullptr;
+static bool g_cacheInitialized = false;
+
 bool g_cachedIsResisted = false;
-bool g_cacheInitialized = false;
-
-void* g_cachedPaimonGameObject = nullptr;
-void* g_cachedDivePaimonGameObject = nullptr;
-void* g_cachedBeydPaimonGameObject = nullptr;
-void* g_cachedProfileLayerGameObject = nullptr;
-void* g_cachedTextComponent = nullptr;
-
-HANDLE g_cacheThreadHandle = nullptr;
 
 extern LPVOID findString;
 extern LPVOID findGameObject;
@@ -26,170 +18,145 @@ typedef void*(* GetComponentFn)(void*, Il2CppString*);
 typedef Il2CppString* (*GetTextFn)(void*);
 
 void* GetCachedUidGameObject() {
-    if (g_cachedUidGameObject) {
-		Log("Returning cached UID GameObject");
-        return g_cachedUidGameObject;
-	}
-
     if (findGameObject && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
         void* uidStr = findStringFunc(UID_PATH);
         if (uidStr) {
             FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-            g_cachedUidGameObject = findGameObjectFunc(uidStr);
+            Log("Finding UID GameObject (no cache)");
+            return findGameObjectFunc(uidStr);
         }
     }
-
-	Log("Cached UID GameObject initialized");
-    return g_cachedUidGameObject;
+    
+    Log("Failed to find UID GameObject");
+    return nullptr;
 }
 
 void* GetCachedTextComponent() {
-	if (g_cachedTextComponent) {
-        Log("Returning cached Text Component");
-        return g_cachedTextComponent;
-    }
-
     if (getComponent && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
-        void* uidObj = g_cachedUidGameObject;
+        
+        void* uidObj = GetCachedUidGameObject();
+        if (!uidObj) {
+            Log("Cannot find Text Component: UID GameObject not found");
+            return nullptr;
+        }
+        
         Il2CppString* textStr = findStringFunc("Text");
-        if (uidObj && textStr) {
+        if (textStr) {
             GetComponentFn getComponentFunc = (GetComponentFn)getComponent;
-            g_cachedTextComponent = getComponentFunc(uidObj, textStr);
+            Log("Finding Text Component (no cache)");
+            return getComponentFunc(uidObj, textStr);
         }
     }
-
-	Log("Cached Text Component initialized");
-    return g_cachedTextComponent;
+    
+    Log("Failed to find Text Component");
+    return nullptr;
 }
 
 void* GetCachedPaimonGameObject() {
-	if (g_cachedPaimonGameObject) {
-        Log("Returning cached Paimon GameObject");
-		return g_cachedPaimonGameObject;
-	}
-
     if (findGameObject && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
         void* paimonStr = findStringFunc(PAIMON_PATH);
         if (paimonStr) {
             FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-            g_cachedPaimonGameObject = findGameObjectFunc(paimonStr);
+            Log("Finding Paimon GameObject (no cache)");
+            return findGameObjectFunc(paimonStr);
         }
     }
-
-	Log("Cached Paimon GameObject initialized");
-    return g_cachedPaimonGameObject;
+    
+    Log("Failed to find Paimon GameObject");
+    return nullptr;
 }
 
 void* GetCachedDivePaimonGameObject() {
-    if (g_cachedDivePaimonGameObject) {
-        Log("Returning cached Dive Paimon GameObject");
-        return g_cachedDivePaimonGameObject;
-    }
-
     if (findGameObject && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
         void* paimonStr = findStringFunc(DIVE_PAIMON_PATH);
         if (paimonStr) {
             FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-            g_cachedDivePaimonGameObject = findGameObjectFunc(paimonStr);
+            Log("Finding Dive Paimon GameObject (no cache)");
+            return findGameObjectFunc(paimonStr);
         }
     }
-
-    Log("Cached Dive Paimon GameObject initialized");
-    return g_cachedDivePaimonGameObject;
+    
+    Log("Failed to find Dive Paimon GameObject");
+    return nullptr;
 }
 
 void* GetCachedBeydPaimonGameObject() {
-    if (g_cachedBeydPaimonGameObject) {
-        Log("Returning cached Beyd Paimon GameObject");
-        return g_cachedBeydPaimonGameObject;
-	}
-
     if (findGameObject && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
         void* beydPaimonStr = findStringFunc(BEYD_PAIMON_PATH);
         if (beydPaimonStr) {
             FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-            g_cachedBeydPaimonGameObject = findGameObjectFunc(beydPaimonStr);
+            Log("Finding Beyd Paimon GameObject (no cache)");
+            return findGameObjectFunc(beydPaimonStr);
         }
     }
-
-	Log("Cached Beyd Paimon GameObject initialized");
-    return g_cachedBeydPaimonGameObject;
+    
+    Log("Failed to find Beyd Paimon GameObject");
+    return nullptr;
 }
 
 void* GetCachedProfileLayerGameObject() {
-    if (g_cachedProfileLayerGameObject) {
-        Log("Returning cached Profile Layer GameObject");
-		return g_cachedProfileLayerGameObject;
-	}
-
     if (findGameObject && findString) {
         FindStringFn findStringFunc = (FindStringFn)findString;
         void* profileLayerStr = findStringFunc(PROFILE_LAYER_PATH);
         if (profileLayerStr) {
             FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-            g_cachedProfileLayerGameObject = findGameObjectFunc(profileLayerStr);
+            Log("Finding Profile Layer GameObject (no cache)");
+            return findGameObjectFunc(profileLayerStr);
         }
     }
-
-	Log("Cached Profile Layer GameObject initialized");
-    return g_cachedProfileLayerGameObject;
+    
+    Log("Failed to find Profile Layer GameObject");
+    return nullptr;
 }
 
 void Cache_Init() {
     if (g_cacheInitialized) {
         return;
     }
-
-    g_cacheThreadHandle = CreateThread(nullptr, 0, [](LPVOID) -> DWORD {
-        while (true) {
-            Sleep(100);
-			CacheResistState();
-        }
-        return 0;
-		}, nullptr, 0, nullptr);
+    
     g_cacheInitialized = true;
+    Log("Cache system initialized (CacheResistState will run on main thread every 60 frames)");
 }
 
 void Cache_Cleanup() {
-	TerminateThread(g_cacheThreadHandle, 0);
-
-    ClearAllCache();
     g_cacheInitialized = false;
+    Log("Cache system cleaned up");
 }
 
 bool CacheResistState() {
     if (!g_cacheInitialized) {
+        g_cachedIsResisted = false;
         return false;
     }
 
     if (findString && findGameObject && getComponent && getText) {
-        void* textComp = g_cachedTextComponent;
-
+        void* textComp = GetCachedTextComponent();
+        
         if (textComp) {
             GetTextFn getTextFunc = (GetTextFn)getText;
             Il2CppString* textStr = getTextFunc(textComp);
-
+            
             if (textStr) {
-                g_cachedIsResisted = wcsstr(textStr->chars, L"GUID") != nullptr;
-                return g_cachedIsResisted;
+                bool isResisted = wcsstr(textStr->chars, L"GUID") != nullptr;
+                g_cachedIsResisted = isResisted;
+                
+                if (isResisted) {
+                    Log("Resist state detected: GUID found in text");
+                }
+                return isResisted;
             }
         }
     }
-
+    
     g_cachedIsResisted = false;
     return false;
 }
 
 void ClearAllCache() {
-    g_cachedUidGameObject = nullptr;
-    g_cachedIsResisted = false;
-    
-    g_cachedPaimonGameObject = nullptr;
-    g_cachedBeydPaimonGameObject = nullptr;
-    g_cachedProfileLayerGameObject = nullptr;
+    Log("ClearAllCache called (no cache to clear)");
 }

@@ -103,6 +103,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset ActorManagerCtor = 0x" << std::hex << g_pEnv->Offsets.ActorManagerCtor << std::endl;
         std::cout << "Offset GetGlobalActor = 0x" << std::hex << g_pEnv->Offsets.GetGlobalActor << std::endl;
         std::cout << "Offset AvatarPaimonAppear = 0x" << std::hex << g_pEnv->Offsets.AvatarPaimonAppear << std::endl;
+        std::cout << "Offset GetName = 0x" << std::hex << g_pEnv->Offsets.GetName << std::endl;
     }
     
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {

@@ -165,6 +165,7 @@ void Inject()
             pEnv->LastError = 0;
             pEnv->Uid = 0;
             pEnv->ProvideOffsets = FALSE;
+            pEnv->IsOversea = FALSE;
 
             // 设置默认值
 			pEnv->DebugMode = FALSE;
@@ -182,6 +183,7 @@ void Inject()
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
             pEnv->HidePlayerInfo = TRUE;
+			pEnv->DisplayGrass = FALSE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
@@ -195,7 +197,7 @@ void Inject()
             pEnv->Offsets.CheckEnter = 0xfeafc10;  //need pattern scan
             pEnv->Offsets.QuestBanner = 0xa98f410;
             pEnv->Offsets.FindObject = 0x15B625B0;  //GameObject.Find
-            pEnv->Offsets.ObjectActive = 0x15B62300;  //GameObject.set_active
+            pEnv->Offsets.ObjectActive = 0x1063450;  //GameObject.set_active
 			pEnv->Offsets.IsObjectActive = 0x15B622E0;  //GameObject.get_active
             pEnv->Offsets.CameraMove = 0xfa87490;  //BOFBPKLPKOK.DNIJOJKIOIF need pattern scan
             pEnv->Offsets.DamageText = 0x1084e9e0;  //MonoParticleDamageTextContainer.ShowOneDamageText
@@ -221,6 +223,7 @@ void Inject()
 			pEnv->Offsets.AvatarPaimonAppear = 0x107BAC60;  //GlobalActor.AvatarPaimonAppear
 			pEnv->Offsets.GetComponent = 0x15B61F60;  //GameObject.GetComponent(String type)
 			pEnv->Offsets.GetText = 0x15C45190;  //Text.get_text
+			pEnv->Offsets.GetName = 0x15B79680;  //Object.get_name
         }
 
         // 注入DLL

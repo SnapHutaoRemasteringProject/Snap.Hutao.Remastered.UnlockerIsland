@@ -47,4 +47,6 @@ struct HookFunctionOffsets
 
 	DWORD GetComponent;
     DWORD GetText;
+
+    DWORD GetName;
 };

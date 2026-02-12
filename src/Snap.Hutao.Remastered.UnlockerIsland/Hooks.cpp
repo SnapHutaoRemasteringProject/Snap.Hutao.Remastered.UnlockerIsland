@@ -20,7 +20,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* CheckEnter */ 0xfeafc10,
     /* QuestBanner */ 0xa98f410,
     /* FindObject */ 0x15B625B0,
-    /* ObjectActive */ 0x15B62300,
+    /* ObjectActive */ 0x1063450,
     /* CameraMove */ 0xfa87490,
     /* DamageText */ 0x1084e9e0,
     /* TouchInput */ 0x105c2c10,
@@ -44,7 +44,8 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* GetGlobalActor */ 0xD2CC9E0,
     /* AvatarPaimonAppear */ 0x107BAC60,
     /* GetComponent */ 0x15B61F60,
-    /* GetText */ 0x15C45190
+    /* GetText */ 0x15C45190,
+    /* GetName */ 0x15B79680
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
@@ -82,7 +83,8 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* GetGlobalActor */ 0xd2bd8d0,
     /* AvatarPaimonAppear */ 0x10798cd0,
     /* GetComponent */ 0x15ae6a20,
-    /* GetText */ 0x15bc9990
+    /* GetText */ 0x15bc9990,
+    /* GetName */ 0x15afe150
 };
 
 // Get_FrameCount
@@ -203,6 +205,10 @@ LPVOID getComponent = nullptr;
 LPVOID getText = nullptr;
 typedef void* (*GetComponentFn)(void*, Il2CppString*);
 typedef Il2CppString* (*GetTextFn)(void*);
+
+static LPVOID originalSetActive = nullptr;
+static LPVOID getName = nullptr;
+typedef Il2CppString* (*GetNameFn)(void*);
 
 static bool isResistedLastFrame = false;
 
@@ -582,6 +588,21 @@ static void HookSetUID(void* pThis, uint32_t uid) {
 	original(pThis, uid);
 }
 
+static void HookSetActive(void* pThis, bool active) {
+    GetNameFn getNameFunc = (GetNameFn)getName;
+	if (!g_pEnv->DisplayGrass && !CheckResistInBeyd() && active && getName) {
+		Il2CppString* name = getNameFunc(pThis);
+		if (name) {
+			if (wcsstr(name->chars, L"Grass") || wcsstr(name->chars, L"grass")) {
+                return;
+            }
+        }
+    }
+
+	SetActiveFn original = (SetActiveFn)originalSetActive;
+	original(pThis, active);
+}
+
 static void HookGameUpdate(void* pThis)
 {
     if (!macroDetectorInitialized)
@@ -669,6 +690,10 @@ void SetupHooks()
     if (offsets->ObjectActive)
     {
         setActive = GetFunctionAddress(offsets->ObjectActive);
+        if (setActive)
+        {
+            MH_CreateHook(setActive, HookSetActive, &originalSetActive);
+		}
     }
 
     if (offsets->CameraMove)
@@ -819,4 +844,9 @@ void SetupHooks()
     {
         getText = GetFunctionAddress(offsets->GetText);
 	}
+
+    if (offsets->GetName)
+    {
+        getName = GetFunctionAddress(offsets->GetName);
+    }
 }

@@ -86,7 +86,7 @@ void* GetCachedPaimonGameObject() {
 void* GetCachedDivePaimonGameObject() {
     if (g_cachedDivePaimonGameObject) {
         Log("Returning cached Dive Paimon GameObject");
-        return g_cachedPaimonGameObject;
+        return g_cachedDivePaimonGameObject;
     }
 
     if (findGameObject && findString) {

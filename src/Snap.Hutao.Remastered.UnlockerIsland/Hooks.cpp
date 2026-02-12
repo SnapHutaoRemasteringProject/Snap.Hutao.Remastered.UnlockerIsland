@@ -611,13 +611,14 @@ static void HookGameUpdate(void* pThis)
         macroDetectorInitialized = true;
         Log("[MacroDetector] Initialized on first GameUpdate");
     }
-
-    if (!g_cachedUidGameObject) {
-        GetCachedUidGameObject();
-    }
-
-	if (g_cachedUidGameObject && !g_cachedTextComponent) {
-		GetCachedTextComponent();
+    
+    static int frameCounter = 0;
+    frameCounter++;
+    
+    if (frameCounter >= 100)
+    {
+        frameCounter = 0;
+        CacheResistState();
     }
     
     HandlePaimonV2();

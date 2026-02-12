@@ -33,7 +33,7 @@ struct HookEnvironment
 	BOOL  DisplayPaimon;
 	BOOL  DebugMode;
     BOOL  HidePlayerInfo;
-    BOOL  DisplayGrass;
+    BOOL  HideGrass;
 
     HookFunctionOffsets Offsets;
 };

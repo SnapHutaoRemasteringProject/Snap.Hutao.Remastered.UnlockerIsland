@@ -589,8 +589,8 @@ static void HookSetUID(void* pThis, uint32_t uid) {
 }
 
 static void HookSetActive(void* pThis, bool active) {
-    GetNameFn getNameFunc = (GetNameFn)getName;
-	if (!g_pEnv->DisplayGrass && !CheckResistInBeyd() && active && getName) {
+	if (g_pEnv->HideGrass && !CheckResistInBeyd() && active && getName) {
+        GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
 		if (name) {
 			if (wcsstr(name->chars, L"Grass") || wcsstr(name->chars, L"grass")) {

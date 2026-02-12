@@ -183,7 +183,7 @@ void Inject()
             pEnv->RedirectCombine = TRUE;
 			pEnv->DisplayPaimon = TRUE;
             pEnv->HidePlayerInfo = TRUE;
-			pEnv->DisplayGrass = FALSE;
+			pEnv->HideGrass = FALSE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 

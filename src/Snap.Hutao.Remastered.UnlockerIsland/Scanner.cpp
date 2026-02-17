@@ -22,7 +22,6 @@ namespace Scanner {
                     pattern.push_back(std::stoi(word, nullptr, 16));
                 }
                 catch (...) {
-                    // 转换失败时当作通配符处理
                     pattern.push_back(-1);
                 }
             }
@@ -122,5 +121,18 @@ namespace Scanner {
         }
 
         return nullptr;
+    }
+
+    void* ResolveRelative(void* instruction, int offset, int instrSize) {
+        if (!instruction) return nullptr;
+        __try {
+            uintptr_t instrAddr = (uintptr_t)instruction;
+            int32_t relative = *(int32_t*)(instrAddr + offset);
+            uintptr_t target = instrAddr + instrSize + relative;
+            return (void*)target;
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            return nullptr;
+        }
     }
 }

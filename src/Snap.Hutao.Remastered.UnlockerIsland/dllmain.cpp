@@ -84,6 +84,8 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset CameraMove = 0x" << std::hex << g_pEnv->Offsets.CameraMove << std::endl;
         std::cout << "Offset DamageText = 0x" << std::hex << g_pEnv->Offsets.DamageText << std::endl;
         std::cout << "Offset TouchInput = 0x" << std::hex << g_pEnv->Offsets.TouchInput << std::endl;
+        std::cout << "Offset KeyboardMouseInput = 0x" << std::hex << g_pEnv->Offsets.KeyboardMouseInput << std::endl;
+        std::cout << "Offset JoypadInput = 0x" << std::hex << g_pEnv->Offsets.JoypadInput << std::endl;
         std::cout << "Offset CombineEntry = 0x" << std::hex << g_pEnv->Offsets.CombineEntry << std::endl;
         std::cout << "Offset CombineEntryPartner = 0x" << std::hex << g_pEnv->Offsets.CombineEntryPartner << std::endl;
         std::cout << "Offset SetupResinList = 0x" << std::hex << g_pEnv->Offsets.SetupResinList << std::endl;
@@ -103,6 +105,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset ActorManagerCtor = 0x" << std::hex << g_pEnv->Offsets.ActorManagerCtor << std::endl;
         std::cout << "Offset GetGlobalActor = 0x" << std::hex << g_pEnv->Offsets.GetGlobalActor << std::endl;
         std::cout << "Offset AvatarPaimonAppear = 0x" << std::hex << g_pEnv->Offsets.AvatarPaimonAppear << std::endl;
+        std::cout << "Offset GetText = 0x" << std::hex << g_pEnv->Offsets.GetText << std::endl;
         std::cout << "Offset GetName = 0x" << std::hex << g_pEnv->Offsets.GetName << std::endl;
     }
     

@@ -4,6 +4,8 @@
 #include "MacroDetector.h"
 #include "Cache.h"
 #include "Logger.h"
+#include "GamepadHotSwitch.h"
+#include "HookWndProc.h"
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
@@ -24,6 +26,8 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* CameraMove */ 0xfa87490,
     /* DamageText */ 0x1084e9e0,
     /* TouchInput */ 0x105c2c10,
+	/* KeyboardMouseInput */ 0x105AC8D0,
+	/* JoypadInput */ 0x105C3E10,
     /* CombineEntry */ 0x69ea500,
     /* CombineEntryPartner */ 0x9199950,
     /* SetupResinList */ 0,
@@ -63,6 +67,8 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* CameraMove */ 0xfa486c0,
     /* DamageText */ 0x10836b90,
     /* TouchInput */ 0x105a6ab0,
+	/* KeyboardMouseInput */ 0x105AD8D0,
+    /* JoypadInput */ 0x105AE050,
     /* CombineEntry */ 0x69e9630,
     /* CombineEntryPartner */ 0x91936d0,
     /* SetupResinList */ 0,
@@ -98,7 +104,9 @@ static LPVOID fnDisplayFog = nullptr;
 // Player_Perspective
 static LPVOID originalPlayerPerspective = nullptr;
 // Touch Screen
-static LPVOID switchInputDeviceToTouchScreen = nullptr;
+LPVOID switchInputDeviceToTouchScreen = nullptr;
+LPVOID switchInputDeviceToKeboardMouse = nullptr;
+LPVOID switchInputDeviceToJoypad = nullptr;
 
 // Quest Banner
 static LPVOID originalSetupQuestBanner = nullptr;
@@ -131,6 +139,9 @@ static bool macroDetectorInitialized = false;
 // Flag to request opening the craft menu from the main thread
 static bool requestOpenCraft = false;
 
+// Gamepad Hot Switch
+static bool gamepadHotSwitchInitialized = false;
+
 // Paimon Display
 LPVOID getActive = nullptr;
 
@@ -156,6 +167,8 @@ typedef int(* GetFrameCountFn)();
 typedef int(* SetFrameCountFn)(int);
 typedef int(* SetFovFn)(void*, float);
 typedef void(* SwitchInputDeviceToTouchScreenFn)(void*);
+typedef void(*SwitchInputDeviceToKeyboardMouseFn)(void*);
+typedef void(* SwitchInputDeviceToJoypadFn)(void*);
 
 // Quest Banner Types
 typedef void(* SetupQuestBannerFn)(void*);
@@ -347,6 +360,39 @@ void HandleTouchMode() {
 	}
 }
 
+void HandleGamepadHotSwitch() {
+    if (!gamepadHotSwitchInitialized && g_pEnv->GamepadHotSwitchEnabled)
+    {
+        gamepadHotSwitchInitialized = true;
+        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+        
+        if (!hotSwitch.Initialize())
+        {
+            Log("[GamepadHotSwitch] Failed to initialize");
+            return;
+        }
+        
+        hotSwitch.SetEnabled(true);
+        
+        InitializeWndProcHooks();
+        
+        Log("[GamepadHotSwitch] Initialized and enabled");
+    }
+    else if (gamepadHotSwitchInitialized && !g_pEnv->GamepadHotSwitchEnabled)
+    {
+        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+        hotSwitch.SetEnabled(false);
+        gamepadHotSwitchInitialized = false;
+        Log("[GamepadHotSwitch] Disabled");
+    }
+    
+    if (gamepadHotSwitchInitialized)
+    {
+        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+        hotSwitch.SetEnabled(g_pEnv->GamepadHotSwitchEnabled);
+    }
+}
+
 bool CheckResistInBeyd() {
     return g_cachedIsResisted;
 }
@@ -424,6 +470,7 @@ static int HookSetFov(void* a1, float changeFovValue)
     isResistedLastFrame = isResisted;
 
     HandleTouchMode();
+    HandleGamepadHotSwitch();
 
     // FOV override
     if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
@@ -621,6 +668,11 @@ static void HookGameUpdate(void* pThis)
         HandlePaimonV2();
         HandlePlayerInfo();
         CacheResistState();
+        
+        if (gamepadHotSwitchInitialized)
+        {
+            HandleGamepadHotSwitch();
+        }
     }
 
     if (requestOpenCraft)
@@ -672,6 +724,16 @@ void SetupHooks()
     {
         switchInputDeviceToTouchScreen = GetFunctionAddress(offsets->TouchInput);
     }
+
+    if (offsets->KeyboardMouseInput)
+    {
+		switchInputDeviceToKeboardMouse = GetFunctionAddress(offsets->KeyboardMouseInput);
+    }
+
+    if (offsets->JoypadInput)
+    {
+        switchInputDeviceToJoypad = GetFunctionAddress(offsets->JoypadInput);
+	}
 
     if (offsets->QuestBanner)
     {

@@ -167,8 +167,7 @@ void Inject()
             pEnv->ProvideOffsets = FALSE;
             pEnv->IsOversea = FALSE;
 
-            // 设置默认值
-			pEnv->DebugMode = FALSE;
+			pEnv->DebugMode = TRUE;
             pEnv->EnableSetFov = TRUE;
             pEnv->FieldOfView = 90.0f;
             pEnv->DisablePlayerPerspective = TRUE;
@@ -184,6 +183,7 @@ void Inject()
 			pEnv->DisplayPaimon = TRUE;
             pEnv->HidePlayerInfo = TRUE;
 			pEnv->HideGrass = TRUE;
+			pEnv->GamepadHotSwitchEnabled = TRUE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
@@ -202,6 +202,8 @@ void Inject()
             pEnv->Offsets.CameraMove = 0xfa87490;  //BOFBPKLPKOK.DNIJOJKIOIF need pattern scan
             pEnv->Offsets.DamageText = 0x1084e9e0;  //MonoParticleDamageTextContainer.ShowOneDamageText
             pEnv->Offsets.TouchInput = 0x105c2c10;  //CNGPNBOAIKK.FGKNOKNIIPL need pattern scan
+			pEnv->Offsets.KeyboardMouseInput = 0xA2AF880;  // need pattern scan
+			pEnv->Offsets.JoypadInput = 0x105AE050;  // need pattern scan
             pEnv->Offsets.CombineEntry = 0x69ea500;  //NBJLAEKBCIM.DNJNIKDKECD need pattern scan
             pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
             pEnv->Offsets.SetupResinList = 0;
@@ -226,7 +228,6 @@ void Inject()
 			pEnv->Offsets.GetName = 0x15B79680;  //Object.get_name
         }
 
-        // 注入DLL
         if (InjectDLL(hProcess, dllPath))
         {
             //InjectDLL(hProcess, GetDumpDLLPath());
@@ -235,7 +236,6 @@ void Inject()
             // 等待DLL初始化完成
             Sleep(2000);
             
-            // 恢复游戏进程（使用保存的主线程句柄）
             if (hMainThread)
             {
                 ResumeThread(hMainThread);
@@ -253,7 +253,6 @@ void Inject()
         }
     }
 
-    // 关闭进程句柄
     if (hProcess)
     {
         CloseHandle(hProcess);
@@ -277,7 +276,6 @@ bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFi
         return false;
     }
     
-    // 映射共享内存的视图
     pEnv = (HookEnvironment*)MapViewOfFile(
         hMapFile,
         FILE_MAP_ALL_ACCESS,

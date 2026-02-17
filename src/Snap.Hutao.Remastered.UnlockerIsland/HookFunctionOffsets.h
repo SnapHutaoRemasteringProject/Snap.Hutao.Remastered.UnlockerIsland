@@ -21,6 +21,8 @@ struct HookFunctionOffsets
     DWORD CameraMove;
     DWORD DamageText;
     DWORD TouchInput;
+	DWORD KeyboardMouseInput;
+    DWORD JoypadInput;
     
     DWORD CombineEntry;
     DWORD CombineEntryPartner;

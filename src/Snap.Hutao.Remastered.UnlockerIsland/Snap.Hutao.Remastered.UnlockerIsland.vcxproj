@@ -154,8 +154,10 @@
     <ClInclude Include="Constants.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GamepadHotSwitch.h" />
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
+    <ClInclude Include="HookWndProc.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="IslandState.h" />
     <ClInclude Include="Logger.h" />
@@ -170,6 +172,8 @@
     <ClCompile Include="Constants.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="framework.cpp" />
+    <ClCompile Include="GamepadHotSwitch.cpp" />
+    <ClCompile Include="HookWndProc.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MacroDetector.cpp" />

@@ -34,6 +34,7 @@ struct HookEnvironment
 	BOOL  DebugMode;
     BOOL  HidePlayerInfo;
     BOOL  HideGrass;
+    BOOL  GamepadHotSwitchEnabled;
 
     HookFunctionOffsets Offsets;
 };

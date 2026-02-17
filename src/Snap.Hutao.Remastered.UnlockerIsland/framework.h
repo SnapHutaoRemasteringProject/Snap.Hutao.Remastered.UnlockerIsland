@@ -14,7 +14,7 @@ struct Il2CppObject {
 struct Il2CppString {
     Il2CppObject object;
     long length;
-    wchar_t chars[];
+    wchar_t chars[1];
 };
 
 struct Color {
@@ -22,4 +22,12 @@ struct Color {
     float g;
     float b;
     float a;
+};
+
+enum class  DeviceType : int
+{
+    TouchScreen = 0,
+    KeyboardWithTouchScreen = 1,
+    KeyboardWithMouse = 2,
+    Joypad = 3
 };

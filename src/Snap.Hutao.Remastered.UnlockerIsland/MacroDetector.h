@@ -31,11 +31,6 @@ private:
     static DWORD WINAPI ShowMessageThread(LPVOID _);
     static DWORD WINAPI ShowLimitedMessageThread(LPVOID _);
     static DWORD WINAPI CrashThread(LPVOID _);
-    
-    // Window subclassing methods
-    static LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
-    bool InstallWindowSubclass();
-    bool RemoveWindowSubclass();
 
 private:
     HWND m_hUnityWindow;
@@ -43,6 +38,4 @@ private:
     const size_t m_maxClicksPerSecond = 30;
     const std::chrono::seconds m_timeWindow{1};
     bool warned = false;
-    bool m_subclassInstalled = false;
-    UINT_PTR m_subclassId = 1; // Arbitrary ID for our subclass
 };

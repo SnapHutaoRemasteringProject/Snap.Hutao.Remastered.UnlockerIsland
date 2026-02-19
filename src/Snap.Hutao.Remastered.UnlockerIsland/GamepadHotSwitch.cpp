@@ -183,6 +183,11 @@ bool GamepadHotSwitch::IsMouseActive() const
 
 void GamepadHotSwitch::SendSwitchMessage(bool toGamepad)
 {
+	if (isGamepadMode == toGamepad)
+        return;
+
+	isGamepadMode = toGamepad;
+
     HWND hWnd = GetUnityMainWindow();
     if (hWnd)
     {

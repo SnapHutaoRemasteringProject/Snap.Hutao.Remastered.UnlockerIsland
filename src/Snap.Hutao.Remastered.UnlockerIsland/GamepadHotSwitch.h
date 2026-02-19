@@ -49,6 +49,8 @@ private:
     std::atomic<ULONGLONG> m_lastMouseActivityTime{0};
     
     std::atomic<ULONGLONG> m_lastGamepadActivityTime{0};
+
+	bool isGamepadMode = false;
     
     static constexpr DWORD SWITCH_DELAY_MS = 100;
     static constexpr DWORD MOUSE_INACTIVITY_THRESHOLD_MS = 2000;

@@ -193,4 +193,3 @@ void MacroDetector::ShowLimitedMessage()
     CreateThread(NULL, 0, ShowLimitedMessageThread, 0, 0, NULL);
 }
 
-// 这些函数现在由HookWndProc.cpp统一处理

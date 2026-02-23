@@ -2,6 +2,7 @@
 #include "Hooks.h"
 #include "AntiAntiDebug.h"
 #include "MacroDetector.h"
+#include "GamepadHotSwitch.h"
 #include <cstdio>
 #include <iostream>
 
@@ -38,6 +39,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         break;
         
     case DLL_PROCESS_DETACH:
+		GamepadHotSwitch::GetInstance().Shutdown();
         MH_DisableHook(MH_ALL_HOOKS);
         MH_Uninitialize();
         
@@ -97,7 +99,6 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset PlayerPerspective = 0x" << std::hex << g_pEnv->Offsets.PlayerPerspective << std::endl;
         std::cout << "Offset IsObjectActive = 0x" << std::hex << g_pEnv->Offsets.IsObjectActive << std::endl;
         std::cout << "Offset GameUpdate = 0x" << std::hex << g_pEnv->Offsets.GameUpdate << std::endl;
-        std::cout << "Offset PtrToStringAnsi = 0x" << std::hex << g_pEnv->Offsets.PtrToStringAnsi << std::endl;
         std::cout << "Offset GetPlayerID = 0x" << std::hex << g_pEnv->Offsets.GetPlayerID << std::endl;
         std::cout << "Offset SetText = 0x" << std::hex << g_pEnv->Offsets.SetText << std::endl;
         std::cout << "Offset MonoInLevelPlayerProfilePageV3Ctor = 0x" << std::hex << g_pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor << std::endl;

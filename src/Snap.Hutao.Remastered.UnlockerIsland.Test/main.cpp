@@ -214,7 +214,6 @@ void Inject()
             pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
             pEnv->Offsets.PlayerPerspective = 0xd80fb50;
 			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
-			pEnv->Offsets.PtrToStringAnsi = 0x15565F40;  //Marshal.PtrToStringAnsi
             pEnv->Offsets.GetPlayerID = 0x1082F640;  //MonoInLevelPlayerProfilePageV3.get_playerID
             pEnv->Offsets.SetText = 0x15C451A0; //Text.set_text
             pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor = 0x1082F8E0;  //MonoInLevelPlayerProfilePageV3..ctor
@@ -226,6 +225,7 @@ void Inject()
 			pEnv->Offsets.GetComponent = 0x15B61F60;  //GameObject.GetComponent(String type)
 			pEnv->Offsets.GetText = 0x15C45190;  //Text.get_text
 			pEnv->Offsets.GetName = 0x15B79680;  //Object.get_name
+			pEnv->Offsets.CheckCanOpenMap = 0x69E9DD3;  // need pattern scan
         }
 
         if (InjectDLL(hProcess, dllPath))

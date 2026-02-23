@@ -47,6 +47,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             g_pEnv->State = IslandState::Stopped;
             UnmapViewOfFile(g_pEnv);
         }
+
+		exit(0);
         break;
     }
     return TRUE;
@@ -109,6 +111,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "Offset GetComponent = 0x" << std::hex << g_pEnv->Offsets.GetComponent << std::endl;
         std::cout << "Offset GetText = 0x" << std::hex << g_pEnv->Offsets.GetText << std::endl;
         std::cout << "Offset GetName = 0x" << std::hex << g_pEnv->Offsets.GetName << std::endl;
+        std::cout << "Offset CheckCanOpenMap = 0x" << std::hex << g_pEnv->Offsets.CheckCanOpenMap << std::endl;
     }
     
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {

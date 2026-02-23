@@ -489,10 +489,6 @@ static int HookSetFov(void* a1, float changeFovValue)
         gameUpdateInit = true;
     }
 
-    if (g_pEnv->DebugMode && !isResisted) {
-        Log("Function not limited");
-    }
-
     if (isResisted && !isResistedLastFrame) {
         MacroDetector::GetInstance().ShowLimitedMessage();
     }
@@ -670,7 +666,8 @@ static void HookSetActive(void* pThis, bool active) {
         GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
 		if (name) {
-			if (wcsstr(name->chars, L"Grass") || wcsstr(name->chars, L"grass")) {
+			if (wcsstr(name->chars, L"Grass") && !wcsstr(name->chars, L"Eff")) {
+                Log(name);
                 return;
             }
         }

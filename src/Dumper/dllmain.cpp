@@ -191,13 +191,9 @@ std::wstring GetGameObjectPath(void* gameObject) {
 }
 
 bool IsImportantGameObject(const std::wstring& path) {
-    return true;
     // 只记录重要的GameObject，避免日志过大
     static const std::vector<std::wstring> importantKeywords = {
-        L"Player", L"Enemy", L"NPC", L"Character", L"Monster",
-        L"Camera", L"Main", L"UI", L"Canvas", L"Button",
-        L"Panel", L"Menu", L"HUD", L"Health", L"Damage",
-        L"Weapon", L"Skill", L"Item", L"Quest", L"Dialog"
+        L"Grass", L"grass"
     };
 
     for (const auto& keyword : importantKeywords) {

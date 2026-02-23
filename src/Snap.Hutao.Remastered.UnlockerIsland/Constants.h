@@ -13,6 +13,8 @@ extern std::string GetFrameCountPattern;
 extern std::string SetFrameCountPattern;
 extern std::string SetFovPattern;
 extern std::string SwitchInputDeviceToTouchScreenPattern;
+extern std::string SwitchInputDeviceToJoypadPattern;
+extern std::string SwitchInputDeviceToKeyboardPattern;
 extern std::string SetupQuestBannerPattern;
 extern std::string FindGameObjectPattern;
 extern std::string SetActivePattern;
@@ -26,4 +28,5 @@ extern std::string CraftEntryPattern;
 extern std::string CheckCanEnterPattern;
 extern std::string OpenTeamPageAccordinglyPattern;
 extern std::string OpenTeamPattern;
+extern std::string CheckCanOpenMapPattern;
 

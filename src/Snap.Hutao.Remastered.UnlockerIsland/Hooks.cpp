@@ -39,7 +39,6 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* PlayerPerspective */ 0xd80fb50,
     /* IsObjectActive */ 0x15B622E0,
     /* GameUpdate */ 0x15394C70,
-    /* PtrToStringAnsi */ 0x15565F40,
     /* GetPlayerID */ 0x1082F640,
     /* SetText */ 0x15C451A0,
     /* MonoInLevelPlayerProfilePageV3Ctor */ 0x1082F8E0,
@@ -49,7 +48,8 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* AvatarPaimonAppear */ 0x107BAC60,
     /* GetComponent */ 0x15B61F60,
     /* GetText */ 0x15C45190,
-    /* GetName */ 0x15B79680
+    /* GetName */ 0x15B79680,
+	/* CheckCanOpenMap */ 0x69E9DD3
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
@@ -80,7 +80,6 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* PlayerPerspective */ 0xd7fdde0,
     /* IsObjectActive */ 0x15ae6da0,
     /* GameUpdate */ 0x1531c5a0,
-    /* PtrToStringAnsi */ 0x154ed320,
     /* GetPlayerID */ 0x10817160,
     /* SetText */ 0x15bc99a0,
     /* MonoInLevelPlayerProfilePageV3Ctor */ 0x10816de0,
@@ -90,7 +89,8 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* AvatarPaimonAppear */ 0x10798cd0,
     /* GetComponent */ 0x15ae6a20,
     /* GetText */ 0x15bc9990,
-    /* GetName */ 0x15afe150
+    /* GetName */ 0x15afe150,
+    /* CheckCanOpenMap */ 0x69E8B53
 };
 
 // Get_FrameCount
@@ -121,9 +121,11 @@ static LPVOID originalShowOneDamageTextEx = nullptr;
 
 // Craft Redirect
 LPVOID findString = nullptr;
-LPVOID ptrToStringAnsi = nullptr;
 LPVOID craftEntryPartner = nullptr;
 static LPVOID originalCraftEntry = nullptr;
+static LPVOID originalCheckCanOpenMap = nullptr;
+static LPVOID checkCanOpenMap = nullptr;
+static unsigned char originalCheckCanOpenMapBytes[5];
 
 // Team Anime
 LPVOID checkCanEnter = nullptr;
@@ -225,6 +227,10 @@ typedef Il2CppString* (*GetNameFn)(void*);
 
 static bool isResistedLastFrame = false;
 
+bool CheckResistInBeyd() {
+    return g_cachedIsResisted;
+}
+
 void HandlePaimon() {
     if (!setActive || !getActive)
     {
@@ -294,7 +300,7 @@ void HandlePlayerInfo() {
         return;
     }
 
-    if (!findString || !findGameObject || !setActive || !getActive || !setText ||!ptrToStringAnsi || !getPlayerName) {
+    if (!findString || !findGameObject || !setActive || !getActive || !setText || !getPlayerName) {
         return;
     }
 
@@ -303,7 +309,6 @@ void HandlePlayerInfo() {
     SetActiveFn setActiveFunc = (SetActiveFn)setActive;
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
     SetTextFn setTextFunc = (SetTextFn)setText;
-    PtrToStringAnsiFn ptrToStringAnsiFunc = (PtrToStringAnsiFn)ptrToStringAnsi;
     GetPlayerNameFn getPlayerNameFunc = (GetPlayerNameFn)getPlayerName;
 
     Il2CppString* uidStrObj = findStringFunc(UID_PATH);
@@ -393,8 +398,33 @@ void HandleGamepadHotSwitch() {
     }
 }
 
-bool CheckResistInBeyd() {
-    return g_cachedIsResisted;
+void HandleOpenMap() {
+    if (!checkCanOpenMap) {
+        return;
+    }
+
+	unsigned char* patchBytes = (unsigned char*)checkCanOpenMap;
+    if (patchBytes[0] == 0xE8) {
+		originalCheckCanOpenMapBytes[0] = patchBytes[0];
+        originalCheckCanOpenMapBytes[1] = patchBytes[1];
+        originalCheckCanOpenMapBytes[2] = patchBytes[2];
+        originalCheckCanOpenMapBytes[3] = patchBytes[3];
+        originalCheckCanOpenMapBytes[4] = patchBytes[4];
+    }
+
+	if (g_pEnv->RedirectCombine && !CheckResistInBeyd()) {
+        patchBytes[0] = 0xB8;
+        patchBytes[1] = 0x00;
+        patchBytes[2] = 0x00;
+        patchBytes[3] = 0x00;
+        patchBytes[4] = 0x00;
+    } else {
+        patchBytes[0] = originalCheckCanOpenMapBytes[0];
+        patchBytes[1] = originalCheckCanOpenMapBytes[1];
+        patchBytes[2] = originalCheckCanOpenMapBytes[2];
+        patchBytes[3] = originalCheckCanOpenMapBytes[3];
+        patchBytes[4] = originalCheckCanOpenMapBytes[4];
+    }
 }
 
 void RequestOpenCraft()
@@ -667,12 +697,15 @@ static void HookGameUpdate(void* pThis)
         frameCounter = 0;
         HandlePaimonV2();
         HandlePlayerInfo();
+        HandleOpenMap();
         CacheResistState();
         
         if (gamepadHotSwitchInitialized)
         {
             HandleGamepadHotSwitch();
         }
+
+        
     }
 
     if (requestOpenCraft)
@@ -692,7 +725,8 @@ void SetupHooks()
     if (!g_pEnv->ProvideOffsets) {
         if (!g_pEnv->IsOversea) {
             offsets = &g_ChinaOffsets;
-        } else {
+        }
+        else {
             offsets = &g_OverseaOffsets;
         }
     }
@@ -727,13 +761,13 @@ void SetupHooks()
 
     if (offsets->KeyboardMouseInput)
     {
-		switchInputDeviceToKeboardMouse = GetFunctionAddress(offsets->KeyboardMouseInput);
+        switchInputDeviceToKeboardMouse = GetFunctionAddress(offsets->KeyboardMouseInput);
     }
 
     if (offsets->JoypadInput)
     {
         switchInputDeviceToJoypad = GetFunctionAddress(offsets->JoypadInput);
-	}
+    }
 
     if (offsets->QuestBanner)
     {
@@ -755,7 +789,7 @@ void SetupHooks()
         if (setActive)
         {
             MH_CreateHook(setActive, HookSetActive, &originalSetActive);
-		}
+        }
     }
 
     if (offsets->CameraMove)
@@ -828,7 +862,7 @@ void SetupHooks()
         }
     }
 
-	if (offsets->IsObjectActive)
+    if (offsets->IsObjectActive)
     {
         getActive = GetFunctionAddress(offsets->IsObjectActive);
     }
@@ -840,14 +874,9 @@ void SetupHooks()
         {
             MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
         }
-	}
-
-	if (offsets->PtrToStringAnsi)
-    {
-		ptrToStringAnsi = GetFunctionAddress(offsets->PtrToStringAnsi);
     }
 
-	if (offsets->GetPlayerID)
+    if (offsets->GetPlayerID)
     {
         getPlayerID = GetFunctionAddress(offsets->GetPlayerID);
     }
@@ -868,14 +897,14 @@ void SetupHooks()
         getPlayerName = GetFunctionAddress(offsets->GetPlayerName);
     }
 
-	if (offsets->ActorManagerCtor)
+    if (offsets->ActorManagerCtor)
     {
         LPVOID actorManagerCtorAddr = GetFunctionAddress(offsets->ActorManagerCtor);
         if (actorManagerCtorAddr)
         {
             MH_CreateHook(actorManagerCtorAddr, HookActorManagerCtor, &originalActorManagerCtor);
         }
-	}
+    }
 
     if (offsets->GetGlobalActor)
     {
@@ -895,9 +924,9 @@ void SetupHooks()
         {
             MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
         }
-	}
+    }
 
-	if (offsets->GetComponent)
+    if (offsets->GetComponent)
     {
         getComponent = GetFunctionAddress(offsets->GetComponent);
     }
@@ -905,10 +934,17 @@ void SetupHooks()
     if (offsets->GetText)
     {
         getText = GetFunctionAddress(offsets->GetText);
-	}
+    }
 
     if (offsets->GetName)
     {
         getName = GetFunctionAddress(offsets->GetName);
+    }
+
+    if (offsets->CheckCanOpenMap)
+    {
+        checkCanOpenMap = GetFunctionAddress(offsets->CheckCanOpenMap);
+		DWORD oldProtect;
+        VirtualProtect(checkCanOpenMap, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
     }
 }

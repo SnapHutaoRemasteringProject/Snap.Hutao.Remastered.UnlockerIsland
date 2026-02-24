@@ -29,4 +29,4 @@ extern std::string CheckCanEnterPattern;
 extern std::string OpenTeamPageAccordinglyPattern;
 extern std::string OpenTeamPattern;
 extern std::string CheckCanOpenMapPattern;
-
+extern std::string GetNamePattern;

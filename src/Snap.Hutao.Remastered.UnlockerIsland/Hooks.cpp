@@ -666,7 +666,7 @@ static void HookSetActive(void* pThis, bool active) {
         GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
 		if (name) {
-			if (wcsstr(name->chars, L"Grass") && !wcsstr(name->chars, L"Eff")) {
+			if (wcsstr(name->chars, L"Grass") && !wcsstr(name->chars, L"Eff") && !wcsstr(name->chars, L"Monster")) {
                 Log(name);
                 return;
             }

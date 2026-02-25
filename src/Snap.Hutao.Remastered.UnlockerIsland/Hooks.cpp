@@ -37,7 +37,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* ResinRemove */ 0,
     /* FindString */ 0x417cc0,
     /* PlayerPerspective */ 0x8d91f60,
-    /* IsObjectActive */ 0x15F93300,
+    /* IsObjectActive */ 0x15F932F0,
     /* GameUpdate */ 0x157C4540,
     /* GetPlayerID */ 0x10A18500,
     /* SetText */ 0x1608F970,

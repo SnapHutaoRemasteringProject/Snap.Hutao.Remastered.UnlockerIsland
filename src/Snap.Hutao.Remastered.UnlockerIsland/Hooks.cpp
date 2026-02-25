@@ -14,7 +14,7 @@
 static HookFunctionOffsets g_ChinaOffsets = {
     /* SetUid */ 0xAF27BD0,
     /* SetFov */ 0x15946c0,
-    /* SetFog */ 0x15b73330,
+    /* SetFog */ 0x15FA41D0,
     /* GetFps */ 0x1097ac0,
     /* SetFps */ 0x1097ad0,
     /* OpenTeam */ 0xf87d050,

@@ -693,7 +693,6 @@ static void HookGameUpdate(void* pThis)
     {
         lastExecutionTime = currentTime;
         HandlePaimonV2();
-        HandlePlayerInfo();
         HandleOpenMap();
         CacheResistState();
         
@@ -702,6 +701,8 @@ static void HookGameUpdate(void* pThis)
             HandleGamepadHotSwitch();
         }
     }
+
+    HandlePlayerInfo();
 
     if (requestOpenCraft)
     {

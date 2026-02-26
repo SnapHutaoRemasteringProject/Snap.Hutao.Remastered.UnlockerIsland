@@ -686,12 +686,12 @@ static void HookGameUpdate(void* pThis)
         Log("[MacroDetector] Initialized on first GameUpdate");
     }
     
-    static int frameCounter = 0;
-    frameCounter++;
+    static ULONGLONG lastExecutionTime = 0;
+    ULONGLONG currentTime = GetTickCount64();
     
-    if (frameCounter >= 100)
+    if (currentTime - lastExecutionTime >= 500)
     {
-        frameCounter = 0;
+        lastExecutionTime = currentTime;
         HandlePaimonV2();
         HandlePlayerInfo();
         HandleOpenMap();
@@ -701,8 +701,6 @@ static void HookGameUpdate(void* pThis)
         {
             HandleGamepadHotSwitch();
         }
-
-        
     }
 
     if (requestOpenCraft)

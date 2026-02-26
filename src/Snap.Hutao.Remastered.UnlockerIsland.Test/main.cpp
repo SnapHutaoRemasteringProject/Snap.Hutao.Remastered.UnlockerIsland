@@ -126,7 +126,9 @@ void Inject()
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\YuanShen.exe",
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\GenshinImpact.exe",
         L"D:\\Genshin Impact Game\\YuanShen.exe",
+        L"D:\\Genshin Impact Game\\GenshinImpact.exe",
         L"E:\\Genshin Impact Game\\YuanShen.exe"
+        L"E:\\Genshin Impact Game\\GenshinImpact.exe"
     };
     
     for (const auto& path : possiblePaths)
@@ -165,7 +167,7 @@ void Inject()
             pEnv->LastError = 0;
             pEnv->Uid = 0;
             pEnv->ProvideOffsets = FALSE;
-            pEnv->IsOversea = FALSE;
+            pEnv->IsOversea = TRUE;
 
 			pEnv->DebugMode = TRUE;
             pEnv->EnableSetFov = TRUE;

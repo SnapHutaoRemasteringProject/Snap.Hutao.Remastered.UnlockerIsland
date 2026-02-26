@@ -55,7 +55,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
 static HookFunctionOffsets g_OverseaOffsets = {
     /* SetUid */ 0xAF1A5A0,
     /* SetFov */ 0x15936c0,
-    /* SetFog */ 0x15AF7DE0,
+    /* SetFog */ 0x15F5D670,
     /* GetFps */ 0x1096ac0,
     /* SetFps */ 0x1096ad0,
     /* OpenTeam */ 0xf870450,

@@ -21,7 +21,6 @@ MacroDetector& MacroDetector::GetInstance()
 
 void MacroDetector::Initialize()
 {
-    // 使用统一的WndProc Hook系统
     InitializeWndProcHooks();
     
     HWND hWnd = GetUnityMainWindow();
@@ -29,7 +28,6 @@ void MacroDetector::Initialize()
     {
         std::cout << "[MacroDetector] Found Unity main window: " << hWnd << std::endl;
 
-        // 创建更新线程
         CreateThread(NULL, 0, [](LPVOID _) -> DWORD 
         {
             while (true) {

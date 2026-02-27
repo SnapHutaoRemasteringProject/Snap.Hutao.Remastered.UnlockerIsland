@@ -9,6 +9,7 @@
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
 static HookFunctionOffsets g_ChinaOffsets = {
@@ -30,8 +31,8 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* JoypadInput */ 0xA1EEBE0,
     /* CombineEntry */ 0x9d24a70,
     /* CombineEntryPartner */ 0xefc9f90,
-    /* SetupResinList */ 0,
-    /* ResinList */ 0,
+    /* SetupResinList */ 0xee750d0,
+    /* ResinList */ 0x1f0,
     /* ResinCount */ 0,
     /* ResinItem */ 0,
     /* ResinRemove */ 0,
@@ -71,8 +72,8 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* JoypadInput */ 0xA1D7510,
     /* CombineEntry */ 0x9d1d2c0,
     /* CombineEntryPartner */ 0xef9ab80,
-    /* SetupResinList */ 0,
-    /* ResinList */ 0,
+    /* SetupResinList */ 0xEE50040,
+    /* ResinList */ 0x1f8,
     /* ResinCount */ 0,
     /* ResinItem */ 0,
     /* ResinRemove */ 0,
@@ -154,9 +155,6 @@ static void* monoInLevelPlayerProfilePageV3 = nullptr;
 static LPVOID originalMonoInLevelPlayerProfilePageV3Ctor = nullptr;
 LPVOID getPlayerName = nullptr;
 
-// Resin
-static LPVOID originalSetupResinList = nullptr;
-
 // Paimon Display
 static LPVOID originalActorManagerCtor = nullptr;
 static void* actorManager = nullptr;
@@ -224,6 +222,10 @@ typedef Il2CppString* (*GetTextFn)(void*);
 static LPVOID originalSetActive = nullptr;
 static LPVOID getName = nullptr;
 typedef Il2CppString* (*GetNameFn)(void*);
+
+// Resin
+static LPVOID originalSetupResinList;
+typedef void (*SetupResinListFn)(void*);
 
 static bool isResistedLastFrame = false;
 
@@ -677,6 +679,37 @@ static void HookSetActive(void* pThis, bool active) {
 	original(pThis, active);
 }
 
+static void HookSetupResinList(void* pThis) {
+    SetupResinListFn original = (SetupResinListFn)originalSetupResinList;
+    original(pThis);
+
+    Il2CppList<ULONG64>* resinList = *(Il2CppList<ULONG64>**)((intptr_t)pThis + g_pEnv->Offsets.ResinList);
+    std::vector<ULONG64> toRemove(5);
+
+    for (int i = 0; i < resinList->Count(); i++) {
+        ULONG64 item = resinList->Get(i);
+        Log("item=" + std::to_string(item) + ";len=" + std::to_string(resinList->Count()));
+
+        UINT32 hight = (UINT32)(item >> 32);
+        UINT32 low = (UINT32)(item & 0xFFFFFFFF);
+
+        if ((hight == 106 || low == 106) && !g_pEnv->ResinItem000106
+            || (hight == 201 || low == 201) && !g_pEnv->ResinItem000201
+            || (hight == 107009 || low == 107009) && !g_pEnv->ResinItem107009
+            || (hight == 107012 || low == 107012) && !g_pEnv->ResinItem107012
+            || (hight == 220007 || low == 220007) && !g_pEnv->ResinItem220007)
+        {
+            toRemove.push_back(item);
+        }
+    }
+
+    for (ULONG64 item : toRemove) {
+        if (item == 0) continue;
+        resinList->Remove(item);
+        Log(std::to_string(item) + " was Removed");
+    }
+}
+
 static void HookGameUpdate(void* pThis)
 {
     if (!macroDetectorInitialized)
@@ -726,6 +759,8 @@ void SetupHooks()
             offsets = &g_OverseaOffsets;
         }
     }
+
+    g_pEnv->Offsets = *offsets;
 
     if (offsets->GetFps)
     {
@@ -942,5 +977,13 @@ void SetupHooks()
         checkCanOpenMap = GetFunctionAddress(offsets->CheckCanOpenMap);
 		DWORD oldProtect;
         VirtualProtect(checkCanOpenMap, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
+    }
+
+    if (offsets->SetupResinList) {
+        LPVOID setupResinListAddr = GetFunctionAddress(offsets->SetupResinList);
+        if (setupResinListAddr)
+        {
+            MH_CreateHook(setupResinListAddr, HookSetupResinList, &originalSetupResinList);
+        }
     }
 }

@@ -167,7 +167,13 @@ void Inject()
             pEnv->LastError = 0;
             pEnv->Uid = 0;
             pEnv->ProvideOffsets = FALSE;
-            pEnv->IsOversea = TRUE;
+            pEnv->IsOversea = FALSE;
+
+            pEnv->ResinItem000106 = TRUE;
+            pEnv->ResinItem000201 = FALSE;
+            pEnv->ResinItem107009 = TRUE;
+            pEnv->ResinItem107012 = TRUE;
+            pEnv->ResinItem220007 = TRUE;
 
 			pEnv->DebugMode = TRUE;
             pEnv->EnableSetFov = TRUE;

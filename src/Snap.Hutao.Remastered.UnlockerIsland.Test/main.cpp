@@ -192,6 +192,7 @@ void Inject()
             pEnv->HidePlayerInfo = TRUE;
 			pEnv->HideGrass = TRUE;
 			pEnv->GamepadHotSwitchEnabled = TRUE;
+            pEnv->EnableInLevelClockPageSpeedUp = TRUE;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 
@@ -216,9 +217,6 @@ void Inject()
             pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
             pEnv->Offsets.SetupResinList = 0;
             pEnv->Offsets.ResinList = 0;
-            pEnv->Offsets.ResinCount = 0;
-            pEnv->Offsets.ResinItem = 0;
-            pEnv->Offsets.ResinRemove = 0;
             pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
             pEnv->Offsets.PlayerPerspective = 0xd80fb50;
 			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update

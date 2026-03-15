@@ -6,9 +6,6 @@
 #include "Logger.h"
 #include "GamepadHotSwitch.h"
 #include "HookWndProc.h"
-#include <cstring>
-#include <iostream>
-#include <cstdlib>
 #include <vector>
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
@@ -33,9 +30,6 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* CombineEntryPartner */ 0xefc9f90,
     /* SetupResinList */ 0xee750d0,
     /* ResinList */ 0x1f0,
-    /* ResinCount */ 0,
-    /* ResinItem */ 0,
-    /* ResinRemove */ 0,
     /* FindString */ 0x417cc0,
     /* PlayerPerspective */ 0x8d91f60,
     /* IsObjectActive */ 0x15F932F0,
@@ -50,7 +44,9 @@ static HookFunctionOffsets g_ChinaOffsets = {
     /* GetComponent */ 0x15F92F70,
     /* GetText */ 0x1608F960,
     /* GetName */ 0x1077fb0,
-	/* CheckCanOpenMap */ 0x9D24313
+	/* CheckCanOpenMap */ 0x9D24313,
+    /* InLevelClockPageOkButtonClicked */ 0xe638050,
+    /* InLevelClockPageCloseButtonClicked */ 0xDF566D0,
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
@@ -74,9 +70,6 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* CombineEntryPartner */ 0xef9ab80,
     /* SetupResinList */ 0xEE50040,
     /* ResinList */ 0x1f8,
-    /* ResinCount */ 0,
-    /* ResinItem */ 0,
-    /* ResinRemove */ 0,
     /* FindString */ 0x417080,
     /* PlayerPerspective */ 0x8d88e70,
     /* IsObjectActive */ 0x15F4C7D0,
@@ -91,7 +84,9 @@ static HookFunctionOffsets g_OverseaOffsets = {
     /* GetComponent */ 0x15F4C450,
     /* GetText */ 0x160489A0,
     /* GetName */ 0x15F63A80,
-    /* CheckCanOpenMap */ 0x9d1dd73
+    /* CheckCanOpenMap */ 0x9d1dd73,
+    /* InLevelClockPageOkButtonClicked */ 0xE6153F0,
+    /* InLevelClockPageCloseButtonClicked */ 0xDF310B0,
 };
 
 // Get_FrameCount
@@ -161,6 +156,10 @@ static void* actorManager = nullptr;
 LPVOID getGlobalActor = nullptr;
 LPVOID avatarPaimonAppear = nullptr;
 
+// InLevelClockPage Speed Up
+static LPVOID originalInLevelClockPageOkButtonClicked = nullptr;
+LPVOID inLevelClockPageCloseButtonClicked = nullptr;
+
 static LPVOID originalSetUID = nullptr;
 
 typedef int(* GetFrameCountFn)();
@@ -226,6 +225,9 @@ typedef Il2CppString* (*GetNameFn)(void*);
 // Resin
 static LPVOID originalSetupResinList;
 typedef void (*SetupResinListFn)(void*);
+
+// InLevelClockPage Speed Up
+typedef void (*ButtonClickedFn)(void*);
 
 static bool isResistedLastFrame = false;
 
@@ -553,7 +555,7 @@ static void HookSetupQuestBanner(void* pThis)
         // Hide Quest Banner Logic
         if (g_pEnv->HideQuestBanner)
         {
-            void* strObj = findStringFunc(QUEST_BANNER_PATH);
+            Il2CppString* strObj = findStringFunc(QUEST_BANNER_PATH);
             if (strObj)
             {
                 void* banner = findGameObjectFunc(strObj);
@@ -665,7 +667,7 @@ static void HookSetUID(void* pThis, uint32_t uid) {
 
 static void HookSetActive(void* pThis, bool active) {
 	if (g_pEnv->HideGrass && !CheckResistInBeyd() && active && getName) {
-        GetNameFn getNameFunc = (GetNameFn)getName;
+    GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
 		if (name) {
 			if (wcsstr(name->chars, L"Grass") && !wcsstr(name->chars, L"Eff") && !wcsstr(name->chars, L"Monster")) {
@@ -676,7 +678,7 @@ static void HookSetActive(void* pThis, bool active) {
     }
 
 	SetActiveFn original = (SetActiveFn)originalSetActive;
-	original(pThis, active);
+    original(pThis, active);
 }
 
 static void HookSetupResinList(void* pThis) {
@@ -708,6 +710,18 @@ static void HookSetupResinList(void* pThis) {
         resinList->Remove(item);
         Log(std::to_string(item) + " was Removed");
     }
+}
+
+static void HookInLevelClockPageOkButtonClicked(void* pThis) {
+    ButtonClickedFn original = (ButtonClickedFn)originalInLevelClockPageOkButtonClicked;
+
+    if (g_pEnv->EnableInLevelClockPageSpeedUp && inLevelClockPageCloseButtonClicked) {
+        ButtonClickedFn inLevelClockPageCloseButtonClickedFunc = (ButtonClickedFn)inLevelClockPageCloseButtonClicked;
+        Log("InLevelClockPage Speed Up");
+        inLevelClockPageCloseButtonClickedFunc(pThis);
+    }
+
+    original(pThis);
 }
 
 static void HookGameUpdate(void* pThis)
@@ -985,5 +999,18 @@ void SetupHooks()
         {
             MH_CreateHook(setupResinListAddr, HookSetupResinList, &originalSetupResinList);
         }
+    }
+
+    if (offsets->InLevelClockPageOkButtonClicked) {
+        LPVOID inLevelClockPageOkButtonClickedAddr = GetFunctionAddress(offsets->InLevelClockPageOkButtonClicked);
+        if (inLevelClockPageOkButtonClickedAddr)
+        {
+            MH_CreateHook(inLevelClockPageOkButtonClickedAddr, HookInLevelClockPageOkButtonClicked, &originalInLevelClockPageOkButtonClicked);
+        }
+    }
+
+    if (offsets->InLevelClockPageCloseButtonClicked)
+    {
+        inLevelClockPageCloseButtonClicked = GetFunctionAddress(offsets->InLevelClockPageCloseButtonClicked);
     }
 }

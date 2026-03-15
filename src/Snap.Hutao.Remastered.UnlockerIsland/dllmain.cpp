@@ -94,9 +94,6 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
         std::cout << "Offset CombineEntryPartner = 0x" << std::hex << g_pEnv->Offsets.CombineEntryPartner << std::endl;
         std::cout << "Offset SetupResinList = 0x" << std::hex << g_pEnv->Offsets.SetupResinList << std::endl;
         std::cout << "Offset ResinList = 0x" << std::hex << g_pEnv->Offsets.ResinList << std::endl;
-        std::cout << "Offset ResinCount = 0x" << std::hex << g_pEnv->Offsets.ResinCount << std::endl;
-        std::cout << "Offset ResinItem = 0x" << std::hex << g_pEnv->Offsets.ResinItem << std::endl;
-        std::cout << "Offset ResinRemove = 0x" << std::hex << g_pEnv->Offsets.ResinRemove << std::endl;
         std::cout << "Offset FindString = 0x" << std::hex << g_pEnv->Offsets.FindString << std::endl;
         std::cout << "Offset PlayerPerspective = 0x" << std::hex << g_pEnv->Offsets.PlayerPerspective << std::endl;
         std::cout << "Offset IsObjectActive = 0x" << std::hex << g_pEnv->Offsets.IsObjectActive << std::endl;

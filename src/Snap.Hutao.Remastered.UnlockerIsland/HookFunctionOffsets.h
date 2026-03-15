@@ -29,9 +29,6 @@ struct HookFunctionOffsets
     
     DWORD SetupResinList;
     DWORD ResinList;
-    DWORD ResinCount;
-    DWORD ResinItem;
-    DWORD ResinRemove;
     
     DWORD FindString;
     DWORD PlayerPerspective;
@@ -52,4 +49,7 @@ struct HookFunctionOffsets
     DWORD GetName;
 
     DWORD CheckCanOpenMap;
+
+    DWORD InLevelClockPageOkButtonClicked;
+    DWORD InLevelClockPageCloseButtonClicked;
 };

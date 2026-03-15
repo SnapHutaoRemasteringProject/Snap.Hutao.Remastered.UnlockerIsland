@@ -35,6 +35,9 @@ struct HookEnvironment
     BOOL  HidePlayerInfo;
     BOOL  HideGrass;
     BOOL  GamepadHotSwitchEnabled;
+    BOOL  EnableInLevelClockPageSpeedUp;
+    DWORD Reversed1;
+    DWORD Reversed2;
 
     HookFunctionOffsets Offsets;
 };

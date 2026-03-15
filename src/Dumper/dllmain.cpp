@@ -1,4 +1,4 @@
-﻿#include <windows.h>
+﻿#include "framework.h"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -16,20 +16,14 @@
 
 
 namespace GameOffsets {
-    // GameObject相关函数
-    const uint64_t GetName = 0x15B79680; //
+    const uint64_t GetName = 0x1077fb0; //
     
-    const uint64_t GetGameObject = 0x15B626E0; //
-    const uint64_t GetTransform = 0x15B622B0; //
+    const uint64_t GetTransform = 0x15f932c0; //
 
-    // 关键函数Hook点
-    const uint64_t GameObject_Constructor = 0x1063BC0; //
-    const uint64_t GameObject_SetActive = 0x1063450; //
+    const uint64_t GameObject_Constructor = 0x1091370; //
+    const uint64_t GameObject_SetActive = 0x1090be0; //
 
-    // Transform函数
-    const uint64_t Transform_GetChild = 0x15B7F420; //
-    const uint64_t Transform_GetChildCount = 0x15B7F2A0; //
-    const uint64_t Transform_GetParent = 0x15B7B2A0; //
+    const uint64_t Transform_GetParent = 0x15fac210; //
 }
 // =============================================================
 
@@ -50,16 +44,13 @@ std::mutex cacheMutex;
 // Unity函数指针类型定义
 using Fn_GetName = void* (__fastcall*)(void*);
 using Fn_GetParent = void* (__fastcall*)(void*);
-using Fn_GetGameObject = void* (__fastcall*)(void*);
 using Fn_GetTransform = void* (__fastcall*)(void*);
-using Fn_GameObject_OnEnable = void(__fastcall*)(void*);
 using Fn_GameObject_ctor = void* (__fastcall*)(void*, void*);
 using Fn_GameObject_SetActive = void(__fastcall*)(void*, bool);
 
 // 原始函数指针
 Fn_GetName Original_GetName = nullptr;
 Fn_GetParent Original_Transform_GetParent = nullptr;
-Fn_GetGameObject Original_GetGameObject = nullptr;
 Fn_GetTransform Original_GetTransform = nullptr;
 Fn_GameObject_ctor Original_GameObject_ctor = nullptr;
 Fn_GameObject_SetActive Original_GameObject_SetActive = nullptr;
@@ -76,19 +67,15 @@ std::wstring ReadUnityString(void* str) {
     }
 
     try {
-        // 将指针转换为 uintptr_t 并加上 0x14 偏移
         uintptr_t ptr = reinterpret_cast<uintptr_t>(str);
         wchar_t* stringPtr = reinterpret_cast<wchar_t*>(ptr + 0x14);
         
-        // 读取字符串
         std::wstring result = stringPtr;
         
-        // 检查字符串是否为空或等于 "none"（不区分大小写）
         if (result.empty()) {
             return L"";
         }
         
-        // 转换为小写进行比较
         std::wstring lowerResult = result;
         std::transform(lowerResult.begin(), lowerResult.end(), lowerResult.begin(), ::towlower);
         
@@ -99,7 +86,7 @@ std::wstring ReadUnityString(void* str) {
         return result;
     }
     catch (...) {
-        // 捕获所有异常，返回空字符串
+
     }
     
     return L"";
@@ -131,6 +118,34 @@ void AddLog(const std::wstring& message, bool toConsole = true) {
     }
 }
 
+void DumpStack()
+{
+    const int maxFrames = 32;
+    void* stack[maxFrames];
+    WORD frames = RtlCaptureStackBackTrace(0, maxFrames, stack, NULL);
+
+    HMODULE hModule = GetModuleHandleA("YuanShen.exe");
+
+    AddLog(L"stack: " + std::to_wstring(frames) + L"");
+    for (int i = 0; i < frames; i++)
+    {
+        uintptr_t addr = (uintptr_t)stack[i];
+        std::wstringstream ss;
+        if (hModule)
+        {
+            uintptr_t base = (uintptr_t)hModule;
+            uintptr_t rva = addr - base;
+            ss << L"stack " << i << L": 0x" << std::hex << addr << L" (RVA: 0x" << std::hex << rva << L")";
+        }
+        else
+        {
+            ss << L"stack " << i << L": 0x" << std::hex << addr;
+        }
+        AddLog(ss.str());
+    }
+    AddLog(L"============");
+}
+
 std::wstring GetGameObjectPath(void* gameObject) {
     if (!gameObject || !Original_GetTransform || !Original_GetName) {
         return L"";
@@ -146,14 +161,12 @@ std::wstring GetGameObjectPath(void* gameObject) {
         int depth = 0;
 
         while (current && depth < 30) {
-            // 防止循环引用
             if (visited.find(current) != visited.end()) {
                 pathParts.insert(pathParts.begin(), L"[CIRCULAR]");
                 break;
             }
             visited.insert(current);
 
-            // 获取当前transform的名称
             void* nameStr = Original_GetName(current);
             std::wstring name = ReadUnityString(nameStr);
 
@@ -164,7 +177,6 @@ std::wstring GetGameObjectPath(void* gameObject) {
 
             pathParts.insert(pathParts.begin(), name);
 
-            // 获取父transform
             void* parent = Original_Transform_GetParent(current);
             if (!parent || parent == current) {
                 break;
@@ -174,7 +186,6 @@ std::wstring GetGameObjectPath(void* gameObject) {
             depth++;
         }
 
-        // 构建完整路径
         std::wstring fullPath;
         for (size_t i = 0; i < pathParts.size(); i++) {
             fullPath += pathParts[i];
@@ -191,9 +202,8 @@ std::wstring GetGameObjectPath(void* gameObject) {
 }
 
 bool IsImportantGameObject(const std::wstring& path) {
-    // 只记录重要的GameObject，避免日志过大
     static const std::vector<std::wstring> importantKeywords = {
-        L"Grass", L"grass"
+        L"InLevelClockPage"
     };
 
     for (const auto& keyword : importantKeywords) {
@@ -226,8 +236,7 @@ void* __fastcall Hooked_GameObject_ctor(void* thisptr, void* name) {
                 recordedGameObjects.insert(objPtr);
 
                 std::wstring nameStr = ReadUnityString(name);
-                AddLog(L"[Constructor] GameObject: " + (nameStr.empty() ? L"Unnamed" : nameStr) +
-                    L" | Ptr: 0x" + std::to_wstring(objPtr));
+                AddLog(L"[Constructor] GameObject: " + (nameStr.empty() ? L"Unnamed" : nameStr));
             }
         }
     }
@@ -239,8 +248,8 @@ void __fastcall Hooked_GameObject_SetActive(void* thisptr, bool active) {
         std::wstring path = GetGameObjectPath(thisptr);
         if (!path.empty() && IsImportantGameObject(path)) {
             AddLog(L"[SetActive] " + std::wstring(active ? L"True" : L"False") +
-                L" | Path: " + path + L" | Ptr: 0x" +
-                std::to_wstring(reinterpret_cast<uintptr_t>(thisptr)));
+                L" | Path: " + path);
+            DumpStack();
         }
     }
 
@@ -322,13 +331,10 @@ bool InitializeUnityFunctions() {
 
     uintptr_t base = reinterpret_cast<uintptr_t>(hUnityModule);
 
-    // 初始化函数指针
     Original_GetName = reinterpret_cast<Fn_GetName>(base + GameOffsets::GetName);
     Original_Transform_GetParent = reinterpret_cast<Fn_GetParent>(base + GameOffsets::Transform_GetParent);
-    Original_GetGameObject = reinterpret_cast<Fn_GetGameObject>(base + GameOffsets::GetGameObject);
     Original_GetTransform = reinterpret_cast<Fn_GetTransform>(base + GameOffsets::GetTransform);
 
-    // 验证函数指针
     if (!Original_GetName || !Original_Transform_GetParent) {
         AddLog(L"ERROR: Failed to initialize Unity function pointers");
         return false;

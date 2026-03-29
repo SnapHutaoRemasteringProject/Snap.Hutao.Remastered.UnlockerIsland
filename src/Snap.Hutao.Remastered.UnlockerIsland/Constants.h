@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <list>
+
+extern std::list<std::wstring> GrassPrefix;
 
 extern const char* PAIMON_PATH;
 extern const char* DIVE_PAIMON_PATH;

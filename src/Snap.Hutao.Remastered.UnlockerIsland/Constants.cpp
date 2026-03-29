@@ -1,5 +1,17 @@
 #include "Constants.h"
 #include <string>
+#include <list>
+
+std::list<std::wstring> GrassPrefix
+{
+	L"Area_Ndkl_",
+	L"Area_Nt_",
+	L"Area_Fd_",
+	L"Area_Xm_",
+	L"Area_Ly_",
+	L"Stages_M",
+	L"BigWorld_",
+};
 
 const char* PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon(Clone)";
 const char* DIVE_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon_Dive(Clone)";

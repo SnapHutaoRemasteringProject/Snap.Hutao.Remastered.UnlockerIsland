@@ -670,13 +670,18 @@ static void HookSetActive(void* pThis, bool active) {
     GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
 		if (name) {
-			if (wcsstr(name->chars, L"Grass") && !wcsstr(name->chars, L"Eff") && !wcsstr(name->chars, L"Monster")) {
-                Log(name);
-                return;
+			if (wcsstr(name->chars, L"_Grass_")) {
+                for (std::wstring prefix : GrassPrefix) {
+                    if (wcsstr(name->chars, prefix.c_str())) {
+                        Log(name);
+                        return;
+                    }
+                }
             }
         }
     }
 
+    pass:
 	SetActiveFn original = (SetActiveFn)originalSetActive;
     original(pThis, active);
 }

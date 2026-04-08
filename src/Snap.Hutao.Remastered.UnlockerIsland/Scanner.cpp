@@ -1,4 +1,4 @@
-#include "Scanner.h"
+﻿#include "Scanner.h"
 
 #include <Windows.h>
 #include <Psapi.h>
@@ -6,133 +6,161 @@
 #include <vector>
 #include <iostream>
 
-namespace Scanner {
+namespace Scanner
+{
 
-    std::vector<int> ParsePattern(const std::string& signature) {
-        std::vector<int> pattern;
-        std::stringstream ss(signature);
-        std::string word;
-        
-        while (ss >> word) {
-            if (word == "?" || word == "??") {
-                pattern.push_back(-1);
-            }
-            else {
-                try {
-                    pattern.push_back(std::stoi(word, nullptr, 16));
-                }
-                catch (...) {
-                    pattern.push_back(-1);
-                }
-            }
-        }
-        
-        return pattern;
-    }
-    
-    void* ScanMainModule(const std::string& signature) {
-        return ScanModule(nullptr, signature);
-    }
+	std::vector<int> ParsePattern(const std::string& signature)
+	{
+		std::vector<int> pattern;
+		std::stringstream ss(signature);
+		std::string word;
 
-    void* ScanModule(const char* moduleName, const std::string& signature) {
-        HMODULE hModule = nullptr;
-        
-        if (moduleName == nullptr) {
-            hModule = GetModuleHandle(nullptr);
-        }
-        else {
-            hModule = GetModuleHandleA(moduleName);
-        }
-        
-        if (!hModule) {
-            return nullptr;
-        }
+		while (ss >> word)
+		{
+			if (word == "?" || word == "??")
+			{
+				pattern.push_back(-1);
+			}
+			else
+			{
+				try
+				{
+					pattern.push_back(std::stoi(word, nullptr, 16));
+				}
+				catch (...)
+				{
+					pattern.push_back(-1);
+				}
+			}
+		}
 
-        MODULEINFO modInfo = { 0 };
-        if (!GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(MODULEINFO))) {
-            return nullptr;
-        }
+		return pattern;
+	}
 
-        auto pattern = ParsePattern(signature);
-        if (pattern.empty()) {
-            return nullptr;
-        }
+	void* ScanMainModule(const std::string& signature)
+	{
+		return ScanModule(nullptr, signature);
+	}
 
-        uintptr_t startAddr = (uintptr_t)modInfo.lpBaseOfDll;
-        uintptr_t endAddr = startAddr + modInfo.SizeOfImage;
-        
-        return ScanMemory((void*)startAddr, modInfo.SizeOfImage, signature);
-    }
+	void* ScanModule(const char* moduleName, const std::string& signature)
+	{
+		HMODULE hModule = nullptr;
 
-    void* ScanMemory(void* start, size_t size, const std::string& signature) {
-        if (!start || size == 0) {
-            return nullptr;
-        }
+		if (moduleName == nullptr)
+		{
+			hModule = GetModuleHandle(nullptr);
+		}
+		else
+		{
+			hModule = GetModuleHandleA(moduleName);
+		}
 
-        auto pattern = ParsePattern(signature);
-        if (pattern.empty()) {
-            return nullptr;
-        }
+		if (!hModule)
+		{
+			return nullptr;
+		}
 
-        uintptr_t startAddr = (uintptr_t)start;
-        uintptr_t endAddr = startAddr + size;
-        uintptr_t current = startAddr;
-        
-        MEMORY_BASIC_INFORMATION mbi;
-        while (current < endAddr) {
-            if (VirtualQuery((LPCVOID)current, &mbi, sizeof(mbi)) == 0) {
-                break;
-            }
-            
-            bool isAvailable = (mbi.State == MEM_COMMIT) &&
-                          ((mbi.Protect & PAGE_EXECUTE_READ) || 
-                           (mbi.Protect & PAGE_EXECUTE_READWRITE) || 
-                           (mbi.Protect & PAGE_READONLY) || 
-                           (mbi.Protect & PAGE_READWRITE));
+		MODULEINFO modInfo = { 0 };
+		if (!GetModuleInformation(GetCurrentProcess(), hModule, &modInfo, sizeof(MODULEINFO)))
+		{
+			return nullptr;
+		}
 
-            if (isAvailable) {
-                size_t regionSize = mbi.RegionSize;
-                uintptr_t regionEnd = (uintptr_t)mbi.BaseAddress + regionSize;
-                
-                if (regionEnd > endAddr) {
-                    regionSize = endAddr - (uintptr_t)mbi.BaseAddress;
-                }
-                
-                const uint8_t* pStart = (const uint8_t*)mbi.BaseAddress;
-                const size_t pSize = pattern.size();
+		auto pattern = ParsePattern(signature);
+		if (pattern.empty())
+		{
+			return nullptr;
+		}
 
-                for (size_t i = 0; i <= regionSize - pSize; ++i) {
-                    bool found = true;
-                    
-                    for (size_t j = 0; j < pSize; ++j) {
-                        if (pattern[j] != -1 && pattern[j] != pStart[i + j]) {
-                            found = false;
-                            break;
-                        }
-                    }
-                    
-                    if (found) {
-                        return (void*)(pStart + i);
-                    }
-                }
-            }
-            
-            current = (uintptr_t)mbi.BaseAddress + mbi.RegionSize;
-        }
+		uintptr_t startAddr = (uintptr_t)modInfo.lpBaseOfDll;
+		uintptr_t endAddr = startAddr + modInfo.SizeOfImage;
 
-        return nullptr;
-    }
+		return ScanMemory((void*)startAddr, modInfo.SizeOfImage, signature);
+	}
 
-    void* ResolveRelative(void* instruction, int offset, int instrSize) {
-        if (!instruction) return nullptr;
-        __try {
-            uintptr_t instrAddr = (uintptr_t)instruction;
-            int32_t relative = *(int32_t*)(instrAddr + offset);
-            uintptr_t target = instrAddr + instrSize + relative;
-            return (void*)target;
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER) {
-            return nullptr;
-        }
-    }
+	void* ScanMemory(void* start, size_t size, const std::string& signature)
+	{
+		if (!start || size == 0)
+		{
+			return nullptr;
+		}
+
+		auto pattern = ParsePattern(signature);
+		if (pattern.empty())
+		{
+			return nullptr;
+		}
+
+		uintptr_t startAddr = (uintptr_t)start;
+		uintptr_t endAddr = startAddr + size;
+		uintptr_t current = startAddr;
+
+		MEMORY_BASIC_INFORMATION mbi;
+		while (current < endAddr)
+		{
+			if (VirtualQuery((LPCVOID)current, &mbi, sizeof(mbi)) == 0)
+			{
+				break;
+			}
+
+			bool isAvailable = (mbi.State == MEM_COMMIT) &&
+				((mbi.Protect & PAGE_EXECUTE_READ) ||
+				 (mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+				 (mbi.Protect & PAGE_READONLY) ||
+				 (mbi.Protect & PAGE_READWRITE));
+
+			if (isAvailable)
+			{
+				size_t regionSize = mbi.RegionSize;
+				uintptr_t regionEnd = (uintptr_t)mbi.BaseAddress + regionSize;
+
+				if (regionEnd > endAddr)
+				{
+					regionSize = endAddr - (uintptr_t)mbi.BaseAddress;
+				}
+
+				const uint8_t* pStart = (const uint8_t*)mbi.BaseAddress;
+				const size_t pSize = pattern.size();
+
+				for (size_t i = 0; i <= regionSize - pSize; ++i)
+				{
+					bool found = true;
+
+					for (size_t j = 0; j < pSize; ++j)
+					{
+						if (pattern[j] != -1 && pattern[j] != pStart[i + j])
+						{
+							found = false;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						return (void*)(pStart + i);
+					}
+				}
+			}
+
+			current = (uintptr_t)mbi.BaseAddress + mbi.RegionSize;
+		}
+
+		return nullptr;
+	}
+
+	void* ResolveRelative(void* instruction, int offset, int instrSize)
+	{
+		if (!instruction) return nullptr;
+		__try
+		{
+			uintptr_t instrAddr = (uintptr_t)instruction;
+			int32_t relative = *(int32_t*)(instrAddr + offset);
+			uintptr_t target = instrAddr + instrSize + relative;
+			return (void*)target;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			return nullptr;
+		}
+	}
 }

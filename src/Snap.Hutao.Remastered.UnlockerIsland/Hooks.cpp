@@ -1,4 +1,4 @@
-#include "Hooks.h"
+﻿#include "Hooks.h"
 #include "framework.h"
 #include "MemoryUtils.h"
 #include "MacroDetector.h"
@@ -10,83 +10,83 @@
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
 static HookFunctionOffsets g_ChinaOffsets = {
-    /* SetUid */ 0xAF27BD0,
-    /* SetFov */ 0x15BF590,
-    /* SetFog */ 0x16C98DC0,
-    /* GetFps */ 0x10BDC90,
-    /* SetFps */ 0x10BDCA0,
-    /* OpenTeam */ 0xF8E0940,
-    /* OpenTeamAdvanced */ 0xF8D6070,
-    /* CheckEnter */ 0x101A8C70,
-    /* QuestBanner */ 0xE279820,
-    /* FindObject */ 0x10B7540,
-    /* ObjectActive */ 0x10B6D00,
-    /* CameraMove */ 0xCBDD200,
-    /* DamageText */ 0x11513DB0,
-    /* TouchInput */ 0xDD938B0,
+	/* SetUid */ 0xAF27BD0,
+	/* SetFov */ 0x15BF590,
+	/* SetFog */ 0x16C98DC0,
+	/* GetFps */ 0x10BDC90,
+	/* SetFps */ 0x10BDCA0,
+	/* OpenTeam */ 0xF8E0940,
+	/* OpenTeamAdvanced */ 0xF8D6070,
+	/* CheckEnter */ 0x101A8C70,
+	/* QuestBanner */ 0xE279820,
+	/* FindObject */ 0x10B7540,
+	/* ObjectActive */ 0x10B6D00,
+	/* CameraMove */ 0xCBDD200,
+	/* DamageText */ 0x11513DB0,
+	/* TouchInput */ 0xDD938B0,
 	/* KeyboardMouseInput */ 0xDD93A60,
 	/* JoypadInput */ 0xDD93A60,
-    /* CombineEntry */ 0x6A1B4A0,
-    /* CombineEntryPartner */ 0x1038AC60,
-    /* SetupResinList */ 0xAF362F0,
-    /* ResinList */ 0x1f0,
-    /* FindString */ 0x434F60,
-    /* PlayerPerspective */ 0xD0F81E0,
-    /* IsObjectActive */ 0x10B6CD0,
-    /* GameUpdate */ 0x164B8860,
-    /* GetPlayerID */ 0,
-    /* SetText */ 0,
-    /* MonoInLevelPlayerProfilePageV3Ctor */ 0,
-    /* GetPlayerName */ 0,
-    /* ActorManagerCtor */ 0xDEFBD30,
-    /* GetGlobalActor */ 0,
-    /* AvatarPaimonAppear */ 0,
-    /* GetComponent */ 0,
-    /* GetText */ 0,
-    /* GetName */ 0,
+	/* CombineEntry */ 0x6A1B4A0,
+	/* CombineEntryPartner */ 0x1038AC60,
+	/* SetupResinList */ 0xAF362F0,
+	/* ResinList */ 0x1f0,
+	/* FindString */ 0x434F60,
+	/* PlayerPerspective */ 0xD0F81E0,
+	/* IsObjectActive */ 0x10B6CD0,
+	/* GameUpdate */ 0x164B8860,
+	/* GetPlayerID */ 0,
+	/* SetText */ 0,
+	/* MonoInLevelPlayerProfilePageV3Ctor */ 0,
+	/* GetPlayerName */ 0,
+	/* ActorManagerCtor */ 0xDEFBD30,
+	/* GetGlobalActor */ 0,
+	/* AvatarPaimonAppear */ 0,
+	/* GetComponent */ 0,
+	/* GetText */ 0,
+	/* GetName */ 0,
 	/* CheckCanOpenMap */ 0x6A1D363,
-    /* InLevelClockPageOkButtonClicked */ 0x1012CFB0,
-    /* InLevelClockPageCloseButtonClicked */ 0x6E75350,
+	/* InLevelClockPageOkButtonClicked */ 0x1012CFB0,
+	/* InLevelClockPageCloseButtonClicked */ 0x6E75350,
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
-    /* SetUid */ 0xAF1A5A0,
-    /* SetFov */ 0,
-    /* SetFog */ 0,
-    /* GetFps */ 0,
-    /* SetFps */ 0,
-    /* OpenTeam */ 0,
-    /* OpenTeamAdvanced */ 0,
-    /* CheckEnter */ 0,
-    /* QuestBanner */ 0,
-    /* FindObject */ 0,
-    /* ObjectActive */ 0,
-    /* CameraMove */ 0,
-    /* DamageText */ 0,
-    /* TouchInput */ 0,
+	/* SetUid */ 0xAF1A5A0,
+	/* SetFov */ 0,
+	/* SetFog */ 0,
+	/* GetFps */ 0,
+	/* SetFps */ 0,
+	/* OpenTeam */ 0,
+	/* OpenTeamAdvanced */ 0,
+	/* CheckEnter */ 0,
+	/* QuestBanner */ 0,
+	/* FindObject */ 0,
+	/* ObjectActive */ 0,
+	/* CameraMove */ 0,
+	/* DamageText */ 0,
+	/* TouchInput */ 0,
 	/* KeyboardMouseInput */ 0,
-    /* JoypadInput */ 0,
-    /* CombineEntry */ 0,
-    /* CombineEntryPartner */ 0,
-    /* SetupResinList */ 0,
-    /* ResinList */ 0x1f8,
-    /* FindString */ 0,
-    /* PlayerPerspective */ 0,
-    /* IsObjectActive */ 0,
-    /* GameUpdate */ 0,
-    /* GetPlayerID */ 0,
-    /* SetText */ 0,
-    /* MonoInLevelPlayerProfilePageV3Ctor */ 0,
-    /* GetPlayerName */ 0,
-    /* ActorManagerCtor */ 0,
-    /* GetGlobalActor */ 0,
-    /* AvatarPaimonAppear */ 0,
-    /* GetComponent */ 0,
-    /* GetText */ 0,
-    /* GetName */ 0,
-    /* CheckCanOpenMap */ 0,
-    /* InLevelClockPageOkButtonClicked */ 0,
-    /* InLevelClockPageCloseButtonClicked */ 0,
+	/* JoypadInput */ 0,
+	/* CombineEntry */ 0,
+	/* CombineEntryPartner */ 0,
+	/* SetupResinList */ 0,
+	/* ResinList */ 0x1f8,
+	/* FindString */ 0,
+	/* PlayerPerspective */ 0,
+	/* IsObjectActive */ 0,
+	/* GameUpdate */ 0,
+	/* GetPlayerID */ 0,
+	/* SetText */ 0,
+	/* MonoInLevelPlayerProfilePageV3Ctor */ 0,
+	/* GetPlayerName */ 0,
+	/* ActorManagerCtor */ 0,
+	/* GetGlobalActor */ 0,
+	/* AvatarPaimonAppear */ 0,
+	/* GetComponent */ 0,
+	/* GetText */ 0,
+	/* GetName */ 0,
+	/* CheckCanOpenMap */ 0,
+	/* InLevelClockPageOkButtonClicked */ 0,
+	/* InLevelClockPageCloseButtonClicked */ 0,
 };
 
 // Get_FrameCount
@@ -162,51 +162,51 @@ LPVOID inLevelClockPageCloseButtonClicked = nullptr;
 
 static LPVOID originalSetUID = nullptr;
 
-typedef int(* GetFrameCountFn)();
-typedef int(* SetFrameCountFn)(int);
-typedef int(* SetFovFn)(void*, float);
-typedef void(* SwitchInputDeviceToTouchScreenFn)(void*);
+typedef int(*GetFrameCountFn)();
+typedef int(*SetFrameCountFn)(int);
+typedef int(*SetFovFn)(void*, float);
+typedef void(*SwitchInputDeviceToTouchScreenFn)(void*);
 typedef void(*SwitchInputDeviceToKeyboardMouseFn)(void*);
-typedef void(* SwitchInputDeviceToJoypadFn)(void*);
+typedef void(*SwitchInputDeviceToJoypadFn)(void*);
 
 // Quest Banner Types
-typedef void(* SetupQuestBannerFn)(void*);
-typedef void*(* FindGameObjectFn)(void*);
-typedef void(* SetActiveFn)(void*, bool);
+typedef void(*SetupQuestBannerFn)(void*);
+typedef void* (*FindGameObjectFn)(void*);
+typedef void(*SetActiveFn)(void*, bool);
 typedef bool(*GetActiveFn)(void*);
 
 // Event Camera Types
-typedef bool(* EventCameraMoveFn)(void*, void*);
+typedef bool(*EventCameraMoveFn)(void*, void*);
 
 // Damage Text Types
-typedef void(* ShowOneDamageTextExFn)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
+typedef void(*ShowOneDamageTextExFn)(void*, int, int, int, float, Il2CppString*, void*, void*, int);
 
 typedef void(*SetEnableFogRenderingFn)(bool);
 
-typedef void*(* PlayerPerspectiveFn)(void*, float, void*);
+typedef void* (*PlayerPerspectiveFn)(void*, float, void*);
 
 // Craft Redirect Types
-typedef Il2CppString*(* FindStringFn)(const char*);
+typedef Il2CppString* (*FindStringFn)(const char*);
 typedef Il2CppString* (*PtrToStringAnsiFn)(const char*);
 
-typedef void(* CraftEntryFn)(void*);
-typedef bool(* CraftEntryPartnerFn)(Il2CppString*, void*, void*, void*, void*);
+typedef void(*CraftEntryFn)(void*);
+typedef bool(*CraftEntryPartnerFn)(Il2CppString*, void*, void*, void*, void*);
 
 // Team Anime Types
-typedef bool(* CheckCanEnterFn)();
+typedef bool(*CheckCanEnterFn)();
 
-typedef void(* OpenTeamFn)();
+typedef void(*OpenTeamFn)();
 
-typedef void(* OpenTeamPageAccordinglyFn)(bool);
+typedef void(*OpenTeamPageAccordinglyFn)(bool);
 
-typedef void(* UpdateFn)(void*);
-typedef void(* SetTextFn)(void*, Il2CppString*);
-typedef void*(* GetPlayerIDFn)(void*);
-typedef void*(* GetPlayerNameFn)(void*);
-typedef void(* CtorFn)(void*);
+typedef void(*UpdateFn)(void*);
+typedef void(*SetTextFn)(void*, Il2CppString*);
+typedef void* (*GetPlayerIDFn)(void*);
+typedef void* (*GetPlayerNameFn)(void*);
+typedef void(*CtorFn)(void*);
 
 // Paimon Display
-typedef void*(*GetGlobalActorFn)(void*);
+typedef void* (*GetGlobalActorFn)(void*);
 typedef void(*ResumePaimonInProfilePageAll)(void*);
 typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
 
@@ -231,791 +231,841 @@ typedef void (*ButtonClickedFn)(void*);
 
 static bool isResistedLastFrame = false;
 
-bool CheckResistInBeyd() {
-    return g_cachedIsResisted;
+bool CheckResistInBeyd()
+{
+	return g_cachedIsResisted;
 }
 
-void HandlePaimon() {
-    if (!setActive || !getActive)
-    {
-        return;
-    }
+void HandlePaimon()
+{
+	if (!setActive || !getActive)
+	{
+		return;
+	}
 
-    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
-    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+	SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+	GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
-    if (g_pEnv->DisplayPaimon)
-    {
-        void* paimonObj = GetCachedPaimonGameObject();
-        void* profileLayerObj = GetCachedProfileLayerGameObject();
+	if (g_pEnv->DisplayPaimon)
+	{
+		void* paimonObj = GetCachedPaimonGameObject();
+		void* profileLayerObj = GetCachedProfileLayerGameObject();
 
-        if (paimonObj && profileLayerObj)
-        {
+		if (paimonObj && profileLayerObj)
+		{
 			bool profileOpen = getActiveFunc(profileLayerObj);
 
-            if (profileOpen) {
-                setActiveFunc(paimonObj, false);
-            }
-            else {
-                setActiveFunc(paimonObj, true);
-            }
-        }
-    }
+			if (profileOpen)
+			{
+				setActiveFunc(paimonObj, false);
+			}
+			else
+			{
+				setActiveFunc(paimonObj, true);
+			}
+		}
+	}
 }
 
-void HandlePaimonV2() {
-    if (!g_pEnv->DisplayPaimon) {
-        return;
-    }
+void HandlePaimonV2()
+{
+	if (!g_pEnv->DisplayPaimon)
+	{
+		return;
+	}
 
-    if (!getGlobalActor || !getActive || !avatarPaimonAppear) {
-        return;
-    }
+	if (!getGlobalActor || !getActive || !avatarPaimonAppear)
+	{
+		return;
+	}
 
-    if (!actorManager) {
-        return;
-    }
+	if (!actorManager)
+	{
+		return;
+	}
 
-    GetGlobalActorFn getGlobalActorFunc = (GetGlobalActorFn)getGlobalActor;
-    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+	GetGlobalActorFn getGlobalActorFunc = (GetGlobalActorFn)getGlobalActor;
+	GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
-    void* paimonObj = GetCachedPaimonGameObject();
+	void* paimonObj = GetCachedPaimonGameObject();
 	void* divePaimonObj = GetCachedDivePaimonGameObject();
-    void* beydPaimonObj = GetCachedBeydPaimonGameObject();
+	void* beydPaimonObj = GetCachedBeydPaimonGameObject();
 
-    if (!paimonObj || !divePaimonObj || !beydPaimonObj) {
-        return;
+	if (!paimonObj || !divePaimonObj || !beydPaimonObj)
+	{
+		return;
 	}
 
-    if (getActiveFunc(paimonObj) || getActiveFunc(divePaimonObj) || getActiveFunc(beydPaimonObj)) {
-        return;
-    }
+	if (getActiveFunc(paimonObj) || getActiveFunc(divePaimonObj) || getActiveFunc(beydPaimonObj))
+	{
+		return;
+	}
 
-    void* globalActor = getGlobalActorFunc(actorManager);
+	void* globalActor = getGlobalActorFunc(actorManager);
 
-    if (globalActor) {
-        AvatarPaimonAppearFn avatarPaimonAppearFunc = (AvatarPaimonAppearFn)avatarPaimonAppear;
-        avatarPaimonAppearFunc(globalActor, nullptr, true);
+	if (globalActor)
+	{
+		AvatarPaimonAppearFn avatarPaimonAppearFunc = (AvatarPaimonAppearFn)avatarPaimonAppear;
+		avatarPaimonAppearFunc(globalActor, nullptr, true);
 	}
 }
 
-void HandlePlayerInfo() {
-    if (!g_pEnv->HidePlayerInfo) {
-        return;
-    }
+void HandlePlayerInfo()
+{
+	if (!g_pEnv->HidePlayerInfo)
+	{
+		return;
+	}
 
-    if (!findString || !findGameObject || !setActive || !getActive || !setText || !getPlayerName) {
-        return;
-    }
+	if (!findString || !findGameObject || !setActive || !getActive || !setText || !getPlayerName)
+	{
+		return;
+	}
 
-    FindStringFn findStringFunc = (FindStringFn)findString;
-    FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-    SetActiveFn setActiveFunc = (SetActiveFn)setActive;
-    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
-    SetTextFn setTextFunc = (SetTextFn)setText;
-    GetPlayerNameFn getPlayerNameFunc = (GetPlayerNameFn)getPlayerName;
+	FindStringFn findStringFunc = (FindStringFn)findString;
+	FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+	SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+	GetActiveFn getActiveFunc = (GetActiveFn)getActive;
+	SetTextFn setTextFunc = (SetTextFn)setText;
+	GetPlayerNameFn getPlayerNameFunc = (GetPlayerNameFn)getPlayerName;
 
-    Il2CppString* uidStrObj = findStringFunc(UID_PATH);
-    if (uidStrObj)
-    {
-        void* uidObj = findGameObjectFunc(uidStrObj);
-        if (uidObj)
-        {
-            setActiveFunc(uidObj, false);
-        }
-    }
+	Il2CppString* uidStrObj = findStringFunc(UID_PATH);
+	if (uidStrObj)
+	{
+		void* uidObj = findGameObjectFunc(uidStrObj);
+		if (uidObj)
+		{
+			setActiveFunc(uidObj, false);
+		}
+	}
 
 	// Hide Player Profile UID
 
-    Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
-    if (!profileLayerStrObj) {
-        return;
-    }
-    void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
-    if (!profileLayerObj || !getPlayerID) {
-        return;
+	Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
+	if (!profileLayerStrObj)
+	{
+		return;
+	}
+	void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
+	if (!profileLayerObj || !getPlayerID)
+	{
+		return;
 	}
 
-    if (!getActiveFunc(profileLayerObj)) {
-        return;
-    }
+	if (!getActiveFunc(profileLayerObj))
+	{
+		return;
+	}
 
 	GetPlayerIDFn getPlayerIDFunc = (GetPlayerIDFn)getPlayerID;
 	void* playerIDText = getPlayerIDFunc(monoInLevelPlayerProfilePageV3);
-    void* playerNameText = getPlayerNameFunc(monoInLevelPlayerProfilePageV3);
+	void* playerNameText = getPlayerNameFunc(monoInLevelPlayerProfilePageV3);
 
-    if (playerIDText) {
-        setTextFunc(playerIDText, nullptr);
+	if (playerIDText)
+	{
+		setTextFunc(playerIDText, nullptr);
 	}
 
-    if (playerNameText) {
-        setTextFunc(playerNameText, nullptr);
-    }
-}
-
-void HandleTouchMode() {
-    if (gameUpdateInit && !touchScreenInit && g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
-    {
-        touchScreenInit = true;
-        SwitchInputDeviceToTouchScreenFn switchInput = (SwitchInputDeviceToTouchScreenFn)switchInputDeviceToTouchScreen;
-        __try
-        {
-            switchInput(nullptr);
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER)
-        {
-            // Ignore exceptions
-        }
+	if (playerNameText)
+	{
+		setTextFunc(playerNameText, nullptr);
 	}
 }
 
-void HandleGamepadHotSwitch() {
-    if (!gamepadHotSwitchInitialized && g_pEnv->GamepadHotSwitchEnabled)
-    {
-        gamepadHotSwitchInitialized = true;
-        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
-        
-        if (!hotSwitch.Initialize())
-        {
-            Log("[GamepadHotSwitch] Failed to initialize");
-            return;
-        }
-        
-        hotSwitch.SetEnabled(true);
-        
-        InitializeWndProcHooks();
-        
-        Log("[GamepadHotSwitch] Initialized and enabled");
-    }
-    else if (gamepadHotSwitchInitialized && !g_pEnv->GamepadHotSwitchEnabled)
-    {
-        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
-        hotSwitch.SetEnabled(false);
-        gamepadHotSwitchInitialized = false;
-        Log("[GamepadHotSwitch] Disabled");
-    }
-    
-    if (gamepadHotSwitchInitialized)
-    {
-        GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
-        hotSwitch.SetEnabled(g_pEnv->GamepadHotSwitchEnabled);
-    }
+void HandleTouchMode()
+{
+	if (gameUpdateInit && !touchScreenInit && g_pEnv->TouchMode && switchInputDeviceToTouchScreen)
+	{
+		touchScreenInit = true;
+		SwitchInputDeviceToTouchScreenFn switchInput = (SwitchInputDeviceToTouchScreenFn)switchInputDeviceToTouchScreen;
+		__try
+		{
+			switchInput(nullptr);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			// Ignore exceptions
+		}
+	}
 }
 
-void HandleOpenMap() {
-    if (!checkCanOpenMap) {
-        return;
-    }
+void HandleGamepadHotSwitch()
+{
+	if (!gamepadHotSwitchInitialized && g_pEnv->GamepadHotSwitchEnabled)
+	{
+		gamepadHotSwitchInitialized = true;
+		GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+
+		if (!hotSwitch.Initialize())
+		{
+			Log("[GamepadHotSwitch] Failed to initialize");
+			return;
+		}
+
+		hotSwitch.SetEnabled(true);
+
+		InitializeWndProcHooks();
+
+		Log("[GamepadHotSwitch] Initialized and enabled");
+	}
+	else if (gamepadHotSwitchInitialized && !g_pEnv->GamepadHotSwitchEnabled)
+	{
+		GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+		hotSwitch.SetEnabled(false);
+		gamepadHotSwitchInitialized = false;
+		Log("[GamepadHotSwitch] Disabled");
+	}
+
+	if (gamepadHotSwitchInitialized)
+	{
+		GamepadHotSwitch& hotSwitch = GamepadHotSwitch::GetInstance();
+		hotSwitch.SetEnabled(g_pEnv->GamepadHotSwitchEnabled);
+	}
+}
+
+void HandleOpenMap()
+{
+	if (!checkCanOpenMap)
+	{
+		return;
+	}
 
 	unsigned char* patchBytes = (unsigned char*)checkCanOpenMap;
-    if (patchBytes[0] == 0xE8) {
+	if (patchBytes[0] == 0xE8)
+	{
 		originalCheckCanOpenMapBytes[0] = patchBytes[0];
-        originalCheckCanOpenMapBytes[1] = patchBytes[1];
-        originalCheckCanOpenMapBytes[2] = patchBytes[2];
-        originalCheckCanOpenMapBytes[3] = patchBytes[3];
-        originalCheckCanOpenMapBytes[4] = patchBytes[4];
-    }
+		originalCheckCanOpenMapBytes[1] = patchBytes[1];
+		originalCheckCanOpenMapBytes[2] = patchBytes[2];
+		originalCheckCanOpenMapBytes[3] = patchBytes[3];
+		originalCheckCanOpenMapBytes[4] = patchBytes[4];
+	}
 
-	if (g_pEnv->RedirectCombine && !CheckResistInBeyd()) {
-        patchBytes[0] = 0xB8;
-        patchBytes[1] = 0x00;
-        patchBytes[2] = 0x00;
-        patchBytes[3] = 0x00;
-        patchBytes[4] = 0x00;
-    } else {
-        patchBytes[0] = originalCheckCanOpenMapBytes[0];
-        patchBytes[1] = originalCheckCanOpenMapBytes[1];
-        patchBytes[2] = originalCheckCanOpenMapBytes[2];
-        patchBytes[3] = originalCheckCanOpenMapBytes[3];
-        patchBytes[4] = originalCheckCanOpenMapBytes[4];
-    }
+	if (g_pEnv->RedirectCombine && !CheckResistInBeyd())
+	{
+		patchBytes[0] = 0xB8;
+		patchBytes[1] = 0x00;
+		patchBytes[2] = 0x00;
+		patchBytes[3] = 0x00;
+		patchBytes[4] = 0x00;
+	}
+	else
+	{
+		patchBytes[0] = originalCheckCanOpenMapBytes[0];
+		patchBytes[1] = originalCheckCanOpenMapBytes[1];
+		patchBytes[2] = originalCheckCanOpenMapBytes[2];
+		patchBytes[3] = originalCheckCanOpenMapBytes[3];
+		patchBytes[4] = originalCheckCanOpenMapBytes[4];
+	}
 }
 
 void RequestOpenCraft()
 {
-    requestOpenCraft = true;
+	requestOpenCraft = true;
 }
 
 static bool DoOpenCraftMenu()
 {
-    if (!findString || !craftEntryPartner)
-    {
-        return false;
-    }
+	if (!findString || !craftEntryPartner)
+	{
+		return false;
+	}
 
-    FindStringFn findStringFunc = (FindStringFn)findString;
-    CraftEntryPartnerFn craftEntryPartnerFunc = (CraftEntryPartnerFn)craftEntryPartner;
+	FindStringFn findStringFunc = (FindStringFn)findString;
+	CraftEntryPartnerFn craftEntryPartnerFunc = (CraftEntryPartnerFn)craftEntryPartner;
 
-    Il2CppString* strObj = findStringFunc(SYNTHESIS_PAGE_NAME);
+	Il2CppString* strObj = findStringFunc(SYNTHESIS_PAGE_NAME);
 
-    if (strObj)
-    {
-        // Invoke the page opener
-        craftEntryPartnerFunc(strObj, nullptr, nullptr, nullptr, nullptr);
-        return true;
-    }
+	if (strObj)
+	{
+		// Invoke the page opener
+		craftEntryPartnerFunc(strObj, nullptr, nullptr, nullptr, nullptr);
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 static int HookGetFrameCount()
 {
-    if (originalGetFrameCount)
-    {
-        GetFrameCountFn original = (GetFrameCountFn)originalGetFrameCount;
-        int ret = original();
-        if (ret >= 60)
-        {
-            return 60;
-        }
-        else if (ret >= 45)
-        {
-            return 45;
-        }
-        else if (ret >= 30)
-        {
-            return 30;
-        }
-        else
-        {
-            return ret;
-        }
-    }
-    return 60;
+	if (originalGetFrameCount)
+	{
+		GetFrameCountFn original = (GetFrameCountFn)originalGetFrameCount;
+		int ret = original();
+		if (ret >= 60)
+		{
+			return 60;
+		}
+		else if (ret >= 45)
+		{
+			return 45;
+		}
+		else if (ret >= 30)
+		{
+			return 30;
+		}
+		else
+		{
+			return ret;
+		}
+	}
+	return 60;
 }
 
 static int HookSetFov(void* a1, float changeFovValue)
 {
-    bool isResisted = CheckResistInBeyd();
-    if (!gameUpdateInit)
-    {
+	bool isResisted = CheckResistInBeyd();
+	if (!gameUpdateInit)
+	{
 		Cache_Init();
-        gameUpdateInit = true;
-    }
+		gameUpdateInit = true;
+	}
 
-    if (isResisted && !isResistedLastFrame) {
-        MacroDetector::GetInstance().ShowLimitedMessage();
-    }
+	if (isResisted && !isResistedLastFrame)
+	{
+		MacroDetector::GetInstance().ShowLimitedMessage();
+	}
 
-    isResistedLastFrame = isResisted;
+	isResistedLastFrame = isResisted;
 
-    HandleTouchMode();
-    HandleGamepadHotSwitch();
+	HandleTouchMode();
+	HandleGamepadHotSwitch();
 
-    // FOV override
-    if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
-    {
-        changeFovValue = g_pEnv->FieldOfView;
-    }
+	// FOV override
+	if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
+	{
+		changeFovValue = g_pEnv->FieldOfView;
+	}
 
-    // FPS override
-    if (setFrameCount && g_pEnv->EnableSetFps && !isResisted) {
-        SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
-        setFrameCountFunc(g_pEnv->TargetFps);
-    }
+	// FPS override
+	if (setFrameCount && g_pEnv->EnableSetFps && !isResisted)
+	{
+		SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
+		setFrameCountFunc(g_pEnv->TargetFps);
+	}
 
 	// Fog override
-    if (fnDisplayFog)
-    {
-        SetEnableFogRenderingFn setFog = (SetEnableFogRenderingFn)fnDisplayFog;
-        setFog(!g_pEnv->DisableFog);
-    }
+	if (fnDisplayFog)
+	{
+		SetEnableFogRenderingFn setFog = (SetEnableFogRenderingFn)fnDisplayFog;
+		setFog(!g_pEnv->DisableFog);
+	}
 
-    if (originalSetFov)
-    {
-        SetFovFn original = (SetFovFn)originalSetFov;
-        return original(a1, changeFovValue);
-    }
-    return 0;
+	if (originalSetFov)
+	{
+		SetFovFn original = (SetFovFn)originalSetFov;
+		return original(a1, changeFovValue);
+	}
+	return 0;
 }
 
 static void* HookPlayerPerspective(void* rcx, float display, void* r8)
 {
-    if (g_pEnv->DisablePlayerPerspective && !CheckResistInBeyd())
-    {
-        display = 1.0f;
-    }
+	if (g_pEnv->DisablePlayerPerspective && !CheckResistInBeyd())
+	{
+		display = 1.0f;
+	}
 
-    if (originalPlayerPerspective)
-    {
-        PlayerPerspectiveFn original = (PlayerPerspectiveFn)originalPlayerPerspective;
-        return original(rcx, display, r8);
-    }
-    return nullptr;
+	if (originalPlayerPerspective)
+	{
+		PlayerPerspectiveFn original = (PlayerPerspectiveFn)originalPlayerPerspective;
+		return original(rcx, display, r8);
+	}
+	return nullptr;
 }
 
 static void HookSetupQuestBanner(void* pThis)
 {
-    if (findString && findGameObject && setActive)
-    {
-        FindStringFn findStringFunc = (FindStringFn)findString;
-        FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
-        SetActiveFn setActiveFunc = (SetActiveFn)setActive;
+	if (findString && findGameObject && setActive)
+	{
+		FindStringFn findStringFunc = (FindStringFn)findString;
+		FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
+		SetActiveFn setActiveFunc = (SetActiveFn)setActive;
 
-        // Hide Quest Banner Logic
-        if (g_pEnv->HideQuestBanner)
-        {
-            Il2CppString* strObj = findStringFunc(QUEST_BANNER_PATH);
-            if (strObj)
-            {
-                void* banner = findGameObjectFunc(strObj);
-                if (banner)
-                {
-                    setActiveFunc(banner, false);
-                    return;
-                }
-            }
-        }
-    }
+		// Hide Quest Banner Logic
+		if (g_pEnv->HideQuestBanner)
+		{
+			Il2CppString* strObj = findStringFunc(QUEST_BANNER_PATH);
+			if (strObj)
+			{
+				void* banner = findGameObjectFunc(strObj);
+				if (banner)
+				{
+					setActiveFunc(banner, false);
+					return;
+				}
+			}
+		}
+	}
 
-    if (originalSetupQuestBanner)
-    {
-        SetupQuestBannerFn original = (SetupQuestBannerFn)originalSetupQuestBanner;
-        original(pThis);
-    }
+	if (originalSetupQuestBanner)
+	{
+		SetupQuestBannerFn original = (SetupQuestBannerFn)originalSetupQuestBanner;
+		original(pThis);
+	}
 }
 
 static bool HookEventCameraMove(void* pThis, void* event)
 {
-    if (g_pEnv->DisableCameraMove && !CheckResistInBeyd())
-    {
-        return true;
-    }
+	if (g_pEnv->DisableCameraMove && !CheckResistInBeyd())
+	{
+		return true;
+	}
 
-    if (originalEventCameraMove)
-    {
-        EventCameraMoveFn original = (EventCameraMoveFn)originalEventCameraMove;
-        return original(pThis, event);
-    }
-    return true;
+	if (originalEventCameraMove)
+	{
+		EventCameraMoveFn original = (EventCameraMoveFn)originalEventCameraMove;
+		return original(pThis, event);
+	}
+	return true;
 }
 
 static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int showType, float damage, Il2CppString* showText, void* worldPos, void* attackee, int elementReactionType)
 {
-    if (g_pEnv->DisableDamageText && !CheckResistInBeyd())
-    {
-        return;
-    }
+	if (g_pEnv->DisableDamageText && !CheckResistInBeyd())
+	{
+		return;
+	}
 
-    if (originalShowOneDamageTextEx)
-    {
-        ShowOneDamageTextExFn original = (ShowOneDamageTextExFn)originalShowOneDamageTextEx;
-        original(pThis, type_, damageType, showType, damage, showText, worldPos, attackee, elementReactionType);
-    }
+	if (originalShowOneDamageTextEx)
+	{
+		ShowOneDamageTextExFn original = (ShowOneDamageTextExFn)originalShowOneDamageTextEx;
+		original(pThis, type_, damageType, showType, damage, showText, worldPos, attackee, elementReactionType);
+	}
 }
 
 static void HookCraftEntry(void* pThis)
 {
-    // If redirect is enabled AND we successfully opened the menu via our helper
-    if (g_pEnv->RedirectCombine && DoOpenCraftMenu() && !CheckResistInBeyd())
-    {
-        // Return early, skipping the original tedious dialog
-        return;
-    }
+	// If redirect is enabled AND we successfully opened the menu via our helper
+	if (g_pEnv->RedirectCombine && DoOpenCraftMenu() && !CheckResistInBeyd())
+	{
+		// Return early, skipping the original tedious dialog
+		return;
+	}
 
-    if (originalCraftEntry)
-    {
-        CraftEntryFn original = (CraftEntryFn)originalCraftEntry;
-        original(pThis);
-    }
+	if (originalCraftEntry)
+	{
+		CraftEntryFn original = (CraftEntryFn)originalCraftEntry;
+		original(pThis);
+	}
 }
 
 static void HookOpenTeam()
 {
-    if (g_pEnv->RemoveTeamProgress && checkCanEnter && !CheckResistInBeyd())
-    {
-        CheckCanEnterFn checkCanEnterFunc = (CheckCanEnterFn)checkCanEnter;
-        if (checkCanEnterFunc())
-        {
-            if (openTeamPageAccordingly)
-            {
-                OpenTeamPageAccordinglyFn openTeamPageFunc = (OpenTeamPageAccordinglyFn)openTeamPageAccordingly;
-                openTeamPageFunc(false);
-                return;
-            }
-        }
-    }
+	if (g_pEnv->RemoveTeamProgress && checkCanEnter && !CheckResistInBeyd())
+	{
+		CheckCanEnterFn checkCanEnterFunc = (CheckCanEnterFn)checkCanEnter;
+		if (checkCanEnterFunc())
+		{
+			if (openTeamPageAccordingly)
+			{
+				OpenTeamPageAccordinglyFn openTeamPageFunc = (OpenTeamPageAccordinglyFn)openTeamPageAccordingly;
+				openTeamPageFunc(false);
+				return;
+			}
+		}
+	}
 
-    if (originalOpenTeam)
-    {
-        OpenTeamFn original = (OpenTeamFn)originalOpenTeam;
-        original();
-    }
+	if (originalOpenTeam)
+	{
+		OpenTeamFn original = (OpenTeamFn)originalOpenTeam;
+		original();
+	}
 }
 
 static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
 {
-    monoInLevelPlayerProfilePageV3 = pThis;
+	monoInLevelPlayerProfilePageV3 = pThis;
 
-    CtorFn original = (CtorFn)originalMonoInLevelPlayerProfilePageV3Ctor;
-    original(pThis);
+	CtorFn original = (CtorFn)originalMonoInLevelPlayerProfilePageV3Ctor;
+	original(pThis);
 }
 
-static void HookActorManagerCtor(void* pThis) {
-    CtorFn original = (CtorFn)originalActorManagerCtor;
+static void HookActorManagerCtor(void* pThis)
+{
+	CtorFn original = (CtorFn)originalActorManagerCtor;
 
-    actorManager = pThis;
+	actorManager = pThis;
 
-    original(pThis);
+	original(pThis);
 }
 
-static void HookSetUID(void* pThis, uint32_t uid) {
-    g_pEnv->Uid = uid;
-    SetUidFn original = (SetUidFn)originalSetUID;
+static void HookSetUID(void* pThis, uint32_t uid)
+{
+	g_pEnv->Uid = uid;
+	SetUidFn original = (SetUidFn)originalSetUID;
 	original(pThis, uid);
 }
 
-static void HookSetActive(void* pThis, bool active) {
-	if (g_pEnv->HideGrass && !CheckResistInBeyd() && active && getName) {
-    GetNameFn getNameFunc = (GetNameFn)getName;
+static void HookSetActive(void* pThis, bool active)
+{
+	if (g_pEnv->HideGrass && !CheckResistInBeyd() && active && getName)
+	{
+		GetNameFn getNameFunc = (GetNameFn)getName;
 		Il2CppString* name = getNameFunc(pThis);
-		if (name) {
-			if (wcsstr(name->chars, L"_Grass_")) {
-                for (std::wstring prefix : GrassPrefix) {
-                    if (wcsstr(name->chars, prefix.c_str())) {
-                        Log(name);
-                        return;
-                    }
-                }
-            }
-        }
-    }
+		if (name)
+		{
+			if (wcsstr(name->chars, L"_Grass_"))
+			{
+				for (std::wstring prefix : GrassPrefix)
+				{
+					if (wcsstr(name->chars, prefix.c_str()))
+					{
+						Log(name);
+						return;
+					}
+				}
+			}
+		}
+	}
 
-    pass:
+pass:
 	SetActiveFn original = (SetActiveFn)originalSetActive;
-    original(pThis, active);
+	original(pThis, active);
 }
 
-static void HookSetupResinList(void* pThis) {
-    SetupResinListFn original = (SetupResinListFn)originalSetupResinList;
-    original(pThis);
+static void HookSetupResinList(void* pThis)
+{
+	SetupResinListFn original = (SetupResinListFn)originalSetupResinList;
+	original(pThis);
 
-    Il2CppList<ULONG64>* resinList = *(Il2CppList<ULONG64>**)((intptr_t)pThis + g_pEnv->Offsets.ResinList);
-    std::vector<ULONG64> toRemove(5);
+	Il2CppList<ULONG64>* resinList = *(Il2CppList<ULONG64>**)((intptr_t)pThis + g_pEnv->Offsets.ResinList);
+	std::vector<ULONG64> toRemove(5);
 
-    for (int i = 0; i < resinList->Count(); i++) {
-        ULONG64 item = resinList->Get(i);
-        Log("item=" + std::to_string(item) + ";len=" + std::to_string(resinList->Count()));
+	for (int i = 0; i < resinList->Count(); i++)
+	{
+		ULONG64 item = resinList->Get(i);
+		Log("item=" + std::to_string(item) + ";len=" + std::to_string(resinList->Count()));
 
-        UINT32 hight = (UINT32)(item >> 32);
-        UINT32 low = (UINT32)(item & 0xFFFFFFFF);
+		UINT32 hight = (UINT32)(item >> 32);
+		UINT32 low = (UINT32)(item & 0xFFFFFFFF);
 
-        if ((hight == 106 || low == 106) && !g_pEnv->ResinItem000106
-            || (hight == 201 || low == 201) && !g_pEnv->ResinItem000201
-            || (hight == 107009 || low == 107009) && !g_pEnv->ResinItem107009
-            || (hight == 107012 || low == 107012) && !g_pEnv->ResinItem107012
-            || (hight == 220007 || low == 220007) && !g_pEnv->ResinItem220007)
-        {
-            toRemove.push_back(item);
-        }
-    }
+		if ((hight == 106 || low == 106) && !g_pEnv->ResinItem000106
+			|| (hight == 201 || low == 201) && !g_pEnv->ResinItem000201
+			|| (hight == 107009 || low == 107009) && !g_pEnv->ResinItem107009
+			|| (hight == 107012 || low == 107012) && !g_pEnv->ResinItem107012
+			|| (hight == 220007 || low == 220007) && !g_pEnv->ResinItem220007)
+		{
+			toRemove.push_back(item);
+		}
+	}
 
-    for (ULONG64 item : toRemove) {
-        if (item == 0) continue;
-        resinList->Remove(item);
-        Log(std::to_string(item) + " was Removed");
-    }
+	for (ULONG64 item : toRemove)
+	{
+		if (item == 0) continue;
+		resinList->Remove(item);
+		Log(std::to_string(item) + " was Removed");
+	}
 }
 
-static void HookInLevelClockPageOkButtonClicked(void* pThis) {
-    ButtonClickedFn original = (ButtonClickedFn)originalInLevelClockPageOkButtonClicked;
+static void HookInLevelClockPageOkButtonClicked(void* pThis)
+{
+	ButtonClickedFn original = (ButtonClickedFn)originalInLevelClockPageOkButtonClicked;
 
-    if (g_pEnv->EnableInLevelClockPageSpeedUp && inLevelClockPageCloseButtonClicked) {
-        ButtonClickedFn inLevelClockPageCloseButtonClickedFunc = (ButtonClickedFn)inLevelClockPageCloseButtonClicked;
-        Log("InLevelClockPage Speed Up");
-        inLevelClockPageCloseButtonClickedFunc(pThis);
-    }
+	if (g_pEnv->EnableInLevelClockPageSpeedUp && inLevelClockPageCloseButtonClicked)
+	{
+		ButtonClickedFn inLevelClockPageCloseButtonClickedFunc = (ButtonClickedFn)inLevelClockPageCloseButtonClicked;
+		Log("InLevelClockPage Speed Up");
+		inLevelClockPageCloseButtonClickedFunc(pThis);
+	}
 
-    original(pThis);
+	original(pThis);
 }
 
 static void HookGameUpdate(void* pThis)
 {
-    if (!macroDetectorInitialized)
-    {
-        MacroDetector::GetInstance().Initialize();
-        macroDetectorInitialized = true;
-        Log("[MacroDetector] Initialized on first GameUpdate");
-    }
-    
-    static ULONGLONG lastExecutionTime = 0;
-    ULONGLONG currentTime = GetTickCount64();
-    
-    if (currentTime - lastExecutionTime >= 500)
-    {
-        lastExecutionTime = currentTime;
-        HandlePaimonV2();
-        HandleOpenMap();
-        CacheResistState();
-        
-        if (gamepadHotSwitchInitialized)
-        {
-            HandleGamepadHotSwitch();
-        }
-    }
+	if (!macroDetectorInitialized)
+	{
+		MacroDetector::GetInstance().Initialize();
+		macroDetectorInitialized = true;
+		Log("[MacroDetector] Initialized on first GameUpdate");
+	}
 
-    HandlePlayerInfo();
+	static ULONGLONG lastExecutionTime = 0;
+	ULONGLONG currentTime = GetTickCount64();
 
-    if (requestOpenCraft)
-    {
-        requestOpenCraft = false;
-        DoOpenCraftMenu();
-    }
+	if (currentTime - lastExecutionTime >= 500)
+	{
+		lastExecutionTime = currentTime;
+		HandlePaimonV2();
+		HandleOpenMap();
+		CacheResistState();
 
-    UpdateFn original = (UpdateFn)originalGameUpdate;
-    original(pThis);
+		if (gamepadHotSwitchInitialized)
+		{
+			HandleGamepadHotSwitch();
+		}
+	}
+
+	HandlePlayerInfo();
+
+	if (requestOpenCraft)
+	{
+		requestOpenCraft = false;
+		DoOpenCraftMenu();
+	}
+
+	UpdateFn original = (UpdateFn)originalGameUpdate;
+	original(pThis);
 }
 
 void SetupHooks()
 {
-    // Choose which offsets to use based on ProvideOffsets flag
-    HookFunctionOffsets* offsets = &g_pEnv->Offsets;
-    if (!g_pEnv->ProvideOffsets) {
-        if (!g_pEnv->IsOversea) {
-            offsets = &g_ChinaOffsets;
-        }
-        else {
-            offsets = &g_OverseaOffsets;
-        }
-    }
+	// Choose which offsets to use based on ProvideOffsets flag
+	HookFunctionOffsets* offsets = &g_pEnv->Offsets;
+	if (!g_pEnv->ProvideOffsets)
+	{
+		if (!g_pEnv->IsOversea)
+		{
+			offsets = &g_ChinaOffsets;
+		}
+		else
+		{
+			offsets = &g_OverseaOffsets;
+		}
+	}
 
-    g_pEnv->Offsets = *offsets;
+	g_pEnv->Offsets = *offsets;
 
-    if (offsets->GetFps)
-    {
-        LPVOID getFrameCountAddr = GetFunctionAddress(offsets->GetFps);
-        if (getFrameCountAddr)
-        {
-            MH_CreateHook(getFrameCountAddr, HookGetFrameCount, &originalGetFrameCount);
-        }
-    }
+	if (offsets->GetFps)
+	{
+		LPVOID getFrameCountAddr = GetFunctionAddress(offsets->GetFps);
+		if (getFrameCountAddr)
+		{
+			MH_CreateHook(getFrameCountAddr, HookGetFrameCount, &originalGetFrameCount);
+		}
+	}
 
-    if (offsets->SetFps)
-    {
-        setFrameCount = GetFunctionAddress(offsets->SetFps);
-    }
+	if (offsets->SetFps)
+	{
+		setFrameCount = GetFunctionAddress(offsets->SetFps);
+	}
 
-    if (offsets->SetFov)
-    {
-        LPVOID changeFovAddr = GetFunctionAddress(offsets->SetFov);
-        if (changeFovAddr)
-        {
-            MH_CreateHook(changeFovAddr, HookSetFov, &originalSetFov);
-        }
-    }
+	if (offsets->SetFov)
+	{
+		LPVOID changeFovAddr = GetFunctionAddress(offsets->SetFov);
+		if (changeFovAddr)
+		{
+			MH_CreateHook(changeFovAddr, HookSetFov, &originalSetFov);
+		}
+	}
 
-    if (offsets->TouchInput)
-    {
-        switchInputDeviceToTouchScreen = GetFunctionAddress(offsets->TouchInput);
-    }
+	if (offsets->TouchInput)
+	{
+		switchInputDeviceToTouchScreen = GetFunctionAddress(offsets->TouchInput);
+	}
 
-    if (offsets->KeyboardMouseInput)
-    {
-        switchInputDeviceToKeboardMouse = GetFunctionAddress(offsets->KeyboardMouseInput);
-    }
+	if (offsets->KeyboardMouseInput)
+	{
+		switchInputDeviceToKeboardMouse = GetFunctionAddress(offsets->KeyboardMouseInput);
+	}
 
-    if (offsets->JoypadInput)
-    {
-        switchInputDeviceToJoypad = GetFunctionAddress(offsets->JoypadInput);
-    }
+	if (offsets->JoypadInput)
+	{
+		switchInputDeviceToJoypad = GetFunctionAddress(offsets->JoypadInput);
+	}
 
-    if (offsets->QuestBanner)
-    {
-        LPVOID setupQuestBannerAddr = GetFunctionAddress(offsets->QuestBanner);
-        if (setupQuestBannerAddr)
-        {
-            MH_CreateHook(setupQuestBannerAddr, HookSetupQuestBanner, &originalSetupQuestBanner);
-        }
-    }
+	if (offsets->QuestBanner)
+	{
+		LPVOID setupQuestBannerAddr = GetFunctionAddress(offsets->QuestBanner);
+		if (setupQuestBannerAddr)
+		{
+			MH_CreateHook(setupQuestBannerAddr, HookSetupQuestBanner, &originalSetupQuestBanner);
+		}
+	}
 
-    if (offsets->FindObject)
-    {
-        findGameObject = GetFunctionAddress(offsets->FindObject);
-    }
+	if (offsets->FindObject)
+	{
+		findGameObject = GetFunctionAddress(offsets->FindObject);
+	}
 
-    if (offsets->ObjectActive)
-    {
-        setActive = GetFunctionAddress(offsets->ObjectActive);
-        if (setActive)
-        {
-            MH_CreateHook(setActive, HookSetActive, &originalSetActive);
-        }
-    }
+	if (offsets->ObjectActive)
+	{
+		setActive = GetFunctionAddress(offsets->ObjectActive);
+		if (setActive)
+		{
+			MH_CreateHook(setActive, HookSetActive, &originalSetActive);
+		}
+	}
 
-    if (offsets->CameraMove)
-    {
-        LPVOID eventCameraMoveAddr = GetFunctionAddress(offsets->CameraMove);
-        if (eventCameraMoveAddr)
-        {
-            MH_CreateHook(eventCameraMoveAddr, HookEventCameraMove, &originalEventCameraMove);
-        }
-    }
+	if (offsets->CameraMove)
+	{
+		LPVOID eventCameraMoveAddr = GetFunctionAddress(offsets->CameraMove);
+		if (eventCameraMoveAddr)
+		{
+			MH_CreateHook(eventCameraMoveAddr, HookEventCameraMove, &originalEventCameraMove);
+		}
+	}
 
-    if (offsets->DamageText)
-    {
-        LPVOID showOneDamageTextExAddr = GetFunctionAddress(offsets->DamageText);
-        if (showOneDamageTextExAddr)
-        {
-            MH_CreateHook(showOneDamageTextExAddr, HookShowOneDamageTextEx, &originalShowOneDamageTextEx);
-        }
-    }
+	if (offsets->DamageText)
+	{
+		LPVOID showOneDamageTextExAddr = GetFunctionAddress(offsets->DamageText);
+		if (showOneDamageTextExAddr)
+		{
+			MH_CreateHook(showOneDamageTextExAddr, HookShowOneDamageTextEx, &originalShowOneDamageTextEx);
+		}
+	}
 
-    if (offsets->SetFog)
-    {
-        fnDisplayFog = GetFunctionAddress(offsets->SetFog);
-    }
+	if (offsets->SetFog)
+	{
+		fnDisplayFog = GetFunctionAddress(offsets->SetFog);
+	}
 
-    if (offsets->PlayerPerspective)
-    {
-        LPVOID playerPerspectiveAddr = GetFunctionAddress(offsets->PlayerPerspective);
-        if (playerPerspectiveAddr)
-        {
-            MH_CreateHook(playerPerspectiveAddr, HookPlayerPerspective, &originalPlayerPerspective);
-        }
-    }
+	if (offsets->PlayerPerspective)
+	{
+		LPVOID playerPerspectiveAddr = GetFunctionAddress(offsets->PlayerPerspective);
+		if (playerPerspectiveAddr)
+		{
+			MH_CreateHook(playerPerspectiveAddr, HookPlayerPerspective, &originalPlayerPerspective);
+		}
+	}
 
-    if (offsets->FindString)
-    {
-        findString = GetFunctionAddress(offsets->FindString);
-    }
+	if (offsets->FindString)
+	{
+		findString = GetFunctionAddress(offsets->FindString);
+	}
 
-    if (offsets->CombineEntryPartner)
-    {
-        craftEntryPartner = GetFunctionAddress(offsets->CombineEntryPartner);
-    }
+	if (offsets->CombineEntryPartner)
+	{
+		craftEntryPartner = GetFunctionAddress(offsets->CombineEntryPartner);
+	}
 
-    if (offsets->CombineEntry)
-    {
-        LPVOID craftEntryAddr = GetFunctionAddress(offsets->CombineEntry);
-        if (craftEntryAddr)
-        {
-            MH_CreateHook(craftEntryAddr, HookCraftEntry, &originalCraftEntry);
-        }
-    }
+	if (offsets->CombineEntry)
+	{
+		LPVOID craftEntryAddr = GetFunctionAddress(offsets->CombineEntry);
+		if (craftEntryAddr)
+		{
+			MH_CreateHook(craftEntryAddr, HookCraftEntry, &originalCraftEntry);
+		}
+	}
 
-    if (offsets->CheckEnter)
-    {
-        checkCanEnter = GetFunctionAddress(offsets->CheckEnter);
-    }
+	if (offsets->CheckEnter)
+	{
+		checkCanEnter = GetFunctionAddress(offsets->CheckEnter);
+	}
 
-    if (offsets->OpenTeamAdvanced)
-    {
-        openTeamPageAccordingly = GetFunctionAddress(offsets->OpenTeamAdvanced);
-    }
+	if (offsets->OpenTeamAdvanced)
+	{
+		openTeamPageAccordingly = GetFunctionAddress(offsets->OpenTeamAdvanced);
+	}
 
-    if (offsets->OpenTeam)
-    {
-        LPVOID openTeamAddr = GetFunctionAddress(offsets->OpenTeam);
-        if (openTeamAddr)
-        {
-            MH_CreateHook(openTeamAddr, HookOpenTeam, &originalOpenTeam);
-        }
-    }
+	if (offsets->OpenTeam)
+	{
+		LPVOID openTeamAddr = GetFunctionAddress(offsets->OpenTeam);
+		if (openTeamAddr)
+		{
+			MH_CreateHook(openTeamAddr, HookOpenTeam, &originalOpenTeam);
+		}
+	}
 
-    if (offsets->IsObjectActive)
-    {
-        getActive = GetFunctionAddress(offsets->IsObjectActive);
-    }
+	if (offsets->IsObjectActive)
+	{
+		getActive = GetFunctionAddress(offsets->IsObjectActive);
+	}
 
-    if (offsets->GameUpdate)
-    {
-        LPVOID gameUpdateAddr = GetFunctionAddress(offsets->GameUpdate);
-        if (gameUpdateAddr)
-        {
-            MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
-        }
-    }
+	if (offsets->GameUpdate)
+	{
+		LPVOID gameUpdateAddr = GetFunctionAddress(offsets->GameUpdate);
+		if (gameUpdateAddr)
+		{
+			MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
+		}
+	}
 
-    if (offsets->GetPlayerID)
-    {
-        getPlayerID = GetFunctionAddress(offsets->GetPlayerID);
-    }
+	if (offsets->GetPlayerID)
+	{
+		getPlayerID = GetFunctionAddress(offsets->GetPlayerID);
+	}
 
-    if (offsets->SetText) {
-        setText = GetFunctionAddress(offsets->SetText);
-    }
+	if (offsets->SetText)
+	{
+		setText = GetFunctionAddress(offsets->SetText);
+	}
 
-    if (offsets->MonoInLevelPlayerProfilePageV3Ctor) {
-        LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(offsets->MonoInLevelPlayerProfilePageV3Ctor);
-        if (monoInLevelPlayerProfilePageV3Addr) {
-            MH_CreateHook(monoInLevelPlayerProfilePageV3Addr, HookMonoInLevelPlayerProfilePageV3Ctor, &originalMonoInLevelPlayerProfilePageV3Ctor);
-        }
-    }
+	if (offsets->MonoInLevelPlayerProfilePageV3Ctor)
+	{
+		LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(offsets->MonoInLevelPlayerProfilePageV3Ctor);
+		if (monoInLevelPlayerProfilePageV3Addr)
+		{
+			MH_CreateHook(monoInLevelPlayerProfilePageV3Addr, HookMonoInLevelPlayerProfilePageV3Ctor, &originalMonoInLevelPlayerProfilePageV3Ctor);
+		}
+	}
 
-    if (offsets->GetPlayerName)
-    {
-        getPlayerName = GetFunctionAddress(offsets->GetPlayerName);
-    }
+	if (offsets->GetPlayerName)
+	{
+		getPlayerName = GetFunctionAddress(offsets->GetPlayerName);
+	}
 
-    if (offsets->ActorManagerCtor)
-    {
-        LPVOID actorManagerCtorAddr = GetFunctionAddress(offsets->ActorManagerCtor);
-        if (actorManagerCtorAddr)
-        {
-            MH_CreateHook(actorManagerCtorAddr, HookActorManagerCtor, &originalActorManagerCtor);
-        }
-    }
+	if (offsets->ActorManagerCtor)
+	{
+		LPVOID actorManagerCtorAddr = GetFunctionAddress(offsets->ActorManagerCtor);
+		if (actorManagerCtorAddr)
+		{
+			MH_CreateHook(actorManagerCtorAddr, HookActorManagerCtor, &originalActorManagerCtor);
+		}
+	}
 
-    if (offsets->GetGlobalActor)
-    {
-        getGlobalActor = GetFunctionAddress(offsets->GetGlobalActor);
-    }
+	if (offsets->GetGlobalActor)
+	{
+		getGlobalActor = GetFunctionAddress(offsets->GetGlobalActor);
+	}
 
 
-    if (offsets->AvatarPaimonAppear)
-    {
-        avatarPaimonAppear = GetFunctionAddress(offsets->AvatarPaimonAppear);
-    }
+	if (offsets->AvatarPaimonAppear)
+	{
+		avatarPaimonAppear = GetFunctionAddress(offsets->AvatarPaimonAppear);
+	}
 
-    if (offsets->SetUid)
-    {
-        LPVOID setUIDAddr = GetFunctionAddress(offsets->SetUid);
-        if (setUIDAddr)
-        {
-            MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
-        }
-    }
+	if (offsets->SetUid)
+	{
+		LPVOID setUIDAddr = GetFunctionAddress(offsets->SetUid);
+		if (setUIDAddr)
+		{
+			MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
+		}
+	}
 
-    if (offsets->GetComponent)
-    {
-        getComponent = GetFunctionAddress(offsets->GetComponent);
-    }
+	if (offsets->GetComponent)
+	{
+		getComponent = GetFunctionAddress(offsets->GetComponent);
+	}
 
-    if (offsets->GetText)
-    {
-        getText = GetFunctionAddress(offsets->GetText);
-    }
+	if (offsets->GetText)
+	{
+		getText = GetFunctionAddress(offsets->GetText);
+	}
 
-    if (offsets->GetName)
-    {
-        getName = GetFunctionAddress(offsets->GetName);
-    }
+	if (offsets->GetName)
+	{
+		getName = GetFunctionAddress(offsets->GetName);
+	}
 
-    if (offsets->CheckCanOpenMap)
-    {
-        checkCanOpenMap = GetFunctionAddress(offsets->CheckCanOpenMap);
+	if (offsets->CheckCanOpenMap)
+	{
+		checkCanOpenMap = GetFunctionAddress(offsets->CheckCanOpenMap);
 		DWORD oldProtect;
-        VirtualProtect(checkCanOpenMap, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
-    }
+		VirtualProtect(checkCanOpenMap, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
+	}
 
-    if (offsets->SetupResinList) {
-        LPVOID setupResinListAddr = GetFunctionAddress(offsets->SetupResinList);
-        if (setupResinListAddr)
-        {
-            MH_CreateHook(setupResinListAddr, HookSetupResinList, &originalSetupResinList);
-        }
-    }
+	if (offsets->SetupResinList)
+	{
+		LPVOID setupResinListAddr = GetFunctionAddress(offsets->SetupResinList);
+		if (setupResinListAddr)
+		{
+			MH_CreateHook(setupResinListAddr, HookSetupResinList, &originalSetupResinList);
+		}
+	}
 
-    if (offsets->InLevelClockPageOkButtonClicked) {
-        LPVOID inLevelClockPageOkButtonClickedAddr = GetFunctionAddress(offsets->InLevelClockPageOkButtonClicked);
-        if (inLevelClockPageOkButtonClickedAddr)
-        {
-            MH_CreateHook(inLevelClockPageOkButtonClickedAddr, HookInLevelClockPageOkButtonClicked, &originalInLevelClockPageOkButtonClicked);
-        }
-    }
+	if (offsets->InLevelClockPageOkButtonClicked)
+	{
+		LPVOID inLevelClockPageOkButtonClickedAddr = GetFunctionAddress(offsets->InLevelClockPageOkButtonClicked);
+		if (inLevelClockPageOkButtonClickedAddr)
+		{
+			MH_CreateHook(inLevelClockPageOkButtonClickedAddr, HookInLevelClockPageOkButtonClicked, &originalInLevelClockPageOkButtonClicked);
+		}
+	}
 
-    if (offsets->InLevelClockPageCloseButtonClicked)
-    {
-        inLevelClockPageCloseButtonClicked = GetFunctionAddress(offsets->InLevelClockPageCloseButtonClicked);
-    }
+	if (offsets->InLevelClockPageCloseButtonClicked)
+	{
+		inLevelClockPageCloseButtonClicked = GetFunctionAddress(offsets->InLevelClockPageCloseButtonClicked);
+	}
 }

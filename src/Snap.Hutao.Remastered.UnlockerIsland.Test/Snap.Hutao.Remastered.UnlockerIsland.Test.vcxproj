@@ -86,12 +86,16 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">RequireAdministrator</UACExecutionLevel>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -106,6 +110,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

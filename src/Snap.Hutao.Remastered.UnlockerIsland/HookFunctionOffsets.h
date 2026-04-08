@@ -1,55 +1,55 @@
-#pragma once
+﻿#pragma once
 
 #include <Windows.h>
 
 struct HookFunctionOffsets
 {
-    DWORD SetUid;
-    DWORD SetFov;
-    DWORD SetFog;
-    DWORD GetFps;
-    DWORD SetFps;
-    
-    DWORD OpenTeam;
-    DWORD OpenTeamAdvanced;
-    DWORD CheckEnter;
-    
-    DWORD QuestBanner;
-    DWORD FindObject;
-    DWORD ObjectActive;
-    
-    DWORD CameraMove;
-    DWORD DamageText;
-    DWORD TouchInput;
-	DWORD KeyboardMouseInput;
-    DWORD JoypadInput;
-    
-    DWORD CombineEntry;
-    DWORD CombineEntryPartner;
-    
-    DWORD SetupResinList;
-    DWORD ResinList;
-    
-    DWORD FindString;
-    DWORD PlayerPerspective;
+	DWORD SetUid;
+	DWORD SetFov;
+	DWORD SetFog;
+	DWORD GetFps;
+	DWORD SetFps;
 
-    DWORD IsObjectActive;
+	DWORD OpenTeam;
+	DWORD OpenTeamAdvanced;
+	DWORD CheckEnter;
+
+	DWORD QuestBanner;
+	DWORD FindObject;
+	DWORD ObjectActive;
+
+	DWORD CameraMove;
+	DWORD DamageText;
+	DWORD TouchInput;
+	DWORD KeyboardMouseInput;
+	DWORD JoypadInput;
+
+	DWORD CombineEntry;
+	DWORD CombineEntryPartner;
+
+	DWORD SetupResinList;
+	DWORD ResinList;
+
+	DWORD FindString;
+	DWORD PlayerPerspective;
+
+	DWORD IsObjectActive;
 	DWORD GameUpdate;
-    DWORD GetPlayerID;
-    DWORD SetText;
-    DWORD MonoInLevelPlayerProfilePageV3Ctor;
-    DWORD GetPlayerName;
-    DWORD ActorManagerCtor;
-    DWORD GetGlobalActor;
-    DWORD AvatarPaimonAppear;
+	DWORD GetPlayerID;
+	DWORD SetText;
+	DWORD MonoInLevelPlayerProfilePageV3Ctor;
+	DWORD GetPlayerName;
+	DWORD ActorManagerCtor;
+	DWORD GetGlobalActor;
+	DWORD AvatarPaimonAppear;
 
 	DWORD GetComponent;
-    DWORD GetText;
+	DWORD GetText;
 
-    DWORD GetName;
+	DWORD GetName;
 
-    DWORD CheckCanOpenMap;
+	DWORD CheckCanOpenMap;
 
-    DWORD InLevelClockPageOkButtonClicked;
-    DWORD InLevelClockPageCloseButtonClicked;
+	DWORD InLevelClockPageOkButtonClicked;
+	DWORD InLevelClockPageCloseButtonClicked;
 };

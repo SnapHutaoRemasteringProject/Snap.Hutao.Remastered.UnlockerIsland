@@ -1,8 +1,9 @@
-#include "MemoryUtils.h"
+﻿#include "MemoryUtils.h"
 
 VoidFunc GetFunctionAddress(DWORD offset)
 {
-	if (g_hModule == NULL) {
+	if (g_hModule == NULL)
+	{
 		InitializeModuleHandle();
 	}
 
@@ -11,7 +12,8 @@ VoidFunc GetFunctionAddress(DWORD offset)
 
 INT64 GetVirtualAddress(INT64 realAddress)
 {
-	if (g_hModule == NULL) {
+	if (g_hModule == NULL)
+	{
 		InitializeModuleHandle();
 	}
 
@@ -21,7 +23,8 @@ INT64 GetVirtualAddress(INT64 realAddress)
 void InitializeModuleHandle()
 {
 	g_hModule = GetModuleHandleW(L"YuanShen.exe");
-	if (g_hModule == NULL) {
+	if (g_hModule == NULL)
+	{
 		g_hModule = GetModuleHandleW(L"GenshinImpact.exe");
 	}
 }

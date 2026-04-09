@@ -35,10 +35,10 @@ struct HookFunctionOffsets
 
 	DWORD IsObjectActive;
 	DWORD GameUpdate;
-	DWORD GetPlayerID;
-	DWORD SetText;
-	DWORD MonoInLevelPlayerProfilePageV3Ctor;
-	DWORD GetPlayerName;
+	DWORD Reserved1;
+	DWORD Reserved2;
+	DWORD Reserved3;
+	DWORD Reserved4;
 	DWORD ActorManagerCtor;
 	DWORD GetGlobalActor;
 	DWORD AvatarPaimonAppear;

@@ -34,10 +34,10 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* PlayerPerspective */ 0xD0F91E0,
 	/* IsObjectActive */ 0x10B7CD0,
 	/* GameUpdate */ 0x164B9860,
-	/* GetPlayerID */ 0,
-	/* SetText */ 0,
-	/* MonoInLevelPlayerProfilePageV3Ctor */ 0,
-	/* GetPlayerName */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
 	/* ActorManagerCtor */ 0xDEFBD30,
 	/* GetGlobalActor */ 0,
 	/* AvatarPaimonAppear */ 0,
@@ -74,10 +74,10 @@ static HookFunctionOffsets g_OverseaOffsets = {
 	/* PlayerPerspective */ 0,
 	/* IsObjectActive */ 0,
 	/* GameUpdate */ 0,
-	/* GetPlayerID */ 0,
-	/* SetText */ 0,
-	/* MonoInLevelPlayerProfilePageV3Ctor */ 0,
-	/* GetPlayerName */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
+	/* Reserved */ 0,
 	/* ActorManagerCtor */ 0,
 	/* GetGlobalActor */ 0,
 	/* AvatarPaimonAppear */ 0,
@@ -142,13 +142,6 @@ static bool gamepadHotSwitchInitialized = false;
 
 // Paimon Display
 LPVOID getActive = nullptr;
-
-// Hide PlayerProfile
-LPVOID getPlayerID = nullptr;
-LPVOID setText = nullptr;
-static void* monoInLevelPlayerProfilePageV3 = nullptr;
-static LPVOID originalMonoInLevelPlayerProfilePageV3Ctor = nullptr;
-LPVOID getPlayerName = nullptr;
 
 // Paimon Display
 static LPVOID originalActorManagerCtor = nullptr;
@@ -317,7 +310,7 @@ void HandlePlayerInfo()
 		return;
 	}
 
-	if (!findString || !findGameObject || !setActive || !getActive || !setText || !getPlayerName)
+	if (!findString || !findGameObject || !setActive || !getActive)
 	{
 		return;
 	}
@@ -326,8 +319,6 @@ void HandlePlayerInfo()
 	FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
 	SetActiveFn setActiveFunc = (SetActiveFn)setActive;
 	GetActiveFn getActiveFunc = (GetActiveFn)getActive;
-	SetTextFn setTextFunc = (SetTextFn)setText;
-	GetPlayerNameFn getPlayerNameFunc = (GetPlayerNameFn)getPlayerName;
 
 	Il2CppString* uidStrObj = findStringFunc(UID_PATH);
 	if (uidStrObj)
@@ -341,35 +332,17 @@ void HandlePlayerInfo()
 
 	// Hide Player Profile UID
 
-	Il2CppString* profileLayerStrObj = findStringFunc(PROFILE_LAYER_PATH);
-	if (!profileLayerStrObj)
+	Il2CppString* profileUidStrObj = findStringFunc(PROFILE_UID_PATH);
+	if (profileUidStrObj)
 	{
-		return;
-	}
-	void* profileLayerObj = findGameObjectFunc(profileLayerStrObj);
-	if (!profileLayerObj || !getPlayerID)
-	{
-		return;
-	}
-
-	if (!getActiveFunc(profileLayerObj))
-	{
-		return;
+		void* profileUidObj = findGameObjectFunc(profileUidStrObj);
+		if (profileUidObj)
+		{
+			setActiveFunc(profileUidObj, false);
+		}
 	}
 
-	GetPlayerIDFn getPlayerIDFunc = (GetPlayerIDFn)getPlayerID;
-	void* playerIDText = getPlayerIDFunc(monoInLevelPlayerProfilePageV3);
-	void* playerNameText = getPlayerNameFunc(monoInLevelPlayerProfilePageV3);
-
-	if (playerIDText)
-	{
-		setTextFunc(playerIDText, nullptr);
-	}
-
-	if (playerNameText)
-	{
-		setTextFunc(playerNameText, nullptr);
-	}
+	// TODO: Hide Player Name in Profile Page
 }
 
 void HandleTouchMode()
@@ -672,14 +645,6 @@ static void HookOpenTeam()
 	}
 }
 
-static void HookMonoInLevelPlayerProfilePageV3Ctor(void* pThis)
-{
-	monoInLevelPlayerProfilePageV3 = pThis;
-
-	CtorFn original = (CtorFn)originalMonoInLevelPlayerProfilePageV3Ctor;
-	original(pThis);
-}
-
 static void HookActorManagerCtor(void* pThis)
 {
 	CtorFn original = (CtorFn)originalActorManagerCtor;
@@ -969,30 +934,6 @@ void SetupHooks()
 		{
 			MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
 		}
-	}
-
-	if (offsets->GetPlayerID)
-	{
-		getPlayerID = GetFunctionAddress(offsets->GetPlayerID);
-	}
-
-	if (offsets->SetText)
-	{
-		setText = GetFunctionAddress(offsets->SetText);
-	}
-
-	if (offsets->MonoInLevelPlayerProfilePageV3Ctor)
-	{
-		LPVOID monoInLevelPlayerProfilePageV3Addr = GetFunctionAddress(offsets->MonoInLevelPlayerProfilePageV3Ctor);
-		if (monoInLevelPlayerProfilePageV3Addr)
-		{
-			MH_CreateHook(monoInLevelPlayerProfilePageV3Addr, HookMonoInLevelPlayerProfilePageV3Ctor, &originalMonoInLevelPlayerProfilePageV3Ctor);
-		}
-	}
-
-	if (offsets->GetPlayerName)
-	{
-		getPlayerName = GetFunctionAddress(offsets->GetPlayerName);
 	}
 
 	if (offsets->ActorManagerCtor)

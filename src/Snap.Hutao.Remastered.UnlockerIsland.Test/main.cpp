@@ -220,10 +220,6 @@ void Inject()
             pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
             pEnv->Offsets.PlayerPerspective = 0xd80fb50;
 			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
-            pEnv->Offsets.GetPlayerID = 0x1082F640;  //MonoInLevelPlayerProfilePageV3.get_playerID
-            pEnv->Offsets.SetText = 0x15C451A0; //Text.set_text
-            pEnv->Offsets.MonoInLevelPlayerProfilePageV3Ctor = 0x1082F8E0;  //MonoInLevelPlayerProfilePageV3..ctor
-            pEnv->Offsets.GetPlayerName = 0x1082F730;  //MonoInLevelPlayerProfilePageV3.get_playerName
 			pEnv->Offsets.ActorManagerCtor = 0xD2D4EF0;  //ActorManager..ctor
 			pEnv->Offsets.GetGlobalActor = 0xD2CC9E0;  //ActorManager.GetGlobalActor
 			//pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll

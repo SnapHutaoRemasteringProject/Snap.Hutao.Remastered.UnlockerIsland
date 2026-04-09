@@ -18,6 +18,7 @@ const char* DIVE_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon_Div
 const char* BEYD_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/Beyd_NPC_Kanban_Paimon(Clone)";
 const char* PROFILE_LAYER_PATH = "/Canvas/Pages/PlayerProfilePage";
 const char* PROFILE_UID_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/UID";
+const char* PROFILE_NAME_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/Layout/PlayerName";
 const char* UID_PATH = "/BetaWatermarkCanvas(Clone)/Panel/TxtUID";
 const char* QUEST_BANNER_PATH = "/Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner";
 const char* SYNTHESIS_PAGE_NAME = "SynthesisPage";

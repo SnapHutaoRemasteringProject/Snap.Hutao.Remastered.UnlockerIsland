@@ -7,6 +7,11 @@ VoidFunc GetFunctionAddress(DWORD offset)
 		InitializeModuleHandle();
 	}
 
+	if (offset == 0)
+	{
+		return 0;
+	}
+
 	return (VoidFunc)((DWORD_PTR)g_hModule + offset);
 }
 

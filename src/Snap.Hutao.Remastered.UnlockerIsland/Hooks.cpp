@@ -10,7 +10,7 @@
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
 static HookFunctionOffsets g_ChinaOffsets = {
-	/* SetUid */ 0xAF27BD0,
+	/* SetUid */ 0,
 	/* SetFov */ 0x15C0590,
 	/* SetFog */ 0x16C99DC0,
 	/* GetFps */ 0x12DCD00,
@@ -32,20 +32,20 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* ResinList */ 0x1f0,
 	/* FindString */ 0x435F60,
 	/* PlayerPerspective */ 0xD0F91E0,
-	/* IsObjectActive */ 0x10B7CD0,
+	/* IsObjectActive */ 0x16c88e30,
 	/* GameUpdate */ 0x164B9860,
 	/* Reserved */ 0,
 	/* Reserved */ 0,
 	/* Reserved */ 0,
 	/* Reserved */ 0,
-	/* ActorManagerCtor */ 0xDEFBD30,
-	/* GetGlobalActor */ 0,
-	/* AvatarPaimonAppear */ 0,
-	/* GetComponent */ 0,
-	/* GetText */ 0,
-	/* GetName */ 0,
+	/* ActorManagerCtor */ 0xdefcd30,
+	/* GetGlobalActor */ 0xdf01950,
+	/* AvatarPaimonAppear */ 0x11469590,
+	/* GetComponent */ 0x16c88ab0,
+	/* GetText */ 0x16d88760,
+	/* GetName */ 0x16ca0230,
 	/* CheckCanOpenMap */ 0x6A1E363,
-	/* InLevelClockPageOkButtonClicked */ 0x1012DFB0,
+	/* InLevelClockPageOkButtonClicked */ 0x118DD5E0,
 	/* InLevelClockPageCloseButtonClicked */ 0x6E76350,
 };
 
@@ -342,7 +342,17 @@ void HandlePlayerInfo()
 		}
 	}
 
-	// TODO: Hide Player Name in Profile Page
+	// Hide Player Name in Profile Page
+
+	Il2CppString* profileNameStrObj = findStringFunc(PROFILE_NAME_PATH);
+	if (profileNameStrObj)
+	{
+		void* profileNameObj = findGameObjectFunc(profileNameStrObj);
+		if (profileNameObj)
+		{
+			setActiveFunc(profileNameObj, false);
+		}
+	}
 }
 
 void HandleTouchMode()

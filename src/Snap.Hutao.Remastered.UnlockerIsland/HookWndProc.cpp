@@ -44,6 +44,11 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		case WM_MOUSE_ACTIVATED:
 			HandleSwitchToKeyboardMouse();
 			return 0;
+		case WM_CLOSE:
+			GamepadHotSwitch::GetInstance().Shutdown();
+			DefSubclassProc(hWnd, uMsg, wParam, lParam);
+			ExitProcess(0);
+			break;
 	}
 
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);

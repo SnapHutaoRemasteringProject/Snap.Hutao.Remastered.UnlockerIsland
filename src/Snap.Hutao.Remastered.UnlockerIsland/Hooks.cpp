@@ -24,7 +24,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* CameraMove */ 0xCBDE200,
 	/* DamageText */ 0x11514DB0,
 	/* TouchInput */ 0xDD948B0,
-	/* KeyboardMouseInput */ 0xDD94A60,
+	/* KeyboardMouseInput */ 0xdd8d7f0,
 	/* JoypadInput */ 0xDD94A60,
 	/* CombineEntry */ 0x6A1C4A0,
 	/* CombineEntryPartner */ 0x1038BC60,

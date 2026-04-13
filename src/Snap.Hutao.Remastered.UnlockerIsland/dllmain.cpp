@@ -41,7 +41,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 			break;
 
 		case DLL_PROCESS_DETACH:
-			GamepadHotSwitch::GetInstance().Shutdown();
 			MH_DisableHook(MH_ALL_HOOKS);
 			MH_Uninitialize();
 
@@ -51,7 +50,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 				UnmapViewOfFile(g_pEnv);
 			}
 
-			exit(0);
 			break;
 	}
 	return TRUE;

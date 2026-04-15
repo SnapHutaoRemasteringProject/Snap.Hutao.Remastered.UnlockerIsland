@@ -101,7 +101,13 @@ void GamepadHotSwitch::Shutdown()
 
 	if (m_hThread)
 	{
-		WaitForSingleObject(m_hThread, 1000);
+		DWORD waitResult = WaitForSingleObject(m_hThread, 0);
+		if (waitResult != WAIT_OBJECT_0)
+		{
+			Log("[GamepadHotSwitch] Shutdown requested while worker thread is still running; skipping blocking wait");
+			return;
+		}
+
 		CloseHandle(m_hThread);
 		m_hThread = nullptr;
 	}

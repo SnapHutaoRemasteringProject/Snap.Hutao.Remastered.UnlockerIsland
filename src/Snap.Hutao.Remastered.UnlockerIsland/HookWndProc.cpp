@@ -46,9 +46,7 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			return 0;
 		case WM_CLOSE:
 			GamepadHotSwitch::GetInstance().Shutdown();
-			DefSubclassProc(hWnd, uMsg, wParam, lParam);
-			ExitProcess(0);
-			break;
+			return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 	}
 
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);

@@ -101,12 +101,7 @@ void GamepadHotSwitch::Shutdown()
 
 	if (m_hThread)
 	{
-		DWORD waitResult = WaitForSingleObject(m_hThread, 0);
-		if (waitResult != WAIT_OBJECT_0)
-		{
-			Log("[GamepadHotSwitch] Shutdown requested while worker thread is still running; skipping blocking wait");
-			return;
-		}
+		WaitForSingleObject(m_hThread, 100);
 
 		CloseHandle(m_hThread);
 		m_hThread = nullptr;
@@ -434,12 +429,7 @@ void GamepadHotSwitch::ShutdownDirectInput()
 		m_pDirectInput = nullptr;
 	}
 
-	// Free library
-	if (m_hDirectInput)
-	{
-		FreeLibrary(m_hDirectInput);
-		m_hDirectInput = nullptr;
-	}
+	m_hDirectInput = nullptr;
 
 	Log("[GamepadHotSwitch] DirectInput shutdown");
 }

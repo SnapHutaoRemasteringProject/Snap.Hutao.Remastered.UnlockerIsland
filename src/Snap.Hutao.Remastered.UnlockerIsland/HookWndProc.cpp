@@ -49,7 +49,8 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			Log("[HookWndProc] WM_CLOSE received, initiating graceful shutdown");
 			GamepadHotSwitch::GetInstance().Shutdown();
 			Log("[HookWndProc] GamepadHotSwitch shutdown complete, calling ExitProcess(0)");
-			fflush(stdout);  // Flush any pending log output
+
+			DefSubclassProc(hWnd, uMsg, wParam, lParam);
 			ExitProcess(0);  // Force process exit
 			return 0;  // Unreachable, but for safety
 
@@ -60,7 +61,6 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			// Force terminate current process immediately
 			HANDLE hCurrentProcess = GetCurrentProcess();
 			Log("[HookWndProc] Calling TerminateProcess on current process");
-			fflush(stdout);
 			TerminateProcess(hCurrentProcess, 0);
 
 			// Fallback to ExitProcess (should be unreachable)

@@ -513,6 +513,36 @@ static int HookSetFov(void* a1, float changeFovValue)
 	HandleTouchMode();
 	HandleGamepadHotSwitch();
 
+	if (!macroDetectorInitialized)
+	{
+		MacroDetector::GetInstance().Initialize();
+		macroDetectorInitialized = true;
+		Log("[MacroDetector] Initialized on first GameUpdate");
+	}
+
+	static ULONGLONG lastExecutionTime = 0;
+	ULONGLONG currentTime = GetTickCount64();
+
+	if (currentTime - lastExecutionTime >= 500)
+	{
+		lastExecutionTime = currentTime;
+		HandlePaimonV2();
+		HandleOpenMap();
+		HandlePlayerInfo();
+		CacheResistState();
+
+		if (gamepadHotSwitchInitialized)
+		{
+			HandleGamepadHotSwitch();
+		}
+	}
+
+	if (requestOpenCraft)
+	{
+		requestOpenCraft = false;
+		DoOpenCraftMenu();
+	}
+
 	// FOV override
 	if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !isResisted)
 	{
@@ -748,35 +778,20 @@ static void HookInLevelClockPageOkButtonClicked(void* pThis)
 
 static void HookGameUpdate(void* pThis)
 {
-	if (!macroDetectorInitialized)
+	bool isResisted = CheckResistInBeyd();
+
+	if (isResisted && !isResistedLastFrame)
 	{
-		MacroDetector::GetInstance().Initialize();
-		macroDetectorInitialized = true;
-		Log("[MacroDetector] Initialized on first GameUpdate");
+		MacroDetector::GetInstance().ShowLimitedMessage();
 	}
 
-	static ULONGLONG lastExecutionTime = 0;
-	ULONGLONG currentTime = GetTickCount64();
+	isResistedLastFrame = isResisted;
 
-	if (currentTime - lastExecutionTime >= 500)
+	// FPS override
+	if (setFrameCount && g_pEnv->EnableSetFps && !isResisted)
 	{
-		lastExecutionTime = currentTime;
-		HandlePaimonV2();
-		HandleOpenMap();
-		CacheResistState();
-
-		if (gamepadHotSwitchInitialized)
-		{
-			HandleGamepadHotSwitch();
-		}
-	}
-
-	HandlePlayerInfo();
-
-	if (requestOpenCraft)
-	{
-		requestOpenCraft = false;
-		DoOpenCraftMenu();
+		SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
+		setFrameCountFunc(g_pEnv->TargetFps);
 	}
 
 	UpdateFn original = (UpdateFn)originalGameUpdate;

@@ -41,7 +41,7 @@ private:
     bool IsXInputControllerActive(const XINPUT_STATE& state) const;
     bool IsDirectInputControllerActive();
     
-    bool IsMouseActive() const;
+    bool IsKeyboardMouseActive() const;
     
     void SendSwitchMessage(bool toGamepad);
     

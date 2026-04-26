@@ -189,7 +189,7 @@ bool GamepadHotSwitch::IsXInputControllerActive(const XINPUT_STATE& state) const
 	return false;
 }
 
-bool GamepadHotSwitch::IsMouseActive() const
+bool GamepadHotSwitch::IsKeyboardMouseActive() const
 {
 	ULONGLONG currentTime = GetTickCount64();
 	ULONGLONG lastActivity = m_lastKeyboardMouseActivityTime.load();
@@ -265,7 +265,7 @@ void GamepadHotSwitch::MainThread()
 			m_lastGamepadActivityTime = GetTickCount64();
 		}
 
-		bool mouseCurrentlyActive = IsMouseActive();
+		bool mouseCurrentlyActive = IsKeyboardMouseActive();
 
 		ULONGLONG currentTime = GetTickCount64();
 
@@ -467,6 +467,12 @@ bool GamepadHotSwitch::IsDirectInputDeviceActive(IDirectInputDevice8W* pDevice)
 	const LONG TRIGGER_SCALED = (TRIGGER_THRESHOLD * 65535L) / 255L;
 	if (state.lRx > TRIGGER_SCALED || state.lRy > TRIGGER_SCALED)
 		return true;
+
+	for (int i = 0; i < 128; ++i)
+	{
+		if (state.rgbButtons[i] & 0x80)
+			return true;
+	}
 
 	return false;
 }

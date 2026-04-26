@@ -179,7 +179,7 @@ void Inject()
             pEnv->EnableSetFov = TRUE;
             pEnv->FieldOfView = 90.0f;
             pEnv->DisablePlayerPerspective = TRUE;
-            pEnv->DisableFog = TRUE;
+            pEnv->DisableFog = FALSE;
             pEnv->EnableSetFps = TRUE;
             pEnv->TargetFps = 2000;
             pEnv->RemoveTeamProgress = TRUE;

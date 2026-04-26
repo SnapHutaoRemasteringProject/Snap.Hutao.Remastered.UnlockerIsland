@@ -10,7 +10,7 @@
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
 static HookFunctionOffsets g_ChinaOffsets = {
-	/* SetUid */ 0,
+	/* SetUid */ 0x682C4E0,
 	/* SetFov */ 0x15C0590,
 	/* SetFog */ 0x16C99DB0,
 	/* GetFps */ 0x12DCD00,
@@ -50,7 +50,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
-	/* SetUid */ 0,
+	/* SetUid */ 0x682E900,
 	/* SetFov */ 0x15C0590,
 	/* SetFog */ 0x16C39260,
 	/* GetFps */ 0x12DCD00,
@@ -723,7 +723,6 @@ static void HookSetActive(void* pThis, bool active)
 		}
 	}
 
-pass:
 	SetActiveFn original = (SetActiveFn)originalSetActive;
 	original(pThis, active);
 }

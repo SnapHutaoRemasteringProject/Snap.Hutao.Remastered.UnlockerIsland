@@ -36,8 +36,8 @@ struct HookEnvironment
     BOOL  HideGrass;
     BOOL  GamepadHotSwitchEnabled;
     BOOL  EnableInLevelClockPageSpeedUp;
-    DWORD Reversed1;
-    DWORD Reversed2;
+    DWORD CombineHotkey;
+    BOOL  WeakMapCheck;
 
     HookFunctionOffsets Offsets;
 };

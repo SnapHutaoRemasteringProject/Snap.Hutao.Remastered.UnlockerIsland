@@ -1,4 +1,5 @@
 ﻿#include "HookWndProc.h"
+#include "Hooks.h"
 #include "MacroDetector.h"
 #include "GamepadHotSwitch.h"
 #include "Logger.h" 
@@ -21,6 +22,12 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	switch (uMsg)
 	{
+	    case WM_KEYDOWN:
+			if (LOWORD(wParam) == g_pEnv->CombineHotkey)
+			{
+				RequestOpenCraft();
+			}
+			[[fallthrough]];
 		case WM_MOUSEMOVE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
@@ -52,19 +59,18 @@ LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 			DefSubclassProc(hWnd, uMsg, wParam, lParam);
 			ExitProcess(0);  // Force process exit
-			return 0;  // Unreachable, but for safety
+
+			return 0;
 
 		case WM_DESTROY:
 			Log("[HookWndProc] WM_DESTROY received, forcing process termination");
 			GamepadHotSwitch::GetInstance().Shutdown();
 
 			// Force terminate current process immediately
-			HANDLE hCurrentProcess = GetCurrentProcess();
 			Log("[HookWndProc] Calling TerminateProcess on current process");
-			TerminateProcess(hCurrentProcess, 0);
-
-			// Fallback to ExitProcess (should be unreachable)
+			TerminateProcess(GetCurrentProcess(), 0);
 			ExitProcess(0);
+
 			return 0;
 	}
 

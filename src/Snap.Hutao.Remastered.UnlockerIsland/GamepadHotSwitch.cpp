@@ -68,7 +68,7 @@ bool GamepadHotSwitch::Initialize()
 
 	GetCursorPos(&m_lastMousePos);
 	m_lastMouseTime = GetTickCount64();
-	m_lastMouseActivityTime = m_lastMouseTime;
+	m_lastKeyboardMouseActivityTime = m_lastMouseTime;
 
 	m_isExiting = false;
 	m_hThread = CreateThread(nullptr, 0, [](LPVOID lpParam) -> DWORD
@@ -152,6 +152,7 @@ void GamepadHotSwitch::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPar
 
 	switch (msg)
 	{
+	    case WM_KEYDOWN:
 		case WM_MOUSEMOVE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
@@ -161,7 +162,7 @@ void GamepadHotSwitch::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPar
 		case WM_MBUTTONUP:
 		case WM_MOUSEWHEEL:
 		case WM_MOUSEHWHEEL:
-			m_lastMouseActivityTime = GetTickCount64();
+			m_lastKeyboardMouseActivityTime = GetTickCount64();
 			break;
 	}
 }
@@ -191,7 +192,7 @@ bool GamepadHotSwitch::IsXInputControllerActive(const XINPUT_STATE& state) const
 bool GamepadHotSwitch::IsMouseActive() const
 {
 	ULONGLONG currentTime = GetTickCount64();
-	ULONGLONG lastActivity = m_lastMouseActivityTime.load();
+	ULONGLONG lastActivity = m_lastKeyboardMouseActivityTime.load();
 
 	if (currentTime - lastActivity < MOUSE_INACTIVITY_THRESHOLD_MS)
 	{

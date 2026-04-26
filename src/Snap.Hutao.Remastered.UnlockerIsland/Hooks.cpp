@@ -44,7 +44,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* GetComponent */ 0x16c88ab0,
 	/* GetText */ 0x16d88760,
 	/* GetName */ 0x16ca0230,
-	/* CheckCanOpenMap */ 0x6A1E363,
+	/* CheckCanOpenMap */ 0x6A1B380,
 	/* InLevelClockPageOkButtonClicked */ 0x118DD5E0,
 	/* InLevelClockPageCloseButtonClicked */ 0x6E76350,
 };
@@ -84,7 +84,7 @@ static HookFunctionOffsets g_OverseaOffsets = {
 	/* GetComponent */ 0x16C27F60,
 	/* GetText */ 0x16D27A80,
 	/* GetName */ 0x16C3F690,
-	/* CheckCanOpenMap */ 0x6A222F3,
+	/* CheckCanOpenMap */ 0x6A1C810,
 	/* InLevelClockPageOkButtonClicked */ 0x118D08E0,
 	/* InLevelClockPageCloseButtonClicked */ 0x6E74C70,
 };
@@ -121,7 +121,6 @@ LPVOID craftEntryPartner = nullptr;
 static LPVOID originalCraftEntry = nullptr;
 static LPVOID originalCheckCanOpenMap = nullptr;
 static LPVOID checkCanOpenMap = nullptr;
-static unsigned char originalCheckCanOpenMapBytes[5];
 
 // Team Anime
 LPVOID checkCanEnter = nullptr;
@@ -221,6 +220,8 @@ typedef void (*SetupResinListFn)(void*);
 
 // InLevelClockPage Speed Up
 typedef void (*ButtonClickedFn)(void*);
+
+typedef bool (*CheckCanOpenMapFn)(void*);
 
 static bool isResistedLastFrame = false;
 
@@ -406,48 +407,31 @@ void HandleGamepadHotSwitch()
 	}
 }
 
-void HandleOpenMap()
-{
-	if (!checkCanOpenMap)
-	{
-		return;
-	}
-
-	unsigned char* patchBytes = (unsigned char*)checkCanOpenMap;
-	if (patchBytes[0] == 0xE8)
-	{
-		originalCheckCanOpenMapBytes[0] = patchBytes[0];
-		originalCheckCanOpenMapBytes[1] = patchBytes[1];
-		originalCheckCanOpenMapBytes[2] = patchBytes[2];
-		originalCheckCanOpenMapBytes[3] = patchBytes[3];
-		originalCheckCanOpenMapBytes[4] = patchBytes[4];
-	}
-
-	if (g_pEnv->RedirectCombine && !CheckResistInBeyd())
-	{
-		patchBytes[0] = 0xB8;
-		patchBytes[1] = 0x00;
-		patchBytes[2] = 0x00;
-		patchBytes[3] = 0x00;
-		patchBytes[4] = 0x00;
-	}
-	else
-	{
-		patchBytes[0] = originalCheckCanOpenMapBytes[0];
-		patchBytes[1] = originalCheckCanOpenMapBytes[1];
-		patchBytes[2] = originalCheckCanOpenMapBytes[2];
-		patchBytes[3] = originalCheckCanOpenMapBytes[3];
-		patchBytes[4] = originalCheckCanOpenMapBytes[4];
-	}
-}
-
 void RequestOpenCraft()
 {
 	requestOpenCraft = true;
 }
 
-static bool DoOpenCraftMenu()
+static bool OpenCraftMenuCheck()
 {
+	if (!originalCheckCanOpenMap || !checkCanEnter)
+	{
+		return false;
+	}
+
+	CheckCanOpenMapFn checkCanOpenMapFunc = (CheckCanOpenMapFn)originalCheckCanOpenMap;
+	CheckCanEnterFn checkCanEnterFunc = (CheckCanEnterFn)checkCanEnter;
+
+	return !(checkCanOpenMapFunc(nullptr) || !checkCanEnterFunc());
+}
+
+static bool DoOpenCraftMenu(bool check = false)
+{
+	if (check && !OpenCraftMenuCheck())
+	{
+		return false;
+	}
+
 	if (!findString || !craftEntryPartner)
 	{
 		return false;
@@ -527,7 +511,6 @@ static int HookSetFov(void* a1, float changeFovValue)
 	{
 		lastExecutionTime = currentTime;
 		HandlePaimonV2();
-		HandleOpenMap();
 		HandlePlayerInfo();
 		CacheResistState();
 
@@ -540,7 +523,7 @@ static int HookSetFov(void* a1, float changeFovValue)
 	if (requestOpenCraft)
 	{
 		requestOpenCraft = false;
-		DoOpenCraftMenu();
+		DoOpenCraftMenu(true);
 	}
 
 	// FOV override
@@ -649,7 +632,7 @@ static void HookShowOneDamageTextEx(void* pThis, int type_, int damageType, int 
 static void HookCraftEntry(void* pThis)
 {
 	// If redirect is enabled AND we successfully opened the menu via our helper
-	if (g_pEnv->RedirectCombine && DoOpenCraftMenu() && !CheckResistInBeyd())
+	if (g_pEnv->RedirectCombine && !CheckResistInBeyd() && DoOpenCraftMenu())
 	{
 		// Return early, skipping the original tedious dialog
 		return;
@@ -773,6 +756,17 @@ static void HookInLevelClockPageOkButtonClicked(void* pThis)
 	}
 
 	original(pThis);
+}
+
+static bool HookCheckCanOpenMap(void* pThis)
+{
+	if (g_pEnv->WeakMapCheck)
+	{
+		return false;
+	}
+
+	CheckCanOpenMapFn original = (CheckCanOpenMapFn)originalCheckCanOpenMap;
+	return original(pThis);
 }
 
 static void HookGameUpdate(void* pThis)
@@ -1007,8 +1001,10 @@ void SetupHooks()
 	if (offsets->CheckCanOpenMap)
 	{
 		checkCanOpenMap = GetFunctionAddress(offsets->CheckCanOpenMap);
-		DWORD oldProtect;
-		VirtualProtect(checkCanOpenMap, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
+		if (checkCanEnter)
+		{
+			MH_CreateHook(checkCanOpenMap, HookCheckCanOpenMap, &originalCheckCanOpenMap);
+		}
 	}
 
 	if (offsets->SetupResinList)

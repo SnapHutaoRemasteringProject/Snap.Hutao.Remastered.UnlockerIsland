@@ -193,6 +193,8 @@ void Inject()
 			pEnv->HideGrass = TRUE;
 			pEnv->GamepadHotSwitchEnabled = TRUE;
             pEnv->EnableInLevelClockPageSpeedUp = TRUE;
+            pEnv->CombineHotkey = VK_F12;
+            pEnv->WeakMapCheck = true;
             
             ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
 

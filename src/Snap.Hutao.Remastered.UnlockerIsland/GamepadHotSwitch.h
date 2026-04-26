@@ -66,7 +66,7 @@ private:
     
     POINT m_lastMousePos{0, 0};
     ULONGLONG m_lastMouseTime = 0;
-    std::atomic<ULONGLONG> m_lastMouseActivityTime{0};
+    std::atomic<ULONGLONG> m_lastKeyboardMouseActivityTime{0};
     
     std::atomic<ULONGLONG> m_lastGamepadActivityTime{0};
 

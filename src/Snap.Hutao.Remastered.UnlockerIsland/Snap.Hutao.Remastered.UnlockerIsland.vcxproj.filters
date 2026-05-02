@@ -25,6 +25,9 @@
     <Filter Include="源文件\hook">
       <UniqueIdentifier>{3b289402-6289-4720-9279-9c129e2030d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\utils">
+      <UniqueIdentifier>{ddb3afac-04f8-44a5-aca7-9308fa73223c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\MinHook.h">
@@ -75,12 +78,12 @@
     <ClInclude Include="HookWndProc.h">
       <Filter>头文件\hook</Filter>
     </ClInclude>
+    <ClInclude Include="Task.h">
+      <Filter>头文件\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MemoryUtils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Hooks.cpp">
@@ -112,6 +115,12 @@
     </ClCompile>
     <ClCompile Include="GamepadHotSwitch.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Task.cpp">
+      <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryUtils.cpp">
+      <Filter>源文件\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

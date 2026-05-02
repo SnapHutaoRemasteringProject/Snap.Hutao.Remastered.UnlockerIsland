@@ -6,6 +6,8 @@
 #include "Logger.h"
 #include "GamepadHotSwitch.h"
 #include "HookWndProc.h"
+#include "Task.h"
+
 #include <vector>
 
 // Hardcoded offsets (used when ProvideOffsets is FALSE)
@@ -47,6 +49,7 @@ static HookFunctionOffsets g_ChinaOffsets = {
 	/* CheckCanOpenMap */ 0x6A1B380,
 	/* InLevelClockPageOkButtonClicked */ 0x118DD5E0,
 	/* InLevelClockPageCloseButtonClicked */ 0x6E76350,
+	/* ClosePage */ 0x328,
 };
 
 static HookFunctionOffsets g_OverseaOffsets = {
@@ -87,6 +90,7 @@ static HookFunctionOffsets g_OverseaOffsets = {
 	/* CheckCanOpenMap */ 0x6A1C810,
 	/* InLevelClockPageOkButtonClicked */ 0x118D08E0,
 	/* InLevelClockPageCloseButtonClicked */ 0x6E74C70,
+	/* ClosePage */ 0x318,
 };
 
 // Get_FrameCount
@@ -752,9 +756,11 @@ static void HookInLevelClockPageOkButtonClicked(void* pThis)
 	{
 		ButtonClickedFn inLevelClockPageCloseButtonClickedFunc = (ButtonClickedFn)inLevelClockPageCloseButtonClicked;
 		Log("InLevelClockPage Speed Up");
-		inLevelClockPageCloseButtonClickedFunc(pThis);
+		Task::RunLater(100, [pThis]()
+			{
+				(*(void(__fastcall**)(void*, int64_t))(*(int64_t*)pThis + g_pEnv->Offsets.ClosePage))(pThis, 0i64);
+			});
 	}
-
 	original(pThis);
 }
 
@@ -780,12 +786,7 @@ static void HookGameUpdate(void* pThis)
 
 	isResistedLastFrame = isResisted;
 
-	// FPS override
-	if (setFrameCount && g_pEnv->EnableSetFps && !isResisted)
-	{
-		SetFrameCountFn setFrameCountFunc = (SetFrameCountFn)setFrameCount;
-		setFrameCountFunc(g_pEnv->TargetFps);
-	}
+	Task::Tick();
 
 	UpdateFn original = (UpdateFn)originalGameUpdate;
 	original(pThis);

@@ -52,4 +52,5 @@ struct HookFunctionOffsets
 
 	DWORD InLevelClockPageOkButtonClicked;
 	DWORD InLevelClockPageCloseButtonClicked;
+	DWORD ClosePage;
 };

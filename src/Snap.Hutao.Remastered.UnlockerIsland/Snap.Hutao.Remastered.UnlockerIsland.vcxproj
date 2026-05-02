@@ -165,6 +165,7 @@
     <ClInclude Include="MemoryUtils.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="include\MinHook.h" />
+    <ClInclude Include="Task.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AntiAntiDebug.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="MacroDetector.cpp" />
     <ClCompile Include="MemoryUtils.cpp" />
     <ClCompile Include="Scanner.cpp" />
+    <ClCompile Include="Task.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\libMinHook.x64.lib" />

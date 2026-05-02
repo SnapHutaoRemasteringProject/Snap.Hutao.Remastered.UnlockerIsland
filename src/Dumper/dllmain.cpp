@@ -16,14 +16,15 @@
 
 
 namespace GameOffsets {
-    const uint64_t GetName = 0x1077fb0; //
+    const uint64_t GetName = 0x16ca0230; //
     
-    const uint64_t GetTransform = 0x15f932c0; //
+    const uint64_t GetTransform = 0x16c88e00; //
 
-    const uint64_t GameObject_Constructor = 0x1091370; //
-    const uint64_t GameObject_SetActive = 0x1090be0; //
+    const uint64_t GameObject_Constructor = 0x10B7380; //
+    const uint64_t GameObject_SetActive = 0x10B7D00; //
 
-    const uint64_t Transform_GetParent = 0x15fac210; //
+    const uint64_t Transform_GetParent = 0x16ca1e50; //
+    const uint64_t ClosePage = 0x118e0840; //
 }
 // =============================================================
 
@@ -47,6 +48,7 @@ using Fn_GetParent = void* (__fastcall*)(void*);
 using Fn_GetTransform = void* (__fastcall*)(void*);
 using Fn_GameObject_ctor = void* (__fastcall*)(void*, void*);
 using Fn_GameObject_SetActive = void(__fastcall*)(void*, bool);
+using Fn_ClosePage = void(__fastcall*)(void*);
 
 // 原始函数指针
 Fn_GetName Original_GetName = nullptr;
@@ -54,6 +56,7 @@ Fn_GetParent Original_Transform_GetParent = nullptr;
 Fn_GetTransform Original_GetTransform = nullptr;
 Fn_GameObject_ctor Original_GameObject_ctor = nullptr;
 Fn_GameObject_SetActive Original_GameObject_SetActive = nullptr;
+Fn_ClosePage Original_ClosePage = nullptr;
 
 // Hook函数声明
 void* __fastcall Hooked_GameObject_ctor(void* thisptr, void* name);
@@ -258,6 +261,11 @@ void __fastcall Hooked_GameObject_SetActive(void* thisptr, bool active) {
     }
 }
 
+void __fastcall Hooked_ClosePage(void* pThis) {
+    DumpStack();
+	Original_ClosePage(pThis);
+}
+
 // ==================== 日志线程 ====================
 
 DWORD WINAPI LogWriterThread(LPVOID) {
@@ -371,6 +379,16 @@ bool InstallGameObjectHooks() {
             reinterpret_cast<LPVOID*>(&Original_GameObject_SetActive)
         ) != MH_OK) {
             AddLog(L"WARNING: Failed to create SetActive hook, continuing...");
+        }
+    }
+
+	if (GameOffsets::ClosePage != 0) {
+        if (MH_CreateHook(
+            reinterpret_cast<LPVOID>(base + GameOffsets::ClosePage),
+            reinterpret_cast<LPVOID>(&Hooked_ClosePage),
+			reinterpret_cast<LPVOID*>(&Original_ClosePage)
+        ) != MH_OK) {
+            AddLog(L"WARNING: Failed to create ClosePage hook, continuing...");
         }
     }
 

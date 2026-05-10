@@ -57,7 +57,13 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
-	HMODULE hModule = (HMODULE)lpParam;
+	HMODULE module = GetModuleHandleW(L"YuanShen.exe");
+	HMODULE module2 = GetModuleHandleW(L"GenshinImpact.exe");
+
+	if (module == 0 && module2 == 0)
+	{
+		return -1;
+	}
 
 	if (MH_Initialize() != MH_OK)
 	{

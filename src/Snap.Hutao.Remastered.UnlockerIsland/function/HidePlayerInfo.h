@@ -12,4 +12,8 @@ public:
     bool IsEnabled() override;
     void SetEnabled(bool enabled) override { (void)enabled; }
     FunctionType GetFunctionType() override { return FunctionType::HIDE_PLAYER_INFO; }
+
+private:
+    int frameCounter = 0;
+    static constexpr int FRAME_INTERVAL = 200;
 };

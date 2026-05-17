@@ -45,6 +45,14 @@ void HidePlayerInfo::OnUpdate()
         return;
     }
 
+    // Execute logic only every 200 frames to reduce performance impact
+    frameCounter++;
+    if (frameCounter < FRAME_INTERVAL)
+    {
+        return;
+    }
+    frameCounter = 0;
+
     if (!findString || !findGameObject || !setActive || !getActive)
     {
         return;

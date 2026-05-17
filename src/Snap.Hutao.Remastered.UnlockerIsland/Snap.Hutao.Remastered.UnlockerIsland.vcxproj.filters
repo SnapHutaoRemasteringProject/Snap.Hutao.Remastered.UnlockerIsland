@@ -28,6 +28,12 @@
     <Filter Include="源文件\utils">
       <UniqueIdentifier>{ddb3afac-04f8-44a5-aca7-9308fa73223c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\function">
+      <UniqueIdentifier>{0c79a70f-2db2-4dd3-98dc-3215387c445a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\function">
+      <UniqueIdentifier>{3cd45d4f-7b1c-4272-977d-401eac926838}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\MinHook.h">
@@ -42,22 +48,10 @@
     <ClInclude Include="HookFunctionOffsets.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryUtils.h">
-      <Filter>头文件\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Hooks.h">
-      <Filter>头文件\hook</Filter>
-    </ClInclude>
-    <ClInclude Include="AntiAntiDebug.h">
-      <Filter>头文件\hook</Filter>
-    </ClInclude>
     <ClInclude Include="Constants.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Scanner.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="IslandState.h">
@@ -75,27 +69,87 @@
     <ClInclude Include="GamepadHotSwitch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="HookWndProc.h">
+    <ClInclude Include="utils\UnityUtils.h">
+      <Filter>头文件\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="hook\Hooks.h">
       <Filter>头文件\hook</Filter>
     </ClInclude>
-    <ClInclude Include="Task.h">
+    <ClInclude Include="hook\HookWndProc.h">
+      <Filter>头文件\hook</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\MemoryUtils.h">
       <Filter>头文件\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Task.h">
+      <Filter>头文件\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="function\IFunction.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\FunctionType.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\HooksShared.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\FovOverride.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DisablePlayerPerspective.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DisableFog.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\EnableSetFps.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\RemoveTeamProgress.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\HideQuestBanner.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DisableCameraMove.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DisableDamageText.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\TouchMode.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\ResinItem.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\DisplayPaimon.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\HidePlayerInfo.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\HideGrass.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\GamepadHotSwitchFunc.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\InLevelClockPageSpeedUp.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\CombineHotkey.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
+    <ClInclude Include="function\WeakMapCheck.h">
+      <Filter>头文件\function</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Hooks.cpp">
-      <Filter>源文件\hook</Filter>
-    </ClCompile>
-    <ClCompile Include="AntiAntiDebug.cpp">
-      <Filter>源文件\hook</Filter>
-    </ClCompile>
     <ClCompile Include="Constants.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Scanner.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="framework.cpp">
@@ -110,17 +164,77 @@
     <ClCompile Include="Logger.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="HookWndProc.cpp">
-      <Filter>源文件\hook</Filter>
-    </ClCompile>
     <ClCompile Include="GamepadHotSwitch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Task.cpp">
+    <ClCompile Include="hook\Hooks.cpp">
+      <Filter>源文件\hook</Filter>
+    </ClCompile>
+    <ClCompile Include="hook\HookWndProc.cpp">
+      <Filter>源文件\hook</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\MemoryUtils.cpp">
       <Filter>源文件\utils</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryUtils.cpp">
+    <ClCompile Include="utils\Task.cpp">
       <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\UnityUtils.cpp">
+      <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="function\IFunction.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\FovOverride.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisablePlayerPerspective.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisableFog.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\EnableSetFps.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\RemoveTeamProgress.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\HideQuestBanner.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisableCameraMove.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisableDamageText.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\TouchMode.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\ResinItem.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisplayPaimon.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\HidePlayerInfo.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\HideGrass.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\GamepadHotSwitchFunc.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\InLevelClockPageSpeedUp.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\CombineHotkey.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\WeakMapCheck.cpp">
+      <Filter>源文件\function</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

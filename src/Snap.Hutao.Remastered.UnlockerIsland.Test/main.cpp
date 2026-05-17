@@ -191,8 +191,8 @@ void Inject()
 			pEnv->DisplayPaimon = TRUE;
             pEnv->HidePlayerInfo = TRUE;
 			pEnv->HideGrass = TRUE;
-			pEnv->GamepadHotSwitchEnabled = TRUE;
-            pEnv->EnableInLevelClockPageSpeedUp = TRUE;
+			pEnv->GamepadHotSwitch = TRUE;
+            pEnv->InLevelClockPageSpeedUp = TRUE;
             pEnv->CombineHotkey = VK_F12;
             pEnv->WeakMapCheck = true;
             

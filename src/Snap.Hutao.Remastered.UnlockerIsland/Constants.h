@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <list>
+#include "HookFunctionOffsets.h"
 
 extern std::list<std::wstring> GrassPrefix;
 
@@ -38,3 +39,7 @@ extern std::string GetNamePattern;
 extern std::string SetupResinListPattern;
 extern std::string InLevelClockPageOkButtonClickedPattern;
 extern std::string InLevelClockPageCloseButtonClickedPattern;
+
+// Hardcoded offsets (used when game does not provide offsets via shared memory)
+extern HookFunctionOffsets g_ChinaOffsets;
+extern HookFunctionOffsets g_OverseaOffsets;

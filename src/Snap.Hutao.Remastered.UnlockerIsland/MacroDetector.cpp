@@ -1,5 +1,5 @@
 ﻿#include "MacroDetector.h"
-#include "HookWndProc.h"
+#include "hook/HookWndProc.h"
 #include <iostream>
 #include <commctrl.h>
 

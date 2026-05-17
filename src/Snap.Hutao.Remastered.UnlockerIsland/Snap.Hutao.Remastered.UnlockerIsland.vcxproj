@@ -139,6 +139,7 @@
       <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CallingConvention>FastCall</CallingConvention>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,38 +150,74 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AntiAntiDebug.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="function\FunctionType.h" />
+    <ClInclude Include="function\IFunction.h" />
+    <ClInclude Include="function\HooksShared.h" />
+    <ClInclude Include="function\FovOverride.h" />
+    <ClInclude Include="function\DisablePlayerPerspective.h" />
+    <ClInclude Include="function\DisableFog.h" />
+    <ClInclude Include="function\EnableSetFps.h" />
+    <ClInclude Include="function\RemoveTeamProgress.h" />
+    <ClInclude Include="function\HideQuestBanner.h" />
+    <ClInclude Include="function\DisableCameraMove.h" />
+    <ClInclude Include="function\DisableDamageText.h" />
+    <ClInclude Include="function\TouchMode.h" />
+    <ClInclude Include="function\ResinItem.h" />
+    <ClInclude Include="function\DisplayPaimon.h" />
+    <ClInclude Include="function\HidePlayerInfo.h" />
+    <ClInclude Include="function\HideGrass.h" />
+    <ClInclude Include="function\GamepadHotSwitchFunc.h" />
+    <ClInclude Include="function\InLevelClockPageSpeedUp.h" />
+    <ClInclude Include="function\CombineHotkey.h" />
+    <ClInclude Include="function\WeakMapCheck.h" />
     <ClInclude Include="GamepadHotSwitch.h" />
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
-    <ClInclude Include="HookWndProc.h" />
-    <ClInclude Include="Hooks.h" />
+    <ClInclude Include="hook\Hooks.h" />
+    <ClInclude Include="hook\HookWndProc.h" />
     <ClInclude Include="IslandState.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MacroDetector.h" />
-    <ClInclude Include="MemoryUtils.h" />
-    <ClInclude Include="Scanner.h" />
     <ClInclude Include="include\MinHook.h" />
-    <ClInclude Include="Task.h" />
+    <ClInclude Include="utils\UnityUtils.h" />
+    <ClInclude Include="utils\MemoryUtils.h" />
+    <ClInclude Include="utils\Task.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AntiAntiDebug.cpp" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Constants.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="framework.cpp" />
+    <ClCompile Include="function\IFunction.cpp" />
     <ClCompile Include="GamepadHotSwitch.cpp" />
-    <ClCompile Include="HookWndProc.cpp" />
-    <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="hook\Hooks.cpp" />
+    <ClCompile Include="hook\HookWndProc.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MacroDetector.cpp" />
-    <ClCompile Include="MemoryUtils.cpp" />
-    <ClCompile Include="Scanner.cpp" />
-    <ClCompile Include="Task.cpp" />
+    <ClCompile Include="utils\MemoryUtils.cpp" />
+    <ClCompile Include="utils\Task.cpp" />
+    <ClCompile Include="utils\UnityUtils.cpp" />
+    <ClCompile Include="function\FovOverride.cpp" />
+    <ClCompile Include="function\DisablePlayerPerspective.cpp" />
+    <ClCompile Include="function\DisableFog.cpp" />
+    <ClCompile Include="function\EnableSetFps.cpp" />
+    <ClCompile Include="function\RemoveTeamProgress.cpp" />
+    <ClCompile Include="function\HideQuestBanner.cpp" />
+    <ClCompile Include="function\DisableCameraMove.cpp" />
+    <ClCompile Include="function\DisableDamageText.cpp" />
+    <ClCompile Include="function\TouchMode.cpp" />
+    <ClCompile Include="function\ResinItem.cpp" />
+    <ClCompile Include="function\DisplayPaimon.cpp" />
+    <ClCompile Include="function\HidePlayerInfo.cpp" />
+    <ClCompile Include="function\HideGrass.cpp" />
+    <ClCompile Include="function\GamepadHotSwitchFunc.cpp" />
+    <ClCompile Include="function\InLevelClockPageSpeedUp.cpp" />
+    <ClCompile Include="function\CombineHotkey.cpp" />
+    <ClCompile Include="function\WeakMapCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\libMinHook.x64.lib" />

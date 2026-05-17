@@ -1,5 +1,5 @@
 ﻿#include "Logger.h"
-#include "Hooks.h"
+#include "hook/Hooks.h"
 #include <iostream>
 
 void Log(const char* msg)

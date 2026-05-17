@@ -1,8 +1,7 @@
 #include "GamepadHotSwitch.h"
-#include "HookWndProc.h"
+#include "hook/HookWndProc.h"
 #include "Logger.h"
 #include <chrono>
-#include <string>
 
 GamepadHotSwitch::GamepadHotSwitch()
 {

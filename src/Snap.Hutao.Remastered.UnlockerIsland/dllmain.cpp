@@ -1,6 +1,5 @@
 ﻿#include "dllmain.h"
-#include "Hooks.h"
-#include "AntiAntiDebug.h"
+#include "hook/Hooks.h"
 #include "MacroDetector.h"
 #include "GamepadHotSwitch.h"
 #include <cstdio>

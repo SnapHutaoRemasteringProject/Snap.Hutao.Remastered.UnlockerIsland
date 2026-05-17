@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dllmain.h"
-#include "MemoryUtils.h"
+#include "../dllmain.h"
+#include "../utils/MemoryUtils.h"
 
 void SetupHooks();
 void RequestOpenCraft();

@@ -19,6 +19,7 @@ const char* BEYD_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/Beyd_NPC_Kanban_Paim
 const char* PROFILE_LAYER_PATH = "/Canvas/Pages/PlayerProfilePage";
 const char* PROFILE_UID_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/UID";
 const char* PROFILE_NAME_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/Layout/PlayerName";
+const char* CHAT_DIALOG_PATH = "/Canvas/Dialogs/DialogLayer(Clone)/ChatDialog";
 const char* UID_PATH = "/BetaWatermarkCanvas(Clone)/Panel/TxtUID";
 const char* QUEST_BANNER_PATH = "/Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner";
 const char* SYNTHESIS_PAGE_NAME = "SynthesisPage";
@@ -40,6 +41,7 @@ std::string SetActivePattern = "E8 ? ? ? ? 48 8B 56 ? 48 85 D2 0F 84 ? ? ? ? 80 
 std::string IsActivePattern = "E8 ?? ?? ?? ?? 84 C0 74 ?? 48 89 F1 E8 ?? ?? ?? ?? 48 8B 4E ?? 48 85 C9 0F 84 ?? ?? ?? ?? 80 79 ?? ?? 0F 94 C1 08 C1";
 std::string EventCameraMovePattern = "41 57 41 56 56 57 55 53 48 83 EC ? 48 89 D7 49 89 CE 80 3D ? ? ? ? 00 0F 85 ? ? ? ? 80 3D ? ? ? ? 00";
 std::string ShowOneDamageTextExPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 44 0F 29 9C 24 ? ? ? ? 44 0F 29 94 24 ? ? ? ? 44 0F 29 8C 24 ? ? ? ? 44 0F 29 84 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 44 89 CF 45 89 C4";
+//REL
 std::string DisplayFogPattern = "E8 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 4C 8B 05 ?? ?? ?? ?? BA 02 00 00 00 E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 F8 0B 74 ??";
 //REL
 std::string PlayerPerspectivePattern = "E8 ? ? ? ? 48 8B BE ? ? ? ? 80 3D ? ? ? ? ? 0F 85 ? ? ? ? 80 BE ? ? ? ? ? 74 11";
@@ -59,3 +61,82 @@ std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48
 //std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? 00 74 ?? 48 83 C4 ?? 5B 5D 5F 5E C3 48 8B 86 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 8B A8 ?? ?? ?? ?? 85 ED 74 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 88";
 std::string InLevelClockPageCloseButtonClickedPattern = "56 57 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 8E ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 83 79 ?? 00 7E ?? 48 8B 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 C7 48 8B 40 ?? 85 C0 7E ?? 89 C0 31 DB 66 66 66 66 66 66 2E 0F 1F 84 00 00 00 00 00 89 C0 48 39 C3 0F 83 ?? ?? ?? ?? 48 8B 4C DF ?? 48 85 C9 0F 84 ?? ?? ?? ?? 48 8B 01 0F B7 90";
 std::string ClosePageCallerPattern = "48 83 EC 48 48 89 C8 80 3D ?? ?? ?? ?? 00 75 ?? 83 7A 04 26 75 ?? 80 B8 ?? ?? 00 00 00 74 ?? 4C 8B 00 48 89 C1 31 D2 41 FF 90 ?? ?? 00 00";
+
+// ===================================================================
+// Hardcoded offset tables (used when ProvideOffsets is FALSE)
+// ===================================================================
+HookFunctionOffsets g_ChinaOffsets = {
+    /* SetUid */ 0x682C4E0,
+    /* SetFov */ 0x15C0590,
+    /* SetFog */ 0x16C99DB0,
+    /* GetFps */ 0x12DCD00,
+    /* SetFps */ 0x12DCD10,
+    /* OpenTeam */ 0xF8E1940,
+    /* OpenTeamAdvanced */ 0xF8D7070,
+    /* CheckEnter */ 0x101A9C70,
+    /* QuestBanner */ 0xE27A820,
+    /* FindObject */ 0x10B8540,
+    /* ObjectActive */ 0x10B7D00,
+    /* CameraMove */ 0xCBDE200,
+    /* DamageText */ 0x11514DB0,
+    /* TouchInput */ 0xDD948B0,
+    /* KeyboardMouseInput */ 0xdd8d7f0,
+    /* JoypadInput */ 0xDD94A60,
+    /* CombineEntry */ 0x6A1C4A0,
+    /* CombineEntryPartner */ 0x1038BC60,
+    /* SetupResinList */ 0xAF372F0,
+    /* ResinList */ 0x230,
+    /* FindString */ 0x435F60,
+    /* PlayerPerspective */ 0xD0F91E0,
+    /* IsObjectActive */ 0x16c88e30,
+    /* GameUpdate */ 0x164B9860,
+    /* Reserved */ 0, 0, 0, 0,
+    /* ActorManagerCtor */ 0xdefcd30,
+    /* GetGlobalActor */ 0xdf01950,
+    /* AvatarPaimonAppear */ 0x11469590,
+    /* GetComponent */ 0x16c88ab0,
+    /* GetText */ 0x16d88760,
+    /* GetName */ 0x16ca0230,
+    /* CheckCanOpenMap */ 0x6A1B380,
+    /* InLevelClockPageOkButtonClicked */ 0x118DD5E0,
+    /* InLevelClockPageCloseButtonClicked */ 0x6E76350,
+    /* ClosePage */ 0x328,
+};
+
+HookFunctionOffsets g_OverseaOffsets = {
+    /* SetUid */ 0x682E900,
+    /* SetFov */ 0x15C0590,
+    /* SetFog */ 0x16C39260,
+    /* GetFps */ 0x12DCD00,
+    /* SetFps */ 0x12DCD10,
+    /* OpenTeam */ 0xF8FB0E0,
+    /* OpenTeamAdvanced */ 0xF9075F0,
+    /* CheckEnter */ 0x10178CC0,
+    /* QuestBanner */ 0xE2312F0,
+    /* FindObject */ 0x10B8540,
+    /* ObjectActive */ 0x10B7D00,
+    /* CameraMove */ 0xCBE3AB0,
+    /* DamageText */ 0x11507260,
+    /* TouchInput */ 0xDD9C9B0,
+    /* KeyboardMouseInput */ 0xDDA7870,
+    /* JoypadInput */ 0xDD85A10,
+    /* CombineEntry */ 0x6A1E0F0,
+    /* CombineEntryPartner */ 0x103A1420,
+    /* SetupResinList */ 0xAF33AF0,
+    /* ResinList */ 0x220,
+    /* FindString */ 0x4359E0,
+    /* PlayerPerspective */ 0xD0F53C0,
+    /* IsObjectActive */ 0x10B7CD0,
+    /* GameUpdate */ 0x16459E70,
+    /* Reserved */ 0, 0, 0, 0,
+    /* ActorManagerCtor */ 0xDEF97E0,
+    /* GetGlobalActor */ 0xDEF2E20,
+    /* AvatarPaimonAppear */ 0x1146C280,
+    /* GetComponent */ 0x16C27F60,
+    /* GetText */ 0x16D27A80,
+    /* GetName */ 0x16C3F690,
+    /* CheckCanOpenMap */ 0x6A1C810,
+    /* InLevelClockPageOkButtonClicked */ 0x118D08E0,
+    /* InLevelClockPageCloseButtonClicked */ 0x6E74C70,
+    /* ClosePage */ 0x318,
+};

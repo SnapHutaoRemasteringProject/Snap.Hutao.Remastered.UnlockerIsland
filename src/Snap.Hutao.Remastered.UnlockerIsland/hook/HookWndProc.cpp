@@ -1,17 +1,14 @@
 #include "HookWndProc.h"
 #include "Hooks.h"
-#include "MacroDetector.h"
-#include "GamepadHotSwitch.h"
-#include "Logger.h" 
+#include "../function/HooksShared.h"
+#include "../MacroDetector.h"
+#include "../GamepadHotSwitch.h"
+#include "../Logger.h"
 #include <commctrl.h>
 
 static HWND g_hUnityWindow = nullptr;
 static bool g_subclassInstalled = false;
 static UINT_PTR g_subclassId = 1;
-
-extern LPVOID switchInputDeviceToTouchScreen;
-extern LPVOID switchInputDeviceToKeboardMouse;
-extern LPVOID switchInputDeviceToJoypad;
 
 LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {

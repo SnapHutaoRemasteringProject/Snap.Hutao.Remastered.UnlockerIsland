@@ -34,8 +34,8 @@ struct HookEnvironment
 	BOOL  DebugMode;
     BOOL  HidePlayerInfo;
     BOOL  HideGrass;
-    BOOL  GamepadHotSwitchEnabled;
-    BOOL  EnableInLevelClockPageSpeedUp;
+    BOOL  GamepadHotSwitch;
+    BOOL  InLevelClockPageSpeedUp;
     DWORD CombineHotkey;
     BOOL  WeakMapCheck;
 

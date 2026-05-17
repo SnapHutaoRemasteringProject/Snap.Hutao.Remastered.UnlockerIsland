@@ -1,5 +1,8 @@
 #include "GamepadHotSwitch.h"
 #include "hook/HookWndProc.h"
+#include "Constants.h"
+#include "utils/UnityUtils.h"
+#include "function/HooksShared.h"
 #include "Logger.h"
 #include <chrono>
 
@@ -129,6 +132,24 @@ void GamepadHotSwitch::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPar
         }
         break;
 
+    case WM_KEYDOWN:
+        // Do not treat keyboard input as "switch to keyboard mode" when
+        // the player is typing in the chat dialog (Enter sends the message).
+        if (wParam == VK_RETURN)
+            break;
+        if (findString && findGameObject && getActive)
+        {
+            void* chatObj = FindGameObject(CHAT_DIALOG_PATH);
+            if (chatObj)
+            {
+                typedef bool (*GetActiveFn)(void*);
+                if (((GetActiveFn)getActive)(chatObj))
+                    break; // Chat dialog is active — ignore this key press.
+            }
+        }
+        m_lastKeyboardActivityTime = currentTime;
+        break;
+
     case WM_LBUTTONDOWN:
     case WM_RBUTTONDOWN:
     case WM_MBUTTONDOWN:
@@ -237,8 +258,15 @@ void GamepadHotSwitch::MainThread()
 
         if (IsXInputControllerActive())
             m_lastGamepadActivityTime = currentTime;
-        if (IsMouseActive())
-            m_lastMouseActivityTime = currentTime;
+
+        // Treat recent keyboard activity like mouse activity for switching.
+        if (IsMouseActive() ||
+            (m_lastKeyboardActivityTime > 0 &&
+             currentTime - m_lastKeyboardActivityTime < SWITCH_DELAY_MS))
+        {
+            if (currentTime > m_pauseUntilTime)
+                m_lastMouseActivityTime = currentTime;
+        }
 
         if (m_lastGamepadActivityTime > m_lastMouseActivityTime + SWITCH_DELAY_MS)
             SendSwitchMessage(true);

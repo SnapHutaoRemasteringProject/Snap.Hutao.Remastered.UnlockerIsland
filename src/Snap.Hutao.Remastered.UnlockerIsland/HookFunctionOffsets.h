@@ -4,53 +4,53 @@
 
 struct HookFunctionOffsets
 {
-	DWORD SetUid;
-	DWORD SetFov;
-	DWORD SetFog;
-	DWORD GetFps;
-	DWORD SetFps;
+	DWORD SetUid;                              // MonoUIWaterMask.SetUID
+	DWORD SetFov;                              // [pattern scan]
+	DWORD SetFog;                              //
+	DWORD GetFps;                              //
+	DWORD SetFps;                              // 双层跳板
 
-	DWORD OpenTeam;
-	DWORD OpenTeamAdvanced;
-	DWORD CheckEnter;
+	DWORD OpenTeam;                            // JGDDADKMLDL.DDFODLGCHGM  [pattern scan]
+	DWORD OpenTeamAdvanced;                    // JGDDADKMLDL.LBLECKJEGOI  [pattern scan]
+	DWORD CheckEnter;                          // [pattern scan]
 
-	DWORD QuestBanner;
-	DWORD FindObject;
-	DWORD ObjectActive;
+	DWORD QuestBanner;                         //
+	DWORD FindObject;                          // GameObject.Find
+	DWORD ObjectActive;                        // GameObject.set_active
 
-	DWORD CameraMove;
-	DWORD DamageText;
-	DWORD TouchInput;
-	DWORD KeyboardMouseInput;
-	DWORD JoypadInput;
+	DWORD CameraMove;                          // BOFBPKLPKOK.DNIJOJKIOIF  [pattern scan]
+	DWORD DamageText;                          // MonoParticleDamageTextContainer.ShowOneDamageText
+	DWORD TouchInput;                          // CNGPNBOAIKK.FGKNOKNIIPL  [pattern scan]
+	DWORD KeyboardMouseInput;                  // [pattern scan]
+	DWORD JoypadInput;                         // [pattern scan]
 
-	DWORD CombineEntry;
-	DWORD CombineEntryPartner;
+	DWORD CombineEntry;                        // NBJLAEKBCIM.DNJNIKDKECD  [pattern scan]
+	DWORD CombineEntryPartner;                 // FGPIAOKFJCE.NJCOCBAONEC  [pattern scan]
 
-	DWORD SetupResinList;
-	DWORD ResinList;
+	DWORD SetupResinList;                      //
+	DWORD ResinList;                           //
 
-	DWORD FindString;
-	DWORD PlayerPerspective;
+	DWORD FindString;                          // internal method  [pattern scan]
+	DWORD PlayerPerspective;                   //
 
-	DWORD IsObjectActive;
-	DWORD GameUpdate;
+	DWORD IsObjectActive;                      // GameObject.get_active
+	DWORD GameUpdate;                          // MainThreadDispatcher.Update
 	DWORD Reserved1;
 	DWORD Reserved2;
 	DWORD Reserved3;
 	DWORD Reserved4;
-	DWORD ActorManagerCtor;
-	DWORD GetGlobalActor;
-	DWORD AvatarPaimonAppear;
+	DWORD ActorManagerCtor;                    // ActorManager..ctor
+	DWORD GetGlobalActor;                      // ActorManager.GetGlobalActor
+	DWORD AvatarPaimonAppear;                  // GlobalActor.AvatarPaimonAppear
 
-	DWORD GetComponent;
-	DWORD GetText;
+	DWORD GetComponent;                        // GameObject.GetComponent(String type)
+	DWORD GetText;                             // Text.get_text
 
-	DWORD GetName;
+	DWORD GetName;                             // Object.get_name
 
-	DWORD CheckCanOpenMap;
+	DWORD CheckCanOpenMap;                     // [pattern scan]
 
-	DWORD InLevelClockPageOkButtonClicked;
-	DWORD InLevelClockPageCloseButtonClicked;
-	DWORD ClosePage;
+	DWORD InLevelClockPageOkButtonClicked;     //
+	DWORD InLevelClockPageCloseButtonClicked;  //
+	DWORD ClosePage;                           //
 };

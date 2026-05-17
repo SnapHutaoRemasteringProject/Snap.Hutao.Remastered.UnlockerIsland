@@ -1,363 +1,392 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include <iostream>
-#include <iomanip>
 #include <filesystem>
+#include <memory>
+#include <vector>
 #include <Windows.h>
 #include <TlHelp32.h>
 
 #include "../Snap.Hutao.Remastered.UnlockerIsland/HookEnvironment.h"
 
+namespace fs = std::filesystem;
 
-const wchar_t* SHARED_MEM_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
+// ---------------------------------------------------------------------------
+// RAII wrappers
+// ---------------------------------------------------------------------------
 
-bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile);
-static bool InjectDLL(HANDLE hProcess, const std::wstring& dllPath);
-
-uintptr_t GetModuleBaseAddress(HANDLE hProcess, const std::wstring& moduleName)
+struct HandleDeleter
 {
-    MODULEENTRY32W me = { 0 };
-    DWORD pid = GetProcessId(hProcess);
-    if (pid == 0)
+    void operator()(HANDLE h) const noexcept
     {
-        return 0;
+        if (h && h != INVALID_HANDLE_VALUE)
+            CloseHandle(h);
     }
+};
 
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
-    if (hSnapshot == INVALID_HANDLE_VALUE)
-    {
-        return 0;
-    }
+using unique_handle = std::unique_ptr<std::remove_pointer_t<HANDLE>, HandleDeleter>;
 
-    me.dwSize = sizeof(MODULEENTRY32W);
-    if (Module32FirstW(hSnapshot, &me))
-    {
-        do
-        {
-            if (moduleName == me.szModule)
-            {
-                CloseHandle(hSnapshot);
-                return reinterpret_cast<uintptr_t>(me.modBaseAddr);
-            }
-        } while (Module32NextW(hSnapshot, &me));
-    }
-
-    CloseHandle(hSnapshot);
-    return 0;
-}
-
-std::wstring GetDLLPath()
+// Custom deleter for remote-process memory allocations.
+struct RemoteMemDeleter
 {
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Snap.Hutao.Remastered.UnlockerIsland.dll";
-
-    if (std::filesystem::exists(dllPath))
+    HANDLE hProcess;
+    void operator()(void* p) const noexcept
     {
-        return dllPath.wstring();
+        if (p) VirtualFreeEx(hProcess, p, 0, MEM_RELEASE);
     }
+};
 
-    std::wcerr << L"DLL not found in current directory: " << dllPath.wstring() << std::endl;
-    std::wcerr << L"Please place Snap.Hutao.Remastered.UnlockerIsland.dll in the current directory." << std::endl;
-    return L"";
-}
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
-std::wstring GetDumpDLLPath()
+constexpr auto SharedMemName = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
+constexpr auto TargetDllName = L"Snap.Hutao.Remastered.UnlockerIsland.dll";
+
+// ---------------------------------------------------------------------------
+// Game path resolution
+// ---------------------------------------------------------------------------
+
+static std::wstring FindGameExecutable()
 {
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    std::filesystem::path dllPath = std::filesystem::path(exePath).parent_path() / L"Dumper.dll";
-
-    if (std::filesystem::exists(dllPath))
-    {
-        return dllPath.wstring();
-    }
-
-    std::wcerr << L"DLL not found in current directory: " << dllPath.wstring() << std::endl;
-    std::wcerr << L"Please place Dumper.dll in the current directory." << std::endl;
-    return L"";
-}
-
-bool StartGameAndSuspend(const std::wstring& gamePath, HANDLE& hProcess, HANDLE& hMainThread, DWORD& pid)
-{
-    // 启动游戏
-    STARTUPINFOW si = { sizeof(si) };
-    PROCESS_INFORMATION pi = { 0 };
-    
-    std::wstring commandLine = L"\"" + gamePath + L"\"";
-    
-    if (!CreateProcessW(
-        gamePath.c_str(),
-        &commandLine[0],
-        nullptr,
-        nullptr,
-        FALSE,
-        CREATE_SUSPENDED, // 创建时挂起
-        0,
-        nullptr,
-        &si,
-        &pi))
-    {
-        std::wcerr << L"Failed to start game: " << GetLastError() << std::endl;
-        return false;
-    }
-    
-    hProcess = pi.hProcess;
-    hMainThread = pi.hThread; // 保存主线程句柄
-    pid = pi.dwProcessId;
-    
-    std::wcout << L"Game started with PID: " << pid << L" (suspended)" << std::endl;
-    return true;
-}
-
-void Inject()
-{
-	std::wstring moduleName = L"YuanShen.exe";
-    std::wstring dllPath = GetDLLPath();
-    if (dllPath.empty())
-    {
-        return;
-    }
-
-    // 总是启动新游戏实例
-    std::wstring gamePath;
-    
-    // 尝试查找游戏路径
-    std::vector<std::wstring> possiblePaths = {
+    const std::vector<std::wstring> candidates = {
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\YuanShen.exe",
         L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\GenshinImpact.exe",
         L"D:\\Genshin Impact Game\\YuanShen.exe",
         L"D:\\Genshin Impact Game\\GenshinImpact.exe",
-        L"E:\\Genshin Impact Game\\YuanShen.exe"
-        L"E:\\Genshin Impact Game\\GenshinImpact.exe"
+        L"E:\\Genshin Impact Game\\YuanShen.exe",
+        L"E:\\Genshin Impact Game\\GenshinImpact.exe",
     };
-    
-    for (const auto& path : possiblePaths)
+
+    for (const auto& path : candidates)
     {
-        if (std::filesystem::exists(path))
+        if (fs::exists(path))
+            return path;
+    }
+    return {};
+}
+
+// ---------------------------------------------------------------------------
+// DLL path (relative to test exe)
+// ---------------------------------------------------------------------------
+
+static std::wstring GetDllPath(std::wstring_view dllName)
+{
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    auto dllPath = fs::path(exePath).parent_path() / dllName;
+
+    if (fs::exists(dllPath))
+        return dllPath.wstring();
+
+    std::wcerr << L"File not found: " << dllPath << std::endl;
+    return {};
+}
+
+// ---------------------------------------------------------------------------
+// Shared memory for HookEnvironment
+// ---------------------------------------------------------------------------
+
+struct SharedMemory
+{
+    HANDLE mapping = nullptr;
+    HookEnvironment* env = nullptr;
+
+    SharedMemory() = default;
+    ~SharedMemory() { Cleanup(); }
+
+    SharedMemory(const SharedMemory&) = delete;
+    SharedMemory& operator=(const SharedMemory&) = delete;
+
+    SharedMemory(SharedMemory&& other) noexcept
+        : mapping(std::exchange(other.mapping, nullptr))
+        , env(std::exchange(other.env, nullptr))
+    {
+    }
+
+    SharedMemory& operator=(SharedMemory&& other) noexcept
+    {
+        if (this != &other)
         {
-            gamePath = path;
-            break;
+            Cleanup();
+            mapping = std::exchange(other.mapping, nullptr);
+            env = std::exchange(other.env, nullptr);
+        }
+        return *this;
+    }
+
+    [[nodiscard]] bool Create()
+    {
+        mapping = CreateFileMappingW(
+            INVALID_HANDLE_VALUE, nullptr,
+            PAGE_READWRITE, 0, sizeof(HookEnvironment),
+            SharedMemName);
+
+        if (!mapping)
+        {
+            std::wcerr << L"CreateFileMappingW failed: " << GetLastError() << std::endl;
+            return false;
+        }
+
+        env = static_cast<HookEnvironment*>(
+            MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(HookEnvironment)));
+
+        if (!env)
+        {
+            std::wcerr << L"MapViewOfFile failed: " << GetLastError() << std::endl;
+            Cleanup();
+            return false;
+        }
+
+        return true;
+    }
+
+private:
+    void Cleanup()
+    {
+        if (env)
+        {
+            UnmapViewOfFile(env);
+            env = nullptr;
+        }
+        if (mapping)
+        {
+            CloseHandle(mapping);
+            mapping = nullptr;
         }
     }
-    
-    if (gamePath.empty())
-    {
-        std::wcerr << L"Game executable not found. Please specify the game path." << std::endl;
-        return;
-    }
-    
-    HANDLE hProcess = nullptr;
-    HANDLE hMainThread = nullptr;
+};
+
+// ---------------------------------------------------------------------------
+// Game launcher (suspended)
+// ---------------------------------------------------------------------------
+
+struct GameProcess
+{
+    unique_handle process;
+    unique_handle mainThread;
     DWORD pid = 0;
-    if (!StartGameAndSuspend(gamePath, hProcess, hMainThread, pid))
-    {
-        return;
-    }
-    
-    HookEnvironment* pEnv = nullptr;
-    HANDLE hMapFile = NULL;
 
-    if (CreateSharedMemoryForHookEnvironment(pEnv, hMapFile))
+    [[nodiscard]] static GameProcess LaunchSuspended(const std::wstring& gamePath)
     {
-        if (pEnv)
+        GameProcess gp;
+        STARTUPINFOW si = { sizeof(si) };
+        PROCESS_INFORMATION pi = {};
+
+        std::wstring cmdLine = L"\"" + gamePath + L"\"";
+
+        if (!CreateProcessW(
+                gamePath.c_str(), cmdLine.data(),
+                nullptr, nullptr, FALSE, CREATE_SUSPENDED,
+                nullptr, nullptr, &si, &pi))
         {
-            ZeroMemory(pEnv, sizeof(HookEnvironment));
-            pEnv->Size = sizeof(HookEnvironment);
-            pEnv->State = IslandState::None;
-            pEnv->LastError = 0;
-            pEnv->Uid = 0;
-            pEnv->ProvideOffsets = FALSE;
-            pEnv->IsOversea = FALSE;
-
-            pEnv->ResinItem000106 = TRUE;
-            pEnv->ResinItem000201 = FALSE;
-            pEnv->ResinItem107009 = TRUE;
-            pEnv->ResinItem107012 = TRUE;
-            pEnv->ResinItem220007 = TRUE;
-
-			pEnv->DebugMode = TRUE;
-            pEnv->EnableSetFov = TRUE;
-            pEnv->FieldOfView = 90.0f;
-            pEnv->DisablePlayerPerspective = TRUE;
-            pEnv->DisableFog = FALSE;
-            pEnv->EnableSetFps = TRUE;
-            pEnv->TargetFps = 2000;
-            pEnv->RemoveTeamProgress = TRUE;
-            pEnv->HideQuestBanner = TRUE;
-            pEnv->DisableCameraMove = TRUE;
-            pEnv->DisableDamageText = FALSE;
-            pEnv->TouchMode = FALSE;
-            pEnv->RedirectCombine = TRUE;
-			pEnv->DisplayPaimon = TRUE;
-            pEnv->HidePlayerInfo = TRUE;
-			pEnv->HideGrass = TRUE;
-			pEnv->GamepadHotSwitch = TRUE;
-            pEnv->InLevelClockPageSpeedUp = TRUE;
-            pEnv->CombineHotkey = VK_F12;
-            pEnv->WeakMapCheck = true;
-            
-            ZeroMemory(&pEnv->Offsets, sizeof(HookFunctionOffsets));
-
-            pEnv->Offsets.SetUid = 0xAC68570;  //MonoUIWaterMask.SetUID
-			pEnv->Offsets.SetFov = 0x1560ec0;  //need pattern scan
-            pEnv->Offsets.SetFog = 0x15b73330;  //
-            pEnv->Offsets.GetFps = 0x106a3b0;  //
-            pEnv->Offsets.SetFps = 0x106a3c0;  //双层跳板, 高 实在是高
-            pEnv->Offsets.OpenTeam = 0xe47e1b0;  //JGDDADKMLDL.DDFODLGCHGM  need pattern scan
-            pEnv->Offsets.OpenTeamAdvanced = 0xe4851e0;  //JGDDADKMLDL.LBLECKJEGOI  need pattern scan
-            pEnv->Offsets.CheckEnter = 0xfeafc10;  //need pattern scan
-            pEnv->Offsets.QuestBanner = 0xa98f410;
-            pEnv->Offsets.FindObject = 0x15B625B0;  //GameObject.Find
-            pEnv->Offsets.ObjectActive = 0x1063450;  //GameObject.set_active
-			pEnv->Offsets.IsObjectActive = 0x15B622E0;  //GameObject.get_active
-            pEnv->Offsets.CameraMove = 0xfa87490;  //BOFBPKLPKOK.DNIJOJKIOIF need pattern scan
-            pEnv->Offsets.DamageText = 0x1084e9e0;  //MonoParticleDamageTextContainer.ShowOneDamageText
-            pEnv->Offsets.TouchInput = 0x105c2c10;  //CNGPNBOAIKK.FGKNOKNIIPL need pattern scan
-			pEnv->Offsets.KeyboardMouseInput = 0xA2AF880;  // need pattern scan
-			pEnv->Offsets.JoypadInput = 0x105AE050;  // need pattern scan
-            pEnv->Offsets.CombineEntry = 0x69ea500;  //NBJLAEKBCIM.DNJNIKDKECD need pattern scan
-            pEnv->Offsets.CombineEntryPartner = 0x9199950;  //FGPIAOKFJCE.NJCOCBAONEC need pattern scan
-            pEnv->Offsets.SetupResinList = 0;
-            pEnv->Offsets.ResinList = 0;
-            pEnv->Offsets.FindString = 0x406330;  //internal method need pattern scan
-            pEnv->Offsets.PlayerPerspective = 0xd80fb50;
-			pEnv->Offsets.GameUpdate = 0x15394C70;  //MainThreadDispatcher.Update
-			pEnv->Offsets.ActorManagerCtor = 0xD2D4EF0;  //ActorManager..ctor
-			pEnv->Offsets.GetGlobalActor = 0xD2CC9E0;  //ActorManager.GetGlobalActor
-			//pEnv->Offsets.ResumePaimonInProfilePageAll = 0xD2FA560;  //GlobalActor.ResumePaimonInProfilePageAll
-			pEnv->Offsets.AvatarPaimonAppear = 0x107BAC60;  //GlobalActor.AvatarPaimonAppear
-			pEnv->Offsets.GetComponent = 0x15B61F60;  //GameObject.GetComponent(String type)
-			pEnv->Offsets.GetText = 0x15C45190;  //Text.get_text
-			pEnv->Offsets.GetName = 0x15B79680;  //Object.get_name
-			pEnv->Offsets.CheckCanOpenMap = 0x69E9DD3;  // need pattern scan
+            std::wcerr << L"CreateProcessW failed: " << GetLastError() << std::endl;
+            return gp;
         }
 
-        if (InjectDLL(hProcess, dllPath))
-        {
-            //InjectDLL(hProcess, GetDumpDLLPath());
-            std::wcout << L"DLL injected successfully. Waiting for module initialization..." << std::endl;
-            
-            // 等待DLL初始化完成
-            Sleep(2000);
-            
-            if (hMainThread)
-            {
-                ResumeThread(hMainThread);
-                CloseHandle(hMainThread);
-                std::wcout << L"Game process resumed." << std::endl;
-            }
-            else
-            {
-                std::wcerr << L"Failed to resume game: main thread handle is null." << std::endl;
-            }
-        }
-        else
-        {
-            std::wcerr << L"Failed to inject DLL." << std::endl;
-        }
+        gp.process.reset(pi.hProcess);
+        gp.mainThread.reset(pi.hThread);
+        gp.pid = pi.dwProcessId;
+
+        std::wcout << L"Game started with PID: " << gp.pid << L" (suspended)" << std::endl;
+        return gp;
     }
 
-    if (hProcess)
+    explicit operator bool() const noexcept
     {
-        CloseHandle(hProcess);
+        return process != nullptr;
     }
-}
 
-bool CreateSharedMemoryForHookEnvironment(HookEnvironment*& pEnv, HANDLE& hMapFile)
+    void Resume()
+    {
+        if (mainThread)
+        {
+            ResumeThread(mainThread.get());
+            std::wcout << L"Game process resumed." << std::endl;
+        }
+    }
+};
+
+// ---------------------------------------------------------------------------
+// DLL injection
+// ---------------------------------------------------------------------------
+
+static bool InjectDll(HANDLE hProcess, const std::wstring& dllPath)
 {
-    hMapFile = CreateFileMappingW(
-        INVALID_HANDLE_VALUE,
-        NULL,
-        PAGE_READWRITE,
-        0,
-        sizeof(HookEnvironment),
-        SHARED_MEM_NAME
-    );
-    
-    if (hMapFile == NULL)
+    auto* loadLibraryAddr = reinterpret_cast<LPVOID>(
+        GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW"));
+
+    if (!loadLibraryAddr)
     {
-        std::wcerr << L"Failed to create shared memory: " << GetLastError() << std::endl;
-        return false;
-    }
-    
-    pEnv = (HookEnvironment*)MapViewOfFile(
-        hMapFile,
-        FILE_MAP_ALL_ACCESS,
-        0,
-        0,
-        sizeof(HookEnvironment)
-    );
-    
-    if (pEnv == NULL)
-    {
-        std::wcerr << L"Failed to map view of shared memory: " << GetLastError() << std::endl;
-        CloseHandle(hMapFile);
+        std::wcerr << L"GetProcAddress(LoadLibraryW) failed: " << GetLastError() << std::endl;
         return false;
     }
 
-    return true;
-}
+    const size_t pathSize = (dllPath.size() + 1) * sizeof(wchar_t);
 
-bool InjectDLL(HANDLE hProcess, const std::wstring& dllPath)
-{
-    // First check if DLL is already injected
-    std::wstring dllName = dllPath.substr(dllPath.find_last_of(L"\\/") + 1);
+    std::unique_ptr<void, RemoteMemDeleter> remoteMem(
+        VirtualAllocEx(hProcess, nullptr, pathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE),
+        RemoteMemDeleter{ hProcess });
 
-    // Get LoadLibraryW function address
-    LPVOID loadLibraryAddr = reinterpret_cast<LPVOID>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW"));
-    if (loadLibraryAddr == nullptr)
+    if (!remoteMem)
     {
-        std::wcerr << L"Failed to get LoadLibraryW address: " << GetLastError() << std::endl;
+        std::wcerr << L"VirtualAllocEx failed: " << GetLastError() << std::endl;
         return false;
     }
 
-    // Allocate memory in target process for DLL path
-    size_t pathSize = (dllPath.length() + 1) * sizeof(wchar_t);
-    LPVOID remoteMemory = VirtualAllocEx(hProcess, nullptr, pathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (remoteMemory == nullptr)
+    if (!WriteProcessMemory(hProcess, remoteMem.get(), dllPath.c_str(), pathSize, nullptr))
     {
-        std::wcerr << L"Failed to allocate memory in target process: " << GetLastError() << std::endl;
+        std::wcerr << L"WriteProcessMemory failed: " << GetLastError() << std::endl;
         return false;
     }
 
-    // Write DLL path to target process
-    if (!WriteProcessMemory(hProcess, remoteMemory, dllPath.c_str(), pathSize, nullptr))
-    {
-        std::wcerr << L"Failed to write DLL path to target process: " << GetLastError() << std::endl;
-        VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
-        return false;
-    }
-
-    // Create remote thread to call LoadLibraryW
-    HANDLE hThread = CreateRemoteThread(hProcess, nullptr, 0,
+    unique_handle hThread(CreateRemoteThread(
+        hProcess, nullptr, 0,
         reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibraryAddr),
-        remoteMemory, 0, nullptr);
+        remoteMem.get(), 0, nullptr));
 
-    if (hThread == nullptr)
+    if (!hThread)
     {
-        std::wcerr << L"Failed to create remote thread: " << GetLastError() << std::endl;
-        VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
+        std::wcerr << L"CreateRemoteThread failed: " << GetLastError() << std::endl;
         return false;
     }
-    WaitForSingleObject(hThread, INFINITE);
+
+    WaitForSingleObject(hThread.get(), INFINITE);
+
     DWORD exitCode = 0;
-    GetExitCodeThread(hThread, &exitCode);
-    CloseHandle(hThread);
-    VirtualFreeEx(hProcess, remoteMemory, 0, MEM_RELEASE);
+    GetExitCodeThread(hThread.get(), &exitCode);
 
     if (exitCode == 0)
     {
-        std::wcerr << L"LoadLibraryW failed in target process" << std::endl;
+        std::wcerr << L"LoadLibraryW returned 0 in target process" << std::endl;
         return false;
     }
 
-    std::wcout << L"DLL injected successfully: " << dllName << std::endl;
+    auto dllName = fs::path(dllPath).filename();
+    std::wcout << L"DLL injected: " << dllName << std::endl;
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// HookEnvironment preset
+// ---------------------------------------------------------------------------
+
+static void ConfigureEnvironment(HookEnvironment& env)
+{
+    ZeroMemory(&env, sizeof(env));
+
+    env.Size = sizeof(HookEnvironment);
+    env.State = IslandState::None;
+
+    // Feature flags
+    env.DebugMode            = TRUE;
+    env.EnableSetFov         = TRUE;
+    env.FieldOfView          = 90.0f;
+    env.DisablePlayerPerspective = TRUE;
+    env.EnableSetFps         = TRUE;
+    env.TargetFps            = 2000;
+    env.RemoveTeamProgress   = TRUE;
+    env.HideQuestBanner      = TRUE;
+    env.DisableCameraMove    = TRUE;
+    env.RedirectCombine      = TRUE;
+    env.DisplayPaimon        = TRUE;
+    env.HidePlayerInfo       = TRUE;
+    env.HideGrass            = TRUE;
+    env.GamepadHotSwitch     = TRUE;
+    env.InLevelClockPageSpeedUp = TRUE;
+    env.WeakMapCheck         = TRUE;
+    env.CombineHotkey        = VK_F12;
+
+    // Resin item overrides
+    env.ResinItem000106 = TRUE;
+    env.ResinItem107009 = TRUE;
+    env.ResinItem107012 = TRUE;
+    env.ResinItem220007 = TRUE;
+
+    // Offsets
+    env.Offsets.SetUid                   = 0xAC68570;
+    env.Offsets.SetFov                   = 0x1560EC0;
+    env.Offsets.SetFog                   = 0x15B73330;
+    env.Offsets.GetFps                   = 0x106A3B0;
+    env.Offsets.SetFps                   = 0x106A3C0;
+    env.Offsets.OpenTeam                 = 0xE47E1B0;
+    env.Offsets.OpenTeamAdvanced         = 0xE4851E0;
+    env.Offsets.CheckEnter               = 0xFEAFC10;
+    env.Offsets.QuestBanner              = 0xA98F410;
+    env.Offsets.FindObject               = 0x15B625B0;
+    env.Offsets.ObjectActive             = 0x1063450;
+    env.Offsets.IsObjectActive           = 0x15B622E0;
+    env.Offsets.CameraMove               = 0xFA87490;
+    env.Offsets.DamageText               = 0x1084E9E0;
+    env.Offsets.TouchInput               = 0x105C2C10;
+    env.Offsets.KeyboardMouseInput       = 0xA2AF880;
+    env.Offsets.JoypadInput              = 0x105AE050;
+    env.Offsets.CombineEntry             = 0x69EA500;
+    env.Offsets.CombineEntryPartner      = 0x9199950;
+    env.Offsets.FindString               = 0x406330;
+    env.Offsets.PlayerPerspective        = 0xD80FB50;
+    env.Offsets.GameUpdate               = 0x15394C70;
+    env.Offsets.ActorManagerCtor         = 0xD2D4EF0;
+    env.Offsets.GetGlobalActor           = 0xD2CC9E0;
+    env.Offsets.AvatarPaimonAppear       = 0x107BAC60;
+    env.Offsets.GetComponent             = 0x15B61F60;
+    env.Offsets.GetText                  = 0x15C45190;
+    env.Offsets.GetName                  = 0x15B79680;
+    env.Offsets.CheckCanOpenMap          = 0x69E9DD3;
+}
+
+// ---------------------------------------------------------------------------
+// Main injection flow
+// ---------------------------------------------------------------------------
+
+static int Inject()
+{
+    // 1. Locate the game executable
+    auto gamePath = FindGameExecutable();
+    if (gamePath.empty())
+    {
+        std::wcerr << L"Game executable not found. "
+                    << L"Adjust the candidate paths in FindGameExecutable()."
+                    << std::endl;
+        return 1;
+    }
+
+    // 2. Locate the target DLL
+    auto dllPath = GetDllPath(TargetDllName);
+    if (dllPath.empty())
+        return 1;
+
+    // 3. Launch game (suspended)
+    auto game = GameProcess::LaunchSuspended(gamePath);
+    if (!game)
+        return 1;
+
+    // 4. Create shared memory and initialise HookEnvironment
+    SharedMemory sharedMem;
+    if (!sharedMem.Create())
+        return 1;
+
+    ConfigureEnvironment(*sharedMem.env);
+
+    // 5. Inject DLL
+    if (!InjectDll(game.process.get(), dllPath))
+    {
+        std::wcerr << L"Injection failed." << std::endl;
+        return 1;
+    }
+
+    // 6. Let the DLL initialise, then resume the game
+    Sleep(2000);
+    game.Resume();
+
+    std::wcout << L"All done." << std::endl;
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Entry point
+// ---------------------------------------------------------------------------
+
 int main()
 {
-    Inject();
-    
-    return 0;
+    return Inject();
 }

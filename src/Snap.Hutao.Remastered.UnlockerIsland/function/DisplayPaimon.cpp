@@ -46,6 +46,14 @@ void DisplayPaimon::OnUpdate()
         return;
     }
 
+    // Execute logic only every 200 frames to reduce performance impact
+    frameCounter++;
+    if (frameCounter < FRAME_INTERVAL)
+    {
+        return;
+    }
+    frameCounter = 0;
+
     if (!getGlobalActor || !getActive || !avatarPaimonAppear)
     {
         return;

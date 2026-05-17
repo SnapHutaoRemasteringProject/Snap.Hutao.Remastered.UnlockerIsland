@@ -23,25 +23,27 @@ void MacroDetector::Initialize()
 {
 	InitializeWndProcHooks();
 
+	// Always start the background thread regardless of whether the Unity
+	// window exists yet. Update() retries window discovery every cycle,
+	// so the detector becomes operational as soon as the window appears.
+	CreateThread(NULL, 0, [](LPVOID _) -> DWORD
+	{
+		while (true)
+		{
+			Sleep(1000);
+			MacroDetector::GetInstance().Update();
+		}
+	}, 0, 0, NULL);
+
 	HWND hWnd = GetUnityMainWindow();
 	if (hWnd)
 	{
 		std::cout << "[MacroDetector] Found Unity main window: " << hWnd << std::endl;
-
-		CreateThread(NULL, 0, [](LPVOID _) -> DWORD
-		{
-			while (true)
-			{
-				Sleep(1000);
-				MacroDetector::GetInstance().Update();
-			}
-		}, 0, 0, NULL);
-
 		std::cout << "[MacroDetector] Initialized with unified WndProc hook system" << std::endl;
 	}
 	else
 	{
-		std::cout << "[MacroDetector] Unity main window not found" << std::endl;
+		std::cout << "[MacroDetector] Unity main window not found yet" << std::endl;
 	}
 }
 

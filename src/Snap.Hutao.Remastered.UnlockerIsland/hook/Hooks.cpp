@@ -140,6 +140,85 @@ static void DispatchUpdate()
 }
 
 // ===================================================================
+// Pattern-scan offset resolver
+// Overrides whatever offsets the test or fallback tables provided
+// with values obtained via pattern scanning. Functions that have no
+// pattern remain at their fallback value (which may be 0 / nullptr).
+// ===================================================================
+
+static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
+{
+	ZeroMemory(&offsets, sizeof(offsets));
+    // ---- Direct-address patterns (scan result IS the function) ----
+
+    auto ScanDirect = [&](const std::string& pattern, DWORD& out)
+    {
+        if (pattern.empty()) return;
+        if (auto* addr = Scanner::Scan(pattern))
+            out = (DWORD)GetVirtualAddress((INT64)addr);
+    };
+
+    ScanDirect(SetFovPattern,                        offsets.SetFov);
+    ScanDirect(SwitchInputDeviceToTouchScreenPattern, offsets.TouchInput);
+    ScanDirect(SwitchInputDeviceToJoypadPattern,      offsets.JoypadInput);
+    ScanDirect(SwitchInputDeviceToKeyboardPattern,    offsets.KeyboardMouseInput);
+    ScanDirect(SetupQuestBannerPattern,                offsets.QuestBanner);
+    ScanDirect(FindGameObjectPattern,                  offsets.FindObject);
+    ScanDirect(SetUIDPattern,                          offsets.SetUid);
+    ScanDirect(EventCameraMovePattern,                 offsets.CameraMove);
+    ScanDirect(ShowOneDamageTextExPattern,             offsets.DamageText);
+    ScanDirect(FindStringPattern,                      offsets.FindString);
+    ScanDirect(CraftEntryPartnerPattern,               offsets.CombineEntryPartner);
+    ScanDirect(CraftEntryPattern,                      offsets.CombineEntry);
+    ScanDirect(CheckCanEnterPattern,                   offsets.CheckEnter);
+    ScanDirect(OpenTeamPageAccordinglyPattern,         offsets.OpenTeamAdvanced);
+    ScanDirect(OpenTeamPattern,                        offsets.OpenTeam);
+    ScanDirect(GetNamePattern,                         offsets.GetName);
+    ScanDirect(GameUpdatePattern,                      offsets.GameUpdate);
+    ScanDirect(InLevelClockPageOkButtonClickedPattern,  offsets.InLevelClockPageOkButtonClicked);
+    ScanDirect(InLevelClockPageCloseButtonClickedPattern, offsets.InLevelClockPageCloseButtonClicked);
+
+    // ---- REL (relative-call) patterns ----
+    // Scan finds a CALL (E8) instruction; ResolveRelative gives the target.
+
+    auto ScanRel = [&](const std::string& pattern, DWORD& out)
+    {
+        if (pattern.empty()) return;
+        if (auto* addr = Scanner::Scan(pattern))
+            if (auto* target = Scanner::ResolveRelative(addr))
+                out = (DWORD)GetVirtualAddress((INT64)target);
+    };
+
+    ScanRel(GetFrameCountPattern,      offsets.GetFps);
+    ScanRel(SetFrameCountPattern,      offsets.SetFps);
+    ScanRel(SetActivePattern,          offsets.ObjectActive);
+    ScanRel(IsActivePattern,           offsets.IsObjectActive);
+    ScanRel(DisplayFogPattern,         offsets.SetFog);
+    ScanRel(PlayerPerspectivePattern,  offsets.PlayerPerspective);
+    ScanRel(SetupResinListPattern,     offsets.SetupResinList);
+    ScanRel(CheckCanOpenMapPattern, offsets.CheckCanOpenMap);
+
+    // ---- Derived data offsets (read from code at a fixed offset) ----
+
+    // ClosePage = *(int32_t*)(ClosePageCallerPattern_result + 0x2A)
+    if (!ClosePageCallerPattern.empty())
+    {
+        if (auto* addr = Scanner::Scan(ClosePageCallerPattern))
+            offsets.ClosePage = Scanner::ReadFieldOffset(addr, 0x2A);
+    }
+
+    // ResinList = *(int32_t*)(SetupResinList_resolved + 0x27)
+    // needs SetupResinListPattern scanned & resolved first.
+    if (offsets.SetupResinList != 0)
+    {
+        auto* funcAddr = GetFunctionAddress(offsets.SetupResinList);
+        if (funcAddr)
+            offsets.ResinList = Scanner::ReadFieldOffset(funcAddr, 0x27);
+    }
+    // If SetupResinList couldn't be resolved, ResinList stays as fallback.
+}
+
+// ===================================================================
 // Master SetFov hook — also serves as the main per-frame dispatch
 // ===================================================================
 static int MasterHookSetFov(void* a1, float changeFovValue)

@@ -32,6 +32,7 @@ private:
     bool InitializeXInput();
     bool IsXInputControllerActive() const;
 
+    bool IsKeyboardActive();
     bool IsMouseActive();
 
     void SendSwitchMessage(bool toGamepad);
@@ -48,12 +49,12 @@ private:
 	bool isGamepadMode{false};
 
     volatile bool m_mouseActivity{false};
+    volatile bool m_keyboardActivity{false};
     volatile ULONGLONG m_pauseUntilTime{0};
 
     LONGLONG m_lastMousePos{0};
-    ULONGLONG m_lastMouseActivityTime{0};
     ULONGLONG m_lastGamepadActivityTime{0};
-    ULONGLONG m_lastKeyboardActivityTime{0};
+    ULONGLONG m_lastKeyboardMouseActivityTime{0};
 
     static constexpr DWORD SWITCH_DELAY_MS = 500;
 };

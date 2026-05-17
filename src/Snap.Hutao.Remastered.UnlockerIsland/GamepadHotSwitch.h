@@ -53,6 +53,7 @@ private:
     LONGLONG m_lastMousePos{0};
     ULONGLONG m_lastMouseActivityTime{0};
     ULONGLONG m_lastGamepadActivityTime{0};
+    ULONGLONG m_lastKeyboardActivityTime{0};
 
     static constexpr DWORD SWITCH_DELAY_MS = 500;
 };

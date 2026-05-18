@@ -133,21 +133,30 @@ void GamepadHotSwitch::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPar
         break;
 
     case WM_KEYDOWN:
-        // Do not treat keyboard input as "switch to keyboard mode" when
-        // the player is typing in the chat dialog (Enter sends the message).
-        if (wParam == VK_RETURN)
-            break;
         if (findString && findGameObject && getActive)
         {
-            void* chatObj = FindGameObject(CHAT_DIALOG_PATH);
-            if (chatObj)
+            const char* paths[] =
             {
-                typedef bool (*GetActiveFn)(void*);
-                if (((GetActiveFn)getActive)(chatObj))
-                    break; // Chat dialog is active — ignore this key press.
+                CHAT_DIALOG_PATH,
+                FRIEND_PAGE_PATH,
+                PROFILE_LAYER_PATH,
+            };
+            for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); i++)
+            {
+                void* chatObj = FindGameObject(paths[i]);
+                if (chatObj)
+                {
+                    typedef bool (*GetActiveFn)(void*);
+                    if (((GetActiveFn)getActive)(chatObj))
+                    {
+                        //Log("[GamepadHotSwitch] Input page active, ignoring key");
+                        return;
+                    }
+                }
             }
         }
-        m_lastKeyboardActivityTime = currentTime;
+        if (currentTime > m_pauseUntilTime)
+            m_keyboardActivity = true;
         break;
 
     case WM_LBUTTONDOWN:
@@ -214,6 +223,16 @@ bool GamepadHotSwitch::IsXInputControllerActive() const
     return false;
 }
 
+bool GamepadHotSwitch::IsKeyboardActive()
+{
+    if (m_keyboardActivity)
+    {
+        m_keyboardActivity = false;
+        return true;
+    }
+    return false;
+}
+
 bool GamepadHotSwitch::IsMouseActive()
 {
     if (m_mouseActivity)
@@ -258,19 +277,12 @@ void GamepadHotSwitch::MainThread()
 
         if (IsXInputControllerActive())
             m_lastGamepadActivityTime = currentTime;
+        if (IsKeyboardActive() || IsMouseActive())
+            m_lastKeyboardMouseActivityTime = currentTime;
 
-        // Treat recent keyboard activity like mouse activity for switching.
-        if (IsMouseActive() ||
-            (m_lastKeyboardActivityTime > 0 &&
-             currentTime - m_lastKeyboardActivityTime < SWITCH_DELAY_MS))
-        {
-            if (currentTime > m_pauseUntilTime)
-                m_lastMouseActivityTime = currentTime;
-        }
-
-        if (m_lastGamepadActivityTime > m_lastMouseActivityTime + SWITCH_DELAY_MS)
+        if (m_lastGamepadActivityTime > m_lastKeyboardMouseActivityTime + SWITCH_DELAY_MS)
             SendSwitchMessage(true);
-        else if (m_lastMouseActivityTime > m_lastGamepadActivityTime + SWITCH_DELAY_MS)
+        else if (m_lastKeyboardMouseActivityTime > m_lastGamepadActivityTime + SWITCH_DELAY_MS)
             SendSwitchMessage(false);
 
         Sleep(50);

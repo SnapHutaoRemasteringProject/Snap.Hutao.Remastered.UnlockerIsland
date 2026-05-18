@@ -20,6 +20,7 @@ const char* PROFILE_LAYER_PATH = "/Canvas/Pages/PlayerProfilePage";
 const char* PROFILE_UID_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/UID";
 const char* PROFILE_NAME_PATH = "/Canvas/Pages/PlayerProfilePage/GrpProfile/Right/GrpPlayerCard/Layout/PlayerName";
 const char* CHAT_DIALOG_PATH = "/Canvas/Dialogs/DialogLayer(Clone)/ChatDialog";
+const char* FRIEND_PAGE_PATH = "/Canvas/Pages/FriendPage";
 const char* UID_PATH = "/BetaWatermarkCanvas(Clone)/Panel/TxtUID";
 const char* QUEST_BANNER_PATH = "/Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner";
 const char* SYNTHESIS_PAGE_NAME = "SynthesisPage";

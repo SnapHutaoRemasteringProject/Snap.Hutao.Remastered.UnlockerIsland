@@ -1,4 +1,4 @@
-#include "Hooks.h"
+﻿#include "Hooks.h"
 
 #include "../framework.h"
 #include "../utils/Scanner.h"
@@ -176,7 +176,6 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
     ScanDirect(CheckCanEnterPattern,                   offsets.CheckEnter);
     ScanDirect(OpenTeamPageAccordinglyPattern,         offsets.OpenTeamAdvanced);
     ScanDirect(OpenTeamPattern,                        offsets.OpenTeam);
-    ScanDirect(CheckCanOpenMapPattern,                 offsets.CheckCanOpenMap);
     ScanDirect(GetNamePattern,                         offsets.GetName);
     ScanDirect(GameUpdatePattern,                      offsets.GameUpdate);
     ScanDirect(InLevelClockPageOkButtonClickedPattern,  offsets.InLevelClockPageOkButtonClicked);
@@ -201,6 +200,7 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
     ScanRel(PlayerPerspectivePattern,  offsets.PlayerPerspective);
     ScanRel(SetupResinListPattern,     offsets.SetupResinList);
     ScanRel(ActorManagerCtorPattern,   offsets.ActorManagerCtor);
+    ScanRel(CheckCanOpenMapPattern, offsets.CheckCanOpenMap);
 
     // ---- Derived data offsets (read from code at a fixed offset) ----
 

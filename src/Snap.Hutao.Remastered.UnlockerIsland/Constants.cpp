@@ -52,14 +52,15 @@ std::string CraftEntryPattern = "41 56 56 57 53 48 83 EC 58 49 89 CE 80 3D ? ? ?
 std::string CheckCanEnterPattern = "56 48 81 ec 80 00 00 00 80 3d ? ? ? ? 00 0f 84 ? ? ? ? 80 3d ? ? ? ? 00";
 std::string OpenTeamPageAccordinglyPattern = "56 57 53 48 83 ec 20 89 cb 80 3d ? ? ? ? 00 74 7a 80 3d ? ? ? ? 00 48 8b 05";
 std::string OpenTeamPattern = "48 83 EC ? 80 3D ? ? ? ? 00 75 ? 48 8B 0D ? ? ? ? 80 B9 ? ? ? ? 00 0F 84 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 84 C0 75";
+//REL
 std::string CheckCanOpenMapPattern = "E8 ?? ?? ?? ?? 84 C0 0F 85 ?? ?? ?? ?? 48 8B 45 ?? 48 85 C0 74 ?? 41 8B 17 4C 8B 40 ?? 48 8B 48 ?? FF 50 ?? 84 C0 0F 84 ?? ?? ?? ??";
 std::string GetNamePattern = "40 53 48 81 EC ?? ?? ?? ?? 48 8B D9 48 85 C9 0F 84 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 48 8B 10 48 8B C8 FF 52 ?? 48 85 C0 0F 85 ?? ?? ?? ?? 48 8B CB E8 ?? ?? ?? ??";
 std::string GameUpdatePattern = "55 56 57 53 48 83 EC ?? 48 8D 6C 24 ?? 48 C7 45 ?? ?? ?? ?? ?? 48 8B 41 ?? 48 85 C0 0F 84 ?? ?? ?? ?? 83 78 ?? ?? 0F 8E ?? ?? ?? ?? 48 89 CF 48 8B 49 ?? 48 85 C9";
 std::string ActorManagerCtorPattern = "E8 ?? ?? ?? ?? 48 85 F6 0F 84 ?? ?? ?? ?? BF ?? ?? ?? ?? 48 89 F1 48 8B 55 ?? 49 89 D8 E8 ?? ?? ?? ?? EB ??";
 //REL
 std::string SetupResinListPattern = "E8 ?? ?? ?? ?? 84 DB 74 ?? 4C 89 F1 E8 ?? ?? ?? ?? 49 8B 86 ?? ?? ?? ?? 48 85 C0 75 ?? E9 ?? ?? ?? ??";
-std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? 00 74 ??";
-//std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? 00 74 ?? 48 83 C4 ?? 5B 5D 5F 5E C3 48 8B 86 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 8B A8 ?? ?? ?? ?? 85 ED 74 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 88";
+//std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? 00 74 ??";
+std::string InLevelClockPageOkButtonClickedPattern = "56 57 55 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 80 BE ?? ?? ?? ?? 00 74 ?? 48 83 C4 ?? 5B 5D 5F 5E C3 48 8B 86 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 8B A8 ?? ?? ?? ?? 85 ED 74 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 88";
 std::string InLevelClockPageCloseButtonClickedPattern = "56 57 53 48 83 EC ?? 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 8E ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 83 79 ?? 00 7E ?? 48 8B 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 C7 48 8B 40 ?? 85 C0 7E ?? 89 C0 31 DB 66 66 66 66 66 66 2E 0F 1F 84 00 00 00 00 00 89 C0 48 39 C3 0F 83 ?? ?? ?? ?? 48 8B 4C DF ?? 48 85 C9 0F 84 ?? ?? ?? ?? 48 8B 01 0F B7 90";
 std::string ClosePageCallerPattern = "48 83 EC 48 48 89 C8 80 3D ?? ?? ?? ?? 00 75 ?? 83 7A 04 26 75 ?? 80 B8 ?? ?? 00 00 00 74 ?? 4C 8B 00 48 89 C1 31 D2 41 FF 90 ?? ?? 00 00";
 
@@ -67,41 +68,41 @@ std::string ClosePageCallerPattern = "48 83 EC 48 48 89 C8 80 3D ?? ?? ?? ?? 00 
 // Hardcoded offset tables (used when ProvideOffsets is FALSE)
 // ===================================================================
 HookFunctionOffsets g_ChinaOffsets = {
-    /* SetUid */ 0x682C4E0,
-    /* SetFov */ 0x15C0590,
-    /* SetFog */ 0x16C99DB0,
-    /* GetFps */ 0x12DCD00,
-    /* SetFps */ 0x12DCD10,
-    /* OpenTeam */ 0xF8E1940,
-    /* OpenTeamAdvanced */ 0xF8D7070,
-    /* CheckEnter */ 0x101A9C70,
-    /* QuestBanner */ 0xE27A820,
-    /* FindObject */ 0x10B8540,
-    /* ObjectActive */ 0x10B7D00,
-    /* CameraMove */ 0xCBDE200,
-    /* DamageText */ 0x11514DB0,
-    /* TouchInput */ 0xDD948B0,
-    /* KeyboardMouseInput */ 0xdd8d7f0,
-    /* JoypadInput */ 0xDD94A60,
-    /* CombineEntry */ 0x6A1C4A0,
-    /* CombineEntryPartner */ 0x1038BC60,
-    /* SetupResinList */ 0xAF372F0,
-    /* ResinList */ 0x230,
-    /* FindString */ 0x435F60,
-    /* PlayerPerspective */ 0xD0F91E0,
-    /* IsObjectActive */ 0x16c88e30,
-    /* GameUpdate */ 0x164B9860,
+    /* SetUid */ 0xbec2e10,
+    /* SetFov */ 0x160f2f0,
+    /* SetFog */ 0x1105810,
+    /* GetFps */ 0x1106f00,
+    /* SetFps */ 0x1106f10,
+    /* OpenTeam */ 0x7a06ba0,
+    /* OpenTeamAdvanced */ 0x79b8680,
+    /* CheckEnter */ 0xe68b6d0,
+    /* QuestBanner */ 0xe93cce0,
+    /* FindObject */ 0x1100760,
+    /* ObjectActive */ 0x10fff20,
+    /* CameraMove */ 0xE5BC000,
+    /* DamageText */ 0x11b07b80,
+    /* TouchInput */ 0xd7accd0,
+    /* KeyboardMouseInput */ 0xd7a7700,
+    /* JoypadInput */ 0xd7a48e0,
+    /* CombineEntry */ 0xe6d4d90,
+    /* CombineEntryPartner */ 0x9d127d0,
+    /* SetupResinList */ 0x104a47e0,
+    /* ResinList */ 0x220,
+    /* FindString */ 0x449eb0,
+    /* PlayerPerspective */ 0xfe61660,
+    /* IsObjectActive */ 0x10ffef0,
+    /* GameUpdate */ 0x16be9c20,
     /* Reserved */ 0, 0, 0, 0,
-    /* ActorManagerCtor */ 0xdefcd30,
-    /* GetGlobalActor */ 0xdf01950,
-    /* AvatarPaimonAppear */ 0x11469590,
-    /* GetComponent */ 0x16c88ab0,
-    /* GetText */ 0x16d88760,
-    /* GetName */ 0x16ca0230,
-    /* CheckCanOpenMap */ 0x6A1B380,
-    /* InLevelClockPageOkButtonClicked */ 0x118DD5E0,
-    /* InLevelClockPageCloseButtonClicked */ 0x6E76350,
-    /* ClosePage */ 0x328,
+    /* ActorManagerCtor */ 0xe4ec670,
+    /* GetGlobalActor */ 0xe3e69f0,
+    /* AvatarPaimonAppear */ 0x11a655e0,
+    /* GetComponent */ 0x173a9300,
+    /* GetText */ 0x174a92e0,
+    /* GetName */ 0x10e7150,
+    /* CheckCanOpenMap */ 0xe6d4390,
+    /* InLevelClockPageOkButtonClicked */ 0x79B4E00,
+    /* InLevelClockPageCloseButtonClicked */ 0x11ce7af0,
+    /* ClosePage */ 0x318,
 };
 
 HookFunctionOffsets g_OverseaOffsets = {

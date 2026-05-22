@@ -106,39 +106,39 @@ typedef void (*SetUidFn)(void*, uint32_t);
 
 static void DispatchUpdate()
 {
-    bool isResisted = CheckResistInBeyd();
+	bool isResisted = CheckResistInBeyd();
 
-    if (isResisted && !isResistedLastFrame)
-    {
-        MacroDetector::GetInstance().ShowLimitedMessage();
-    }
+	if (isResisted && !isResistedLastFrame)
+	{
+		MacroDetector::GetInstance().ShowLimitedMessage();
+	}
 
-    isResistedLastFrame = isResisted;
+	isResistedLastFrame = isResisted;
 
-    if (!macroDetectorInitialized)
-    {
-        MacroDetector::GetInstance().Initialize();
-        macroDetectorInitialized = true;
-    }
+	if (!macroDetectorInitialized)
+	{
+		MacroDetector::GetInstance().Initialize();
+		macroDetectorInitialized = true;
+	}
 
-    // Throttled (500ms) operations
-    static ULONGLONG lastExecutionTime = 0;
-    ULONGLONG currentTime = GetTickCount64();
+	// Throttled (500ms) operations
+	static ULONGLONG lastExecutionTime = 0;
+	ULONGLONG currentTime = GetTickCount64();
 
-    if (currentTime - lastExecutionTime >= 500)
-    {
-        lastExecutionTime = currentTime;
-        CacheResistState();
-    }
+	if (currentTime - lastExecutionTime >= 500)
+	{
+		lastExecutionTime = currentTime;
+		CacheResistState();
+	}
 
-    // Dispatch OnUpdate to all registered functions
-    for (auto* func : g_functions)
-    {
-        if (func->IsEnabled())
-        {
-            func->OnUpdate();
-        }
-    }
+	// Dispatch OnUpdate to all registered functions
+	for (auto* func : g_functions)
+	{
+		if (func->IsEnabled())
+		{
+			func->OnUpdate();
+		}
+	}
 }
 
 // ===================================================================
@@ -146,25 +146,25 @@ static void DispatchUpdate()
 // ===================================================================
 static int MasterHookSetFov(void* a1, float changeFovValue)
 {
-    if (!gameUpdateInit)
-    {
-        gameUpdateInit = true;
-    }
+	if (!gameUpdateInit)
+	{
+		gameUpdateInit = true;
+	}
 
-    DispatchUpdate();
+	DispatchUpdate();
 
-    // FOV override (must be done here because it modifies the parameter)
-    if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !CheckResistInBeyd())
-    {
-        changeFovValue = g_pEnv->FieldOfView;
-    }
+	// FOV override (must be done here because it modifies the parameter)
+	if (changeFovValue > 30.0f && g_pEnv->EnableSetFov && !CheckResistInBeyd())
+	{
+		changeFovValue = g_pEnv->FieldOfView;
+	}
 
-    if (originalSetFov)
-    {
-        SetFovFn original = (SetFovFn)originalSetFov;
-        return original(a1, changeFovValue);
-    }
-    return 0;
+	if (originalSetFov)
+	{
+		SetFovFn original = (SetFovFn)originalSetFov;
+		return original(a1, changeFovValue);
+	}
+	return 0;
 }
 
 // ===================================================================
@@ -172,22 +172,22 @@ static int MasterHookSetFov(void* a1, float changeFovValue)
 // ===================================================================
 static void HookGameUpdate(void* pThis)
 {
-    bool isResisted = CheckResistInBeyd();
+	bool isResisted = CheckResistInBeyd();
 
-    if (isResisted && !isResistedLastFrame)
-    {
-        MacroDetector::GetInstance().ShowLimitedMessage();
-    }
+	if (isResisted && !isResistedLastFrame)
+	{
+		MacroDetector::GetInstance().ShowLimitedMessage();
+	}
 
-    isResistedLastFrame = isResisted;
+	isResistedLastFrame = isResisted;
 
-    Task::Tick();
+	Task::Tick();
 
-    if (originalGameUpdate)
-    {
-        UpdateFn original = (UpdateFn)originalGameUpdate;
-        original(pThis);
-    }
+	if (originalGameUpdate)
+	{
+		UpdateFn original = (UpdateFn)originalGameUpdate;
+		original(pThis);
+	}
 }
 
 // ===================================================================
@@ -195,13 +195,15 @@ static void HookGameUpdate(void* pThis)
 // ===================================================================
 static void HookSetUID(void* pThis, uint32_t uid)
 {
-    g_pEnv->Uid = uid;
+	g_pEnv->Uid = uid;
 
-    if (originalSetUID)
-    {
-        SetUidFn original = (SetUidFn)originalSetUID;
-        original(pThis, uid);
-    }
+	if (originalSetUID)
+	{
+		SetUidFn original = (SetUidFn)originalSetUID;
+
+		if (!g_pEnv->HidePlayerInfo)
+			original(pThis, uid);
+	}
 }
 
 // ===================================================================
@@ -209,7 +211,7 @@ static void HookSetUID(void* pThis, uint32_t uid)
 // ===================================================================
 void RequestOpenCraft()
 {
-    requestOpenCraft = true;
+	requestOpenCraft = true;
 }
 
 // ===================================================================
@@ -217,75 +219,75 @@ void RequestOpenCraft()
 // ===================================================================
 void SetupHooks()
 {
-    // Choose which offsets to use based on ProvideOffsets flag
-    HookFunctionOffsets* offsets = &g_pEnv->Offsets;
-    if (!g_pEnv->ProvideOffsets)
-    {
-        if (!g_pEnv->IsOversea)
-        {
-            offsets = &g_ChinaOffsets;
-        }
-        else
-        {
-            offsets = &g_OverseaOffsets;
-        }
-    }
+	// Choose which offsets to use based on ProvideOffsets flag
+	HookFunctionOffsets* offsets = &g_pEnv->Offsets;
+	if (!g_pEnv->ProvideOffsets)
+	{
+		if (!g_pEnv->IsOversea)
+		{
+			offsets = &g_ChinaOffsets;
+		}
+		else
+		{
+			offsets = &g_OverseaOffsets;
+		}
+	}
 
-    g_pEnv->Offsets = *offsets;
+	g_pEnv->Offsets = *offsets;
 
-    // Create and register all IFunction instances
-    // Order does not matter; each reads from g_pEnv->Offsets in Initialize()
-    g_functions.push_back(new FovOverride());
-    g_functions.push_back(new DisablePlayerPerspective());
-    g_functions.push_back(new DisableFog());
-    g_functions.push_back(new EnableSetFps());
-    g_functions.push_back(new RemoveTeamProgress());
-    g_functions.push_back(new HideQuestBanner());
-    g_functions.push_back(new DisableCameraMove());
-    g_functions.push_back(new DisableDamageText());
-    g_functions.push_back(new TouchMode());
-    g_functions.push_back(new ResinItem());
-    g_functions.push_back(new DisplayPaimon());
-    g_functions.push_back(new HidePlayerInfo());
-    g_functions.push_back(new HideGrass());
-    g_functions.push_back(new GamepadHotSwitchFunc());
-    g_functions.push_back(new InLevelClockPageSpeedUp());
-    g_functions.push_back(new CombineHotkey());
-    g_functions.push_back(new WeakMapCheck());
+	// Create and register all IFunction instances
+	// Order does not matter; each reads from g_pEnv->Offsets in Initialize()
+	g_functions.push_back(new FovOverride());
+	g_functions.push_back(new DisablePlayerPerspective());
+	g_functions.push_back(new DisableFog());
+	g_functions.push_back(new EnableSetFps());
+	g_functions.push_back(new RemoveTeamProgress());
+	g_functions.push_back(new HideQuestBanner());
+	g_functions.push_back(new DisableCameraMove());
+	g_functions.push_back(new DisableDamageText());
+	g_functions.push_back(new TouchMode());
+	g_functions.push_back(new ResinItem());
+	g_functions.push_back(new DisplayPaimon());
+	g_functions.push_back(new HidePlayerInfo());
+	g_functions.push_back(new HideGrass());
+	g_functions.push_back(new GamepadHotSwitchFunc());
+	g_functions.push_back(new InLevelClockPageSpeedUp());
+	g_functions.push_back(new CombineHotkey());
+	g_functions.push_back(new WeakMapCheck());
 
-    // Initialize all functions (resolves offsets, creates MinHook hooks)
-    for (auto* func : g_functions)
-    {
-        func->Initialize();
-    }
+	// Initialize all functions (resolves offsets, creates MinHook hooks)
+	for (auto* func : g_functions)
+	{
+		func->Initialize();
+	}
 
-    // Set up the master SetFov dispatch hook
-    if (offsets->SetFov)
-    {
-        LPVOID changeFovAddr = GetFunctionAddress(offsets->SetFov);
-        if (changeFovAddr)
-        {
-            MH_CreateHook(changeFovAddr, MasterHookSetFov, &originalSetFov);
-        }
-    }
+	// Set up the master SetFov dispatch hook
+	if (offsets->SetFov)
+	{
+		LPVOID changeFovAddr = GetFunctionAddress(offsets->SetFov);
+		if (changeFovAddr)
+		{
+			MH_CreateHook(changeFovAddr, MasterHookSetFov, &originalSetFov);
+		}
+	}
 
-    // Set up the SetUID hook
-    if (offsets->SetUid)
-    {
-        LPVOID setUIDAddr = GetFunctionAddress(offsets->SetUid);
-        if (setUIDAddr)
-        {
-            MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
-        }
-    }
+	// Set up the SetUID hook
+	if (offsets->SetUid)
+	{
+		LPVOID setUIDAddr = GetFunctionAddress(offsets->SetUid);
+		if (setUIDAddr)
+		{
+			MH_CreateHook(setUIDAddr, HookSetUID, &originalSetUID);
+		}
+	}
 
-    // Set up the GameUpdate hook
-    if (offsets->GameUpdate)
-    {
-        LPVOID gameUpdateAddr = GetFunctionAddress(offsets->GameUpdate);
-        if (gameUpdateAddr)
-        {
-            MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
-        }
-    }
+	// Set up the GameUpdate hook
+	if (offsets->GameUpdate)
+	{
+		LPVOID gameUpdateAddr = GetFunctionAddress(offsets->GameUpdate);
+		if (gameUpdateAddr)
+		{
+			MH_CreateHook(gameUpdateAddr, HookGameUpdate, &originalGameUpdate);
+		}
+	}
 }

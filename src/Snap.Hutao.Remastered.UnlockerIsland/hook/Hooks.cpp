@@ -200,9 +200,7 @@ static void HookSetUID(void* pThis, uint32_t uid)
 	if (originalSetUID)
 	{
 		SetUidFn original = (SetUidFn)originalSetUID;
-
-		if (!g_pEnv->HidePlayerInfo)
-			original(pThis, uid);
+		original(pThis, uid);
 	}
 }
 

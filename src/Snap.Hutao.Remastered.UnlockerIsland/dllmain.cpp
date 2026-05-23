@@ -56,20 +56,25 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
+	InitializeHookEnvironment();
+
+	g_pEnv->State = IslandState::Started;
+	g_pEnv->Size = sizeof(HookEnvironment);
+
 	HMODULE module = GetModuleHandleW(L"YuanShen.exe");
 	HMODULE module2 = GetModuleHandleW(L"GenshinImpact.exe");
 
 	if (module == 0 && module2 == 0)
 	{
+		g_pEnv->State = IslandState::Error;
 		return -1;
 	}
 
 	if (MH_Initialize() != MH_OK)
 	{
-		return 0;
+		g_pEnv->State = IslandState::Error;
+		return -1;
 	}
-
-	InitializeHookEnvironment();
 
 	if (g_pEnv->DebugMode)
 	{
@@ -126,11 +131,9 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
 	{
 		MH_Uninitialize();
-		return 0;
+		g_pEnv->State = IslandState::Error;
+		return -1;
 	}
-
-	g_pEnv->State = IslandState::Started;
-	g_pEnv->Size = sizeof(HookEnvironment);
 
 	return 0;
 }

@@ -4,8 +4,6 @@
 #include "Logger.h"
 #include "Constants.h"
 
-static bool g_cacheInitialized = false;
-
 bool g_cachedIsResisted = false;
 
 typedef Il2CppString* (*FindStringFn)(const char*);
@@ -14,12 +12,6 @@ typedef Il2CppString* (*GetTextFn)(void*);
 
 bool CacheResistState()
 {
-    if (!g_cacheInitialized)
-    {
-        g_cachedIsResisted = false;
-        return false;
-    }
-
     if (findString && getComponent && getText)
     {
         FindStringFn findStringFunc = (FindStringFn)findString;

@@ -6,7 +6,7 @@
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
     <MinimalCoreWin>true</MinimalCoreWin>
-    <VCProjectVersion>15.0</VCProjectVersion>
+    <VCProjectVersion>18.0</VCProjectVersion>
     <ProjectGuid>{42e4e7cf-f1eb-4d6b-815a-c21d02b9f4d4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Snap_Hutao_Remastered_UnlockIsland_Test</RootNamespace>

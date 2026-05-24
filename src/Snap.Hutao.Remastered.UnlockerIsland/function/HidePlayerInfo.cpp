@@ -45,7 +45,7 @@ void HidePlayerInfo::OnUpdate()
         return;
     }
 
-    // Execute logic only every 500ms to reduce performance impact
+    // Execute logic only every 200ms to reduce performance impact
     ULONGLONG now = GetTickCount64();
     if (now - m_lastExecuteTime < THROTTLE_MS)
     {

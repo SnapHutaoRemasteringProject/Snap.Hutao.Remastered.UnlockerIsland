@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FunctionType.h"
+#include "../framework.h"
 
 class IFunction
 {

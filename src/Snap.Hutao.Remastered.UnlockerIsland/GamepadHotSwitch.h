@@ -8,53 +8,56 @@
 class GamepadHotSwitch
 {
 public:
-    static GamepadHotSwitch& GetInstance();
+	static GamepadHotSwitch& GetInstance();
 
-    bool Initialize();
-    
-    void Shutdown();
-    
-    void SetEnabled(bool enabled);
-    
-    bool IsEnabled() const;
+	bool Initialize();
 
-    void ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+	void Shutdown();
 
-private:
-    GamepadHotSwitch();
-    ~GamepadHotSwitch();
-    
-    GamepadHotSwitch(const GamepadHotSwitch&) = delete;
-    GamepadHotSwitch& operator=(const GamepadHotSwitch&) = delete;
-    
-    void MainThread();
+	void SetEnabled(bool enabled);
 
-    bool InitializeXInput();
-    bool IsXInputControllerActive() const;
+	void SetIsInChatPage(bool inChat);
 
-    bool IsKeyboardActive();
-    bool IsMouseActive();
+	bool IsEnabled() const;
 
-    void SendSwitchMessage(bool toGamepad);
+	void ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lParam);
 
 private:
-    std::atomic<bool> m_isExiting{false};
-    std::atomic<bool> m_enabled{false};
-    
-    HANDLE m_hThread{nullptr};
+	GamepadHotSwitch();
+	~GamepadHotSwitch();
 
-    HMODULE m_hXInput{nullptr};
-    DWORD (WINAPI* m_XInputGetKeystroke)(DWORD, DWORD, PXINPUT_KEYSTROKE){nullptr};
-    
-	bool isGamepadMode{false};
+	GamepadHotSwitch(const GamepadHotSwitch&) = delete;
+	GamepadHotSwitch& operator=(const GamepadHotSwitch&) = delete;
 
-    volatile bool m_mouseActivity{false};
-    volatile bool m_keyboardActivity{false};
-    volatile ULONGLONG m_pauseUntilTime{0};
+	void MainThread();
 
-    LONGLONG m_lastMousePos{0};
-    ULONGLONG m_lastGamepadActivityTime{0};
-    ULONGLONG m_lastKeyboardMouseActivityTime{0};
+	bool InitializeXInput();
+	bool IsXInputControllerActive() const;
 
-    static constexpr DWORD SWITCH_DELAY_MS = 500;
+	bool IsKeyboardActive();
+	bool IsMouseActive();
+
+	void SendSwitchMessage(bool toGamepad);
+
+private:
+	std::atomic<bool> m_isExiting{ false };
+	std::atomic<bool> m_enabled{ false };
+
+	HANDLE m_hThread{ nullptr };
+
+	HMODULE m_hXInput{ nullptr };
+	DWORD(WINAPI* m_XInputGetKeystroke)(DWORD, DWORD, PXINPUT_KEYSTROKE) { nullptr };
+
+	bool isGamepadMode{ false };
+	bool isInChatPage{ false };
+
+	volatile bool m_mouseActivity{ false };
+	volatile bool m_keyboardActivity{ false };
+	volatile ULONGLONG m_pauseUntilTime{ 0 };
+
+	LONGLONG m_lastMousePos{ 0 };
+	ULONGLONG m_lastGamepadActivityTime{ 0 };
+	ULONGLONG m_lastKeyboardMouseActivityTime{ 0 };
+
+	static constexpr DWORD SWITCH_DELAY_MS = 500;
 };

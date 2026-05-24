@@ -14,6 +14,6 @@ public:
     FunctionType GetFunctionType() override { return FunctionType::HIDE_PLAYER_INFO; }
 
 private:
-    int frameCounter = 0;
-    static constexpr int FRAME_INTERVAL = 200;
+    ULONGLONG m_lastExecuteTime = 0;
+    static constexpr ULONGLONG THROTTLE_MS = 500;
 };

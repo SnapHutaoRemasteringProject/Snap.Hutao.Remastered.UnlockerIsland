@@ -17,5 +17,5 @@ public:
 
 private:
     ULONGLONG m_lastExecuteTime = 0;
-    static constexpr ULONGLONG THROTTLE_MS = 500;
+    static constexpr ULONGLONG THROTTLE_MS = 5000;
 };

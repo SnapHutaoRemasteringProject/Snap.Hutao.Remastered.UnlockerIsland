@@ -55,3 +55,13 @@ $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 $msbuild = Join-Path $vs "MSBuild\Current\Bin\MSBuild.exe"
 & $msbuild "src\Snap.Hutao.Remastered.UnlockerIsland.sln" /t:Snap_Hutao_Remastered_UnlockerIsland /p:Configuration=Release /p:Platform=x64 /m
 ```
+
+### vcpkg dependencies
+
+MinHook is restored through vcpkg manifest mode with a local overlay port:
+
+- `vcpkg.json`
+- `vcpkg-configuration.json`
+- `vcpkg-ports/minhook`
+
+The overlay port tracks upstream `TsudaKageyu/minhook` at `v1.3.4` and replaces the older checked-in `libMinHook.x64.lib` binaries.

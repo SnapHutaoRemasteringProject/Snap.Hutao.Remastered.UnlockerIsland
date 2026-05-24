@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "include/MinHook.h"
+#include <MinHook.h>
 #include <Windows.h>
 #include <cstdint>
 

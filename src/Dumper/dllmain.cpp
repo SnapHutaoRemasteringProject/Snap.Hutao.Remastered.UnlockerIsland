@@ -9,7 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <Psapi.h>
-#include "MinHook.h"
+#include <MinHook.h>
 #include <unordered_set>
 #include <iostream>
 #include <algorithm>

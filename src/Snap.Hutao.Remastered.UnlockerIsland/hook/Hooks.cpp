@@ -1,4 +1,4 @@
-#include "Hooks.h"
+﻿#include "Hooks.h"
 
 #include "../framework.h"
 #include "../function/HooksShared.h"

@@ -46,13 +46,13 @@ void DisplayPaimon::OnUpdate()
         return;
     }
 
-    // Execute logic only every 200 frames to reduce performance impact
-    frameCounter++;
-    if (frameCounter < FRAME_INTERVAL)
+    // Execute logic only every 5000ms to reduce performance impact
+    ULONGLONG now = GetTickCount64();
+    if (now - m_lastExecuteTime < THROTTLE_MS)
     {
         return;
     }
-    frameCounter = 0;
+    m_lastExecuteTime = now;
 
     if (!getGlobalActor || !getActive || !avatarPaimonAppear)
     {

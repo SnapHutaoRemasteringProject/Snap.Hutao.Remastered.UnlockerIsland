@@ -1,4 +1,4 @@
-﻿#include "dllmain.h"
+#include "dllmain.h"
 #include "hook/Hooks.h"
 #include "MacroDetector.h"
 #include "GamepadHotSwitch.h"
@@ -56,20 +56,25 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
+	InitializeHookEnvironment();
+
+	g_pEnv->State = IslandState::Started;
+	g_pEnv->Size = sizeof(HookEnvironment);
+
 	HMODULE module = GetModuleHandleW(L"YuanShen.exe");
 	HMODULE module2 = GetModuleHandleW(L"GenshinImpact.exe");
 
 	if (module == 0 && module2 == 0)
 	{
+		g_pEnv->State = IslandState::Error;
 		return -1;
 	}
 
 	if (MH_Initialize() != MH_OK)
 	{
-		return 0;
+		g_pEnv->State = IslandState::Error;
+		return -1;
 	}
-
-	InitializeHookEnvironment();
 
 	if (g_pEnv->DebugMode)
 	{
@@ -83,47 +88,52 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 
 	if (g_pEnv->DebugMode)
 	{
-		std::cout << "Offset SetUid = 0x" << std::hex << g_pEnv->Offsets.SetUid << std::endl;
-		std::cout << "Offset SetFov = 0x" << std::hex << g_pEnv->Offsets.SetFov << std::endl;
-		std::cout << "Offset SetFog = 0x" << std::hex << g_pEnv->Offsets.SetFog << std::endl;
-		std::cout << "Offset GetFps = 0x" << std::hex << g_pEnv->Offsets.GetFps << std::endl;
-		std::cout << "Offset SetFps = 0x" << std::hex << g_pEnv->Offsets.SetFps << std::endl;
-		std::cout << "Offset OpenTeam = 0x" << std::hex << g_pEnv->Offsets.OpenTeam << std::endl;
-		std::cout << "Offset OpenTeamAdvanced = 0x" << std::hex << g_pEnv->Offsets.OpenTeamAdvanced << std::endl;
-		std::cout << "Offset CheckEnter = 0x" << std::hex << g_pEnv->Offsets.CheckEnter << std::endl;
-		std::cout << "Offset QuestBanner = 0x" << std::hex << g_pEnv->Offsets.QuestBanner << std::endl;
-		std::cout << "Offset FindObject = 0x" << std::hex << g_pEnv->Offsets.FindObject << std::endl;
-		std::cout << "Offset ObjectActive = 0x" << std::hex << g_pEnv->Offsets.ObjectActive << std::endl;
-		std::cout << "Offset CameraMove = 0x" << std::hex << g_pEnv->Offsets.CameraMove << std::endl;
-		std::cout << "Offset DamageText = 0x" << std::hex << g_pEnv->Offsets.DamageText << std::endl;
-		std::cout << "Offset TouchInput = 0x" << std::hex << g_pEnv->Offsets.TouchInput << std::endl;
-		std::cout << "Offset KeyboardMouseInput = 0x" << std::hex << g_pEnv->Offsets.KeyboardMouseInput << std::endl;
-		std::cout << "Offset JoypadInput = 0x" << std::hex << g_pEnv->Offsets.JoypadInput << std::endl;
-		std::cout << "Offset CombineEntry = 0x" << std::hex << g_pEnv->Offsets.CombineEntry << std::endl;
-		std::cout << "Offset CombineEntryPartner = 0x" << std::hex << g_pEnv->Offsets.CombineEntryPartner << std::endl;
-		std::cout << "Offset SetupResinList = 0x" << std::hex << g_pEnv->Offsets.SetupResinList << std::endl;
-		std::cout << "Offset ResinList = 0x" << std::hex << g_pEnv->Offsets.ResinList << std::endl;
-		std::cout << "Offset FindString = 0x" << std::hex << g_pEnv->Offsets.FindString << std::endl;
-		std::cout << "Offset PlayerPerspective = 0x" << std::hex << g_pEnv->Offsets.PlayerPerspective << std::endl;
-		std::cout << "Offset IsObjectActive = 0x" << std::hex << g_pEnv->Offsets.IsObjectActive << std::endl;
-		std::cout << "Offset GameUpdate = 0x" << std::hex << g_pEnv->Offsets.GameUpdate << std::endl;
-		std::cout << "Offset ActorManagerCtor = 0x" << std::hex << g_pEnv->Offsets.ActorManagerCtor << std::endl;
-		std::cout << "Offset GetGlobalActor = 0x" << std::hex << g_pEnv->Offsets.GetGlobalActor << std::endl;
-		std::cout << "Offset AvatarPaimonAppear = 0x" << std::hex << g_pEnv->Offsets.AvatarPaimonAppear << std::endl;
-		std::cout << "Offset GetComponent = 0x" << std::hex << g_pEnv->Offsets.GetComponent << std::endl;
-		std::cout << "Offset GetText = 0x" << std::hex << g_pEnv->Offsets.GetText << std::endl;
-		std::cout << "Offset GetName = 0x" << std::hex << g_pEnv->Offsets.GetName << std::endl;
-		std::cout << "Offset CheckCanOpenMap = 0x" << std::hex << g_pEnv->Offsets.CheckCanOpenMap << std::endl;
+		auto& o = g_pEnv->Offsets;
+		std::cout << "HookFunctionOffsets g_Offsets = {" << std::endl;
+		std::cout << "    /* SetUid */ 0x" << std::hex << o.SetUid << "," << std::endl;
+		std::cout << "    /* SetFov */ 0x" << std::hex << o.SetFov << "," << std::endl;
+		std::cout << "    /* SetFog */ 0x" << std::hex << o.SetFog << "," << std::endl;
+		std::cout << "    /* GetFps */ 0x" << std::hex << o.GetFps << "," << std::endl;
+		std::cout << "    /* SetFps */ 0x" << std::hex << o.SetFps << "," << std::endl;
+		std::cout << "    /* OpenTeam */ 0x" << std::hex << o.OpenTeam << "," << std::endl;
+		std::cout << "    /* OpenTeamAdvanced */ 0x" << std::hex << o.OpenTeamAdvanced << "," << std::endl;
+		std::cout << "    /* CheckEnter */ 0x" << std::hex << o.CheckEnter << "," << std::endl;
+		std::cout << "    /* QuestBanner */ 0x" << std::hex << o.QuestBanner << "," << std::endl;
+		std::cout << "    /* FindObject */ 0x" << std::hex << o.FindObject << "," << std::endl;
+		std::cout << "    /* ObjectActive */ 0x" << std::hex << o.ObjectActive << "," << std::endl;
+		std::cout << "    /* CameraMove */ 0x" << std::hex << o.CameraMove << "," << std::endl;
+		std::cout << "    /* DamageText */ 0x" << std::hex << o.DamageText << "," << std::endl;
+		std::cout << "    /* TouchInput */ 0x" << std::hex << o.TouchInput << "," << std::endl;
+		std::cout << "    /* KeyboardMouseInput */ 0x" << std::hex << o.KeyboardMouseInput << "," << std::endl;
+		std::cout << "    /* JoypadInput */ 0x" << std::hex << o.JoypadInput << "," << std::endl;
+		std::cout << "    /* CombineEntry */ 0x" << std::hex << o.CombineEntry << "," << std::endl;
+		std::cout << "    /* CombineEntryPartner */ 0x" << std::hex << o.CombineEntryPartner << "," << std::endl;
+		std::cout << "    /* SetupResinList */ 0x" << std::hex << o.SetupResinList << "," << std::endl;
+		std::cout << "    /* ResinList */ 0x" << std::hex << o.ResinList << "," << std::endl;
+		std::cout << "    /* FindString */ 0x" << std::hex << o.FindString << "," << std::endl;
+		std::cout << "    /* PlayerPerspective */ 0x" << std::hex << o.PlayerPerspective << "," << std::endl;
+		std::cout << "    /* IsObjectActive */ 0x" << std::hex << o.IsObjectActive << "," << std::endl;
+		std::cout << "    /* GameUpdate */ 0x" << std::hex << o.GameUpdate << "," << std::endl;
+		std::cout << "    /* Reserved */ 0, 0, 0, 0," << std::endl;
+		std::cout << "    /* ActorManagerCtor */ 0x" << std::hex << o.ActorManagerCtor << "," << std::endl;
+		std::cout << "    /* GetGlobalActor */ 0x" << std::hex << o.GetGlobalActor << "," << std::endl;
+		std::cout << "    /* AvatarPaimonAppear */ 0x" << std::hex << o.AvatarPaimonAppear << "," << std::endl;
+		std::cout << "    /* GetComponent */ 0x" << std::hex << o.GetComponent << "," << std::endl;
+		std::cout << "    /* GetText */ 0x" << std::hex << o.GetText << "," << std::endl;
+		std::cout << "    /* GetName */ 0x" << std::hex << o.GetName << "," << std::endl;
+		std::cout << "    /* CheckCanOpenMap */ 0x" << std::hex << o.CheckCanOpenMap << "," << std::endl;
+		std::cout << "    /* InLevelClockPageOkButtonClicked */ 0x" << std::hex << o.InLevelClockPageOkButtonClicked << "," << std::endl;
+		std::cout << "    /* InLevelClockPageCloseButtonClicked */ 0x" << std::hex << o.InLevelClockPageCloseButtonClicked << "," << std::endl;
+		std::cout << "    /* ClosePage */ 0x" << std::hex << o.ClosePage << "," << std::endl;
+		std::cout << "};" << std::endl;
 	}
 
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
 	{
 		MH_Uninitialize();
-		return 0;
+		g_pEnv->State = IslandState::Error;
+		return -1;
 	}
-
-	g_pEnv->State = IslandState::Started;
-	g_pEnv->Size = sizeof(HookEnvironment);
 
 	return 0;
 }

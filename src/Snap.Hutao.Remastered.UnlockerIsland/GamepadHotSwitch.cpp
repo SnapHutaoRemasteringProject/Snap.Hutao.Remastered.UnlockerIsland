@@ -99,6 +99,11 @@ void GamepadHotSwitch::SetEnabled(bool enabled)
     }
 }
 
+void GamepadHotSwitch::SetIsInChatPage(bool inChat)
+{
+	isInChatPage = inChat;
+}
+
 bool GamepadHotSwitch::IsEnabled() const
 {
     return m_enabled;
@@ -133,28 +138,8 @@ void GamepadHotSwitch::ProcessWindowMessage(UINT msg, WPARAM wParam, LPARAM lPar
         break;
 
     case WM_KEYDOWN:
-        if (findString && findGameObject && getActive)
-        {
-            const char* paths[] =
-            {
-                CHAT_DIALOG_PATH,
-                FRIEND_PAGE_PATH,
-                PROFILE_LAYER_PATH,
-            };
-            for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); i++)
-            {
-                void* chatObj = FindGameObject(paths[i]);
-                if (chatObj)
-                {
-                    typedef bool (*GetActiveFn)(void*);
-                    if (((GetActiveFn)getActive)(chatObj))
-                    {
-                        //Log("[GamepadHotSwitch] Input page active, ignoring key");
-                        return;
-                    }
-                }
-            }
-        }
+		if (isInChatPage)
+            break;
         if (currentTime > m_pauseUntilTime)
             m_keyboardActivity = true;
         break;

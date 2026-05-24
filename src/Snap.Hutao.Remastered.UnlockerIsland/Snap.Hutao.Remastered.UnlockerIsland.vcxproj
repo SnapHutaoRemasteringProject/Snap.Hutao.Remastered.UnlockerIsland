@@ -185,7 +185,6 @@
     <ClInclude Include="include\MinHook.h" />
     <ClInclude Include="utils\UnityUtils.h" />
     <ClInclude Include="utils\MemoryUtils.h" />
-    <ClInclude Include="utils\Scanner.h" />
     <ClInclude Include="utils\Task.h" />
   </ItemGroup>
   <ItemGroup>
@@ -200,7 +199,6 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MacroDetector.cpp" />
     <ClCompile Include="utils\MemoryUtils.cpp" />
-    <ClCompile Include="utils\Scanner.cpp" />
     <ClCompile Include="utils\Task.cpp" />
     <ClCompile Include="utils\UnityUtils.cpp" />
     <ClCompile Include="function\FovOverride.cpp" />

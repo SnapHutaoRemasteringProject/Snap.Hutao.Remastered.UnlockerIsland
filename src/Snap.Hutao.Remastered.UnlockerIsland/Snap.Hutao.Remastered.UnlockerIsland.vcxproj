@@ -95,14 +95,12 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;SNAPHUTAOREMASTEREDUNLOCKISLAND_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>NUL</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -142,12 +140,10 @@
       <CallingConvention>FastCall</CallingConvention>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>NUL</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libMinHook.x64.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -189,6 +185,7 @@
     <ClInclude Include="include\MinHook.h" />
     <ClInclude Include="utils\UnityUtils.h" />
     <ClInclude Include="utils\MemoryUtils.h" />
+    <ClInclude Include="utils\Scanner.h" />
     <ClInclude Include="utils\Task.h" />
   </ItemGroup>
   <ItemGroup>
@@ -203,6 +200,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MacroDetector.cpp" />
     <ClCompile Include="utils\MemoryUtils.cpp" />
+    <ClCompile Include="utils\Scanner.cpp" />
     <ClCompile Include="utils\Task.cpp" />
     <ClCompile Include="utils\UnityUtils.cpp" />
     <ClCompile Include="function\FovOverride.cpp" />

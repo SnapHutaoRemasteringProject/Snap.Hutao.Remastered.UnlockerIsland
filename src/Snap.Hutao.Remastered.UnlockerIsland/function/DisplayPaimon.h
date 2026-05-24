@@ -16,6 +16,6 @@ public:
     static void HookActorManagerCtor(void* pThis);
 
 private:
-    int frameCounter = 0;
-    static constexpr int FRAME_INTERVAL = 200;
+    ULONGLONG m_lastExecuteTime = 0;
+    static constexpr ULONGLONG THROTTLE_MS = 500;
 };

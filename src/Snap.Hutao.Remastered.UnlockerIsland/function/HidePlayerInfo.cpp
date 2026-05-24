@@ -45,13 +45,13 @@ void HidePlayerInfo::OnUpdate()
         return;
     }
 
-    // Execute logic only every 200 frames to reduce performance impact
-    frameCounter++;
-    if (frameCounter < FRAME_INTERVAL)
+    // Execute logic only every 500ms to reduce performance impact
+    ULONGLONG now = GetTickCount64();
+    if (now - m_lastExecuteTime < THROTTLE_MS)
     {
         return;
     }
-    frameCounter = 0;
+    m_lastExecuteTime = now;
 
     if (!findString || !findGameObject || !setActive || !getActive)
     {
@@ -61,7 +61,6 @@ void HidePlayerInfo::OnUpdate()
     FindStringFn findStringFunc = (FindStringFn)findString;
     FindGameObjectFn findGameObjectFunc = (FindGameObjectFn)findGameObject;
     SetActiveFn setActiveFunc = (SetActiveFn)setActive;
-    GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
     Il2CppString* uidStrObj = findStringFunc(UID_PATH);
     if (uidStrObj)

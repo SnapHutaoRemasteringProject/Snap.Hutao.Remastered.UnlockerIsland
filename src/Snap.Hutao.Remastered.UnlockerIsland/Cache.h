@@ -5,6 +5,5 @@
 extern bool g_cachedIsResisted;
 
 bool CacheResistState();
-void ClearAllCache();
 
 bool CheckResistInBeyd();

@@ -26,12 +26,16 @@ bool CacheResistState()
             return false;
         }
 
+        Log("UID GameObject was found for resist check");
+
         Il2CppString* textStr = findStringFunc("Text");
         if (textStr)
         {
             void* textComp = getComponentFunc(uidObj, textStr);
+
             if (textComp)
             {
+                Log("Text component was found for resist check");
                 Il2CppString* textContent = getTextFunc(textComp);
                 if (textContent)
                 {
@@ -44,17 +48,16 @@ bool CacheResistState()
                     }
                     return isResisted;
                 }
+            } 
+            else 
+            {
+                Log("Text component was not found for resist check");
             }
         }
     }
 
     g_cachedIsResisted = false;
     return false;
-}
-
-void ClearAllCache()
-{
-    Log("ClearAllCache called (no cache to clear)");
 }
 
 bool CheckResistInBeyd()

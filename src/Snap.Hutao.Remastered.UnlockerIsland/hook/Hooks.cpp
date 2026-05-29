@@ -23,6 +23,7 @@
 #include "../MacroDetector.h"
 #include "../Cache.h"
 #include "../utils/Task.h"
+#include "../Logger.h"
 
 #include <vector>
 
@@ -121,13 +122,14 @@ static void DispatchUpdate()
 		macroDetectorInitialized = true;
 	}
 
-	// Throttled (500ms) operations
+	// Throttled (2000ms) operations — refresh resist (千星奇域) state
 	static ULONGLONG lastExecutionTime = 0;
 	ULONGLONG currentTime = GetTickCount64();
 
-	if (currentTime - lastExecutionTime >= 500)
+	if (currentTime - lastExecutionTime >= 2000)
 	{
 		lastExecutionTime = currentTime;
+		Log("2");
 		CacheResistState();
 	}
 
@@ -257,6 +259,16 @@ void SetupHooks()
 	for (auto* func : g_functions)
 	{
 		func->Initialize();
+	}
+
+	// Resolve core utility addresses used by Cache / resist detection
+	if (offsets->GetComponent)
+	{
+		getComponent = GetFunctionAddress(offsets->GetComponent);
+	}
+	if (offsets->GetText)
+	{
+		getText = GetFunctionAddress(offsets->GetText);
 	}
 
 	// Set up the master SetFov dispatch hook

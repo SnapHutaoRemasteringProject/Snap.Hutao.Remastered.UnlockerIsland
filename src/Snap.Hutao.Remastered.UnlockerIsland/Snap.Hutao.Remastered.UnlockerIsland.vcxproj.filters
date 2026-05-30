@@ -36,9 +36,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\MinHook.h">
-      <Filter>头文件\include</Filter>
-    </ClInclude>
     <ClInclude Include="dllmain.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -236,8 +233,5 @@
     <ClCompile Include="function\WeakMapCheck.cpp">
       <Filter>源文件\function</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="lib\libMinHook.x64.lib" />
   </ItemGroup>
 </Project>

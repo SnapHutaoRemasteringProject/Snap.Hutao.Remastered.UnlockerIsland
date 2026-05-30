@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include/MinHook.h"
+#include <MinHook.h>
 #include "HookEnvironment.h"
 #include "Constants.h"
 #include <Windows.h>

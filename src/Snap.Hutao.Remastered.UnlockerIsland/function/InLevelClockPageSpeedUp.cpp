@@ -42,10 +42,14 @@ void InLevelClockPageSpeedUp::HookInLevelClockPageOkButtonClicked(void* pThis)
     {
         ButtonClickedFn inLevelClockPageCloseButtonClickedFunc = (ButtonClickedFn)inLevelClockPageCloseButtonClicked;
         Log("InLevelClockPage Speed Up");
+        original(pThis);
         Task::RunLater(100, [pThis]()
             {
                 (*(void(__fastcall**)(void*, int64_t))(*(int64_t*)pThis + g_pEnv->Offsets.ClosePage))(pThis, 0i64);
             });
+        inLevelClockPageCloseButtonClickedFunc(pThis);
+        return;
     }
+
     original(pThis);
 }

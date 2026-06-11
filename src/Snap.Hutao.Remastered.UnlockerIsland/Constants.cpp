@@ -13,6 +13,13 @@ std::list<std::wstring> GrassPrefix
 	L"BigWorld_",
 };
 
+std::list<std::wstring> BeyondWhiteList
+{
+    L"45694132064",
+    L"24339714898",
+    L"41376171429",
+};
+
 const char* PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon(Clone)";
 const char* DIVE_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon_Dive(Clone)";
 const char* BEYD_PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/Beyd_NPC_Kanban_Paimon(Clone)";

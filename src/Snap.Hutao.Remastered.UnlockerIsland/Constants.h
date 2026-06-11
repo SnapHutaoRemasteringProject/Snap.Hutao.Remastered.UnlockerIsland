@@ -4,6 +4,7 @@
 #include "HookFunctionOffsets.h"
 
 extern std::list<std::wstring> GrassPrefix;
+extern std::list<std::wstring> BeyondWhiteList;
 
 extern const char* PAIMON_PATH;
 extern const char* DIVE_PAIMON_PATH;

@@ -40,6 +40,19 @@ bool CacheResistState()
                 if (textContent)
                 {
                     bool isResisted = wcsstr(textContent->chars, L"GUID") != nullptr;
+                    if (isResisted)
+                    {
+						for (auto& whiteListItem : BeyondWhiteList)
+						{
+							if (wcsstr(textContent->chars, whiteListItem.c_str()) != nullptr)
+							{
+								isResisted = false;
+								Log(("GUID whitelist match found"));
+								break;
+							}
+						}
+                    }
+
                     g_cachedIsResisted = isResisted;
 
                     if (isResisted)

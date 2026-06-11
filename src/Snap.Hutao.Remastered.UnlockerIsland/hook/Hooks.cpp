@@ -129,7 +129,6 @@ static void DispatchUpdate()
 	if (currentTime - lastExecutionTime >= 2000)
 	{
 		lastExecutionTime = currentTime;
-		Log("2");
 		CacheResistState();
 	}
 

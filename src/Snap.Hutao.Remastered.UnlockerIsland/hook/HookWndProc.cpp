@@ -104,10 +104,10 @@ void HandleSwitchToGamepad()
 
 void HandleSwitchToKeyboardMouse()
 {
-    if (switchInputDeviceToTouchScreen)
+    if (switchInputDeviceToKeyboardMouse)
     {
         typedef void(*SwitchInputDeviceToKeyboardMouseFn)(void*);
-        SwitchInputDeviceToKeyboardMouseFn switchInput = (SwitchInputDeviceToKeyboardMouseFn)switchInputDeviceToKeboardMouse;
+        SwitchInputDeviceToKeyboardMouseFn switchInput = (SwitchInputDeviceToKeyboardMouseFn)switchInputDeviceToKeyboardMouse;
         
         __try
         {
@@ -120,7 +120,7 @@ void HandleSwitchToKeyboardMouse()
     }
     else
     {
-        Log("[HookWndProc] switchInputDeviceToTouchScreen function not available");
+        Log("[HookWndProc] switchInputDeviceToKeyboardMouse function not available");
     }
 }
  

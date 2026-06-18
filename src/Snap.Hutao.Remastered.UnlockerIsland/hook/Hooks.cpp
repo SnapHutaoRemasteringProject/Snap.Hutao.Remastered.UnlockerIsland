@@ -44,7 +44,7 @@ LPVOID getName = nullptr;
 
 // Input switching
 LPVOID switchInputDeviceToTouchScreen = nullptr;
-LPVOID switchInputDeviceToKeboardMouse = nullptr;
+LPVOID switchInputDeviceToKeyboardMouse = nullptr;
 LPVOID switchInputDeviceToJoypad = nullptr;
 
 // Craft / Combine

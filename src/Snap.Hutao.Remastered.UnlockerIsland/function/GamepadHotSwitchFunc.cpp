@@ -11,7 +11,7 @@ void GamepadHotSwitchFunc::Initialize()
 {
 	if (g_pEnv->Offsets.KeyboardMouseInput)
 	{
-		switchInputDeviceToKeboardMouse = GetFunctionAddress(g_pEnv->Offsets.KeyboardMouseInput);
+		switchInputDeviceToKeyboardMouse = GetFunctionAddress(g_pEnv->Offsets.KeyboardMouseInput);
 	}
 
 	if (g_pEnv->Offsets.JoypadInput)

@@ -21,7 +21,7 @@ extern LPVOID getName;          // GetNameFn (used by HideGrass)
 
 // --- Input device switching (used by TouchMode, GamepadHotSwitch) ---
 extern LPVOID switchInputDeviceToTouchScreen;
-extern LPVOID switchInputDeviceToKeboardMouse;
+extern LPVOID switchInputDeviceToKeyboardMouse;
 extern LPVOID switchInputDeviceToJoypad;
 
 // --- Craft / Combine (used by CombineHotkey) ---

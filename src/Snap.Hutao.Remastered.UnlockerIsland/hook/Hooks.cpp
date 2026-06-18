@@ -23,6 +23,7 @@
 #include "../MacroDetector.h"
 #include "../Cache.h"
 #include "../utils/Task.h"
+#include "../utils/Scanner.h"
 #include "../Logger.h"
 
 #include <vector>

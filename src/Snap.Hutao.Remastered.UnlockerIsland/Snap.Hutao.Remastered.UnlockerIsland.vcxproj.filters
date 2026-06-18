@@ -141,6 +141,9 @@
     <ClInclude Include="function\WeakMapCheck.h">
       <Filter>头文件\function</Filter>
     </ClInclude>
+    <ClInclude Include="utils\Scanner.h">
+      <Filter>头文件\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -232,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="function\WeakMapCheck.cpp">
       <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Scanner.cpp">
+      <Filter>源文件\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

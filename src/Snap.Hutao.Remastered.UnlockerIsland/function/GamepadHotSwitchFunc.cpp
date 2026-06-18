@@ -64,6 +64,7 @@ void GamepadHotSwitchFunc::OnUpdate()
 			{
 				Log("[GamepadHotSwitch] Input page active, ignoring key");
 				hotSwitch.SetIsInChatPage(true);
+				goto postChatCheck;
 			}
 
 			hotSwitch.SetIsInChatPage(false);

@@ -301,14 +301,7 @@ void SetupHooks()
 	HookFunctionOffsets* offsets = &g_pEnv->Offsets;
 	if (!g_pEnv->ProvideOffsets)
 	{
-		if (!g_pEnv->IsOversea)
-		{
-			offsets = &g_ChinaOffsets;
-		}
-		else
-		{
-			offsets = &g_OverseaOffsets;
-		}
+		ResolveOffsetsFromPatterns(*offsets);
 	}
 
 	g_pEnv->Offsets = *offsets;

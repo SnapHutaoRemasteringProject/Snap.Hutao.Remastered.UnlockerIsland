@@ -325,8 +325,6 @@ static void ConfigureEnvironment(HookEnvironment& env)
     env.Offsets.FindString               = 0x406330;
     env.Offsets.PlayerPerspective        = 0xD80FB50;
     env.Offsets.GameUpdate               = 0x15394C70;
-    env.Offsets.ActorManagerCtor         = 0xD2D4EF0;
-    env.Offsets.GetGlobalActor           = 0xD2CC9E0;
     env.Offsets.AvatarPaimonAppear       = 0x107BAC60;
     env.Offsets.GetComponent             = 0x15B61F60;
     env.Offsets.GetText                  = 0x15C45190;

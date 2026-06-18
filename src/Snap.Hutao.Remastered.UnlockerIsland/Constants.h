@@ -42,7 +42,6 @@ extern std::string GetNamePattern;
 extern std::string GameUpdatePattern;
 extern std::string IsActivePattern;
 extern std::string SetUIDPattern;
-extern std::string ActorManagerCtorPattern;
 extern std::string ClosePageCallerPattern;
 extern std::string SetupResinListPattern;
 extern std::string InLevelClockPageOkButtonClickedPattern;

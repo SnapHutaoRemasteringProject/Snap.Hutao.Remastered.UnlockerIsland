@@ -56,8 +56,6 @@ LPVOID checkCanEnter = nullptr;
 LPVOID openTeamPageAccordingly = nullptr;
 
 // Paimon display
-void* actorManager = nullptr;
-LPVOID getGlobalActor = nullptr;
 LPVOID avatarPaimonAppear = nullptr;
 
 // InLevelClockPage
@@ -84,7 +82,6 @@ LPVOID originalShowOneDamageTextEx = nullptr;
 LPVOID originalCraftEntry = nullptr;
 LPVOID originalCheckCanOpenMap = nullptr;
 LPVOID originalOpenTeam = nullptr;
-LPVOID originalActorManagerCtor = nullptr;
 LPVOID originalSetUID = nullptr;
 LPVOID originalSetActive = nullptr;
 LPVOID originalSetupResinList = nullptr;

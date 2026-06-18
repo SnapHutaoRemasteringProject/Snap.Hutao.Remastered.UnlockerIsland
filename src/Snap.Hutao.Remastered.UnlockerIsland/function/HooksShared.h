@@ -33,8 +33,6 @@ extern LPVOID checkCanEnter;
 extern LPVOID openTeamPageAccordingly;
 
 // --- Paimon display (used by DisplayPaimon) ---
-extern void* actorManager;
-extern LPVOID getGlobalActor;
 extern LPVOID avatarPaimonAppear;
 
 // --- InLevelClockPage (used by InLevelClockPageSpeedUp) ---
@@ -59,7 +57,6 @@ extern LPVOID originalShowOneDamageTextEx;
 extern LPVOID originalCraftEntry;
 extern LPVOID originalCheckCanOpenMap;
 extern LPVOID originalOpenTeam;
-extern LPVOID originalActorManagerCtor;
 extern LPVOID originalSetUID;
 extern LPVOID originalSetActive;
 extern LPVOID originalSetupResinList;

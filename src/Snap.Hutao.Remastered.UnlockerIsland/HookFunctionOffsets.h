@@ -39,8 +39,8 @@ struct HookFunctionOffsets
 	DWORD Reserved2;
 	DWORD Reserved3;
 	DWORD Reserved4;
-	DWORD ActorManagerCtor;                    // ActorManager..ctor
-	DWORD GetGlobalActor;                      // ActorManager.GetGlobalActor
+	DWORD Reserved5;
+	DWORD Reserved6;
 	DWORD AvatarPaimonAppear;                  // GlobalActor.AvatarPaimonAppear
 
 	DWORD GetComponent;                        // GameObject.GetComponent(String type)

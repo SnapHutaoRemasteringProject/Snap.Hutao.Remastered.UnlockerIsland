@@ -6,10 +6,7 @@
 #include "../Logger.h"
 #include "HooksShared.h"
 
-typedef void(*CtorFn)(void*);
-typedef void* (*GetGlobalActorFn)(void*);
 typedef void(*AvatarPaimonAppearFn)(void*, void*, bool);
-typedef void(*SetActiveFn)(void*, bool);
 typedef bool(*GetActiveFn)(void*);
 
 void DisplayPaimon::Initialize()
@@ -17,20 +14,6 @@ void DisplayPaimon::Initialize()
     if (g_pEnv->Offsets.IsObjectActive)
     {
         getActive = GetFunctionAddress(g_pEnv->Offsets.IsObjectActive);
-    }
-
-    if (g_pEnv->Offsets.ActorManagerCtor)
-    {
-        LPVOID actorManagerCtorAddr = GetFunctionAddress(g_pEnv->Offsets.ActorManagerCtor);
-        if (actorManagerCtorAddr)
-        {
-            MH_CreateHook(actorManagerCtorAddr, &DisplayPaimon::HookActorManagerCtor, &originalActorManagerCtor);
-        }
-    }
-
-    if (g_pEnv->Offsets.GetGlobalActor)
-    {
-        getGlobalActor = GetFunctionAddress(g_pEnv->Offsets.GetGlobalActor);
     }
 
     if (g_pEnv->Offsets.AvatarPaimonAppear)
@@ -54,17 +37,11 @@ void DisplayPaimon::OnUpdate()
     }
     m_lastExecuteTime = now;
 
-    if (!getGlobalActor || !getActive || !avatarPaimonAppear)
+    if (!getActive || !avatarPaimonAppear)
     {
         return;
     }
 
-    if (!actorManager)
-    {
-        return;
-    }
-
-    GetGlobalActorFn getGlobalActorFunc = (GetGlobalActorFn)getGlobalActor;
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
     void* paimonObj = FindGameObject(PAIMON_PATH);
@@ -81,28 +58,11 @@ void DisplayPaimon::OnUpdate()
         return;
     }
 
-    void* globalActor = getGlobalActorFunc(actorManager);
-
-    if (globalActor)
-    {
-        AvatarPaimonAppearFn avatarPaimonAppearFunc = (AvatarPaimonAppearFn)avatarPaimonAppear;
-        avatarPaimonAppearFunc(globalActor, nullptr, true);
-    }
-}
-
-void* DisplayPaimon::GetHookFunction()
-{
-    return (void*)&DisplayPaimon::HookActorManagerCtor;
+    AvatarPaimonAppearFn avatarPaimonAppearFunc = (AvatarPaimonAppearFn)avatarPaimonAppear;
+    avatarPaimonAppearFunc(nullptr, nullptr, true);
 }
 
 bool DisplayPaimon::IsEnabled()
 {
     return g_pEnv->DisplayPaimon != FALSE;
-}
-
-void DisplayPaimon::HookActorManagerCtor(void* pThis)
-{
-    CtorFn original = (CtorFn)originalActorManagerCtor;
-    actorManager = pThis;
-    original(pThis);
 }

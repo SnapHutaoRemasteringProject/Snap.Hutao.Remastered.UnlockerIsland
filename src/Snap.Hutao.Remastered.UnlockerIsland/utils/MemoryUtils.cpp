@@ -34,4 +34,9 @@ void InitializeModuleHandle()
 	}
 }
 
+bool IsCallOpcode(BYTE* address)
+{
+	return *address == 0xE8;
+}
+
 HMODULE g_hModule = NULL;

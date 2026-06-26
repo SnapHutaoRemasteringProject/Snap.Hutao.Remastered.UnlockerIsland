@@ -186,6 +186,7 @@
     <ClInclude Include="IslandState.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MacroDetector.h" />
+    <ClInclude Include="utils\Patch.h" />
     <ClInclude Include="utils\UnityUtils.h" />
     <ClInclude Include="utils\MemoryUtils.h" />
     <ClInclude Include="utils\Task.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MacroDetector.cpp" />
     <ClCompile Include="utils\MemoryUtils.cpp" />
+    <ClCompile Include="utils\Patch.cpp" />
     <ClCompile Include="utils\Task.cpp" />
     <ClCompile Include="utils\UnityUtils.cpp" />
     <ClCompile Include="function\FovOverride.cpp" />

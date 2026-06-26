@@ -145,7 +145,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "    /* Reserved3 */ 0x" << std::hex << o.Reserved3 << "," << std::endl;
 		std::cout << "    /* Reserved4 */ 0x" << std::hex << o.Reserved4 << "," << std::endl;
 		std::cout << "    /* Reserved5 */ 0x" << std::hex << o.Reserved5 << "," << std::endl;
-		std::cout << "    /* PlayerPerspective2 */ 0x" << std::hex << o.PlayerPerspective2 << "," << std::endl;
+		//std::cout << "    /* PlayerPerspective2 */ 0x" << std::hex << o.PlayerPerspective2 << "," << std::endl;
 		std::cout << "    /* AvatarPaimonAppear */ 0x" << std::hex << o.AvatarPaimonAppear << "," << std::endl;
 		std::cout << "    /* GetComponent */ 0x" << std::hex << o.GetComponent << "," << std::endl;
 		std::cout << "    /* GetText */ 0x" << std::hex << o.GetText << "," << std::endl;

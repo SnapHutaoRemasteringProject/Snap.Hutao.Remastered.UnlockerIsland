@@ -77,6 +77,7 @@ bool requestOpenCraft = false;
 LPVOID originalGetFrameCount = nullptr;
 LPVOID originalSetFov = nullptr;
 LPVOID originalPlayerPerspective = nullptr;
+LPVOID originalPlayerPerspective2 = nullptr;
 LPVOID originalSetupQuestBanner = nullptr;
 LPVOID originalEventCameraMove = nullptr;
 LPVOID originalShowOneDamageTextEx = nullptr;

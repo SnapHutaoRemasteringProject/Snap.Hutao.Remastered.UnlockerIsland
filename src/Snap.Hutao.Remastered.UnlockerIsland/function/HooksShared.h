@@ -51,6 +51,7 @@ extern bool requestOpenCraft;
 extern LPVOID originalGetFrameCount;
 extern LPVOID originalSetFov;
 extern LPVOID originalPlayerPerspective;
+extern LPVOID originalPlayerPerspective2;
 extern LPVOID originalSetupQuestBanner;
 extern LPVOID originalEventCameraMove;
 extern LPVOID originalShowOneDamageTextEx;

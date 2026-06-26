@@ -81,7 +81,33 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		CreateConsole();
 		//SetupAntiAntiDebugHooks();
 		std::cout << "Snap.Hutao.Remastered.UnlockerIsland loaded in debug mode." << std::endl;
+		std::cout << "=== HookEnvironment Config ===" << std::endl;
+		std::cout << "Uid = " << g_pEnv->Uid << std::endl;
+		std::cout << "IsOversea = " << g_pEnv->IsOversea << std::endl;
 		std::cout << "ProvideOffsets = " << g_pEnv->ProvideOffsets << std::endl;
+		std::cout << "EnableSetFov = " << g_pEnv->EnableSetFov << " (FOV=" << g_pEnv->FieldOfView << ")" << std::endl;
+		std::cout << "DisablePlayerPerspective = " << g_pEnv->DisablePlayerPerspective << std::endl;
+		std::cout << "DisableFog = " << g_pEnv->DisableFog << std::endl;
+		std::cout << "EnableSetFps = " << g_pEnv->EnableSetFps << " (TargetFps=" << g_pEnv->TargetFps << ")" << std::endl;
+		std::cout << "RemoveTeamProgress = " << g_pEnv->RemoveTeamProgress << std::endl;
+		std::cout << "HideQuestBanner = " << g_pEnv->HideQuestBanner << std::endl;
+		std::cout << "DisableCameraMove = " << g_pEnv->DisableCameraMove << std::endl;
+		std::cout << "DisableDamageText = " << g_pEnv->DisableDamageText << std::endl;
+		std::cout << "TouchMode = " << g_pEnv->TouchMode << std::endl;
+		std::cout << "RedirectCombine = " << g_pEnv->RedirectCombine << std::endl;
+		std::cout << "ResinItem000106 = " << g_pEnv->ResinItem000106 << std::endl;
+		std::cout << "ResinItem000201 = " << g_pEnv->ResinItem000201 << std::endl;
+		std::cout << "ResinItem107009 = " << g_pEnv->ResinItem107009 << std::endl;
+		std::cout << "ResinItem107012 = " << g_pEnv->ResinItem107012 << std::endl;
+		std::cout << "ResinItem220007 = " << g_pEnv->ResinItem220007 << std::endl;
+		std::cout << "DisplayPaimon = " << g_pEnv->DisplayPaimon << std::endl;
+		std::cout << "DebugMode = " << g_pEnv->DebugMode << std::endl;
+		std::cout << "HidePlayerInfo = " << g_pEnv->HidePlayerInfo << std::endl;
+		std::cout << "HideGrass = " << g_pEnv->HideGrass << std::endl;
+		std::cout << "GamepadHotSwitch = " << g_pEnv->GamepadHotSwitch << std::endl;
+		std::cout << "InLevelClockPageSpeedUp = " << g_pEnv->InLevelClockPageSpeedUp << std::endl;
+		std::cout << "CombineHotkey = 0x" << std::hex << g_pEnv->CombineHotkey << std::dec << std::endl;
+		std::cout << "WeakMapCheck = " << g_pEnv->WeakMapCheck << std::endl;
 	}
 
 	SetupHooks();
@@ -114,7 +140,12 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "    /* PlayerPerspective */ 0x" << std::hex << o.PlayerPerspective << "," << std::endl;
 		std::cout << "    /* IsObjectActive */ 0x" << std::hex << o.IsObjectActive << "," << std::endl;
 		std::cout << "    /* GameUpdate */ 0x" << std::hex << o.GameUpdate << "," << std::endl;
-		std::cout << "    /* Reserved */ 0, 0, 0, 0, 0, 0," << std::endl;
+		std::cout << "    /* Reserved1 */ 0x" << std::hex << o.Reserved1 << "," << std::endl;
+		std::cout << "    /* Reserved2 */ 0x" << std::hex << o.Reserved2 << "," << std::endl;
+		std::cout << "    /* Reserved3 */ 0x" << std::hex << o.Reserved3 << "," << std::endl;
+		std::cout << "    /* Reserved4 */ 0x" << std::hex << o.Reserved4 << "," << std::endl;
+		std::cout << "    /* Reserved5 */ 0x" << std::hex << o.Reserved5 << "," << std::endl;
+		//std::cout << "    /* PlayerPerspective2 */ 0x" << std::hex << o.PlayerPerspective2 << "," << std::endl;
 		std::cout << "    /* AvatarPaimonAppear */ 0x" << std::hex << o.AvatarPaimonAppear << "," << std::endl;
 		std::cout << "    /* GetComponent */ 0x" << std::hex << o.GetComponent << "," << std::endl;
 		std::cout << "    /* GetText */ 0x" << std::hex << o.GetText << "," << std::endl;

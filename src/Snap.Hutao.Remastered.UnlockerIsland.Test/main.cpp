@@ -276,6 +276,7 @@ static void ConfigureEnvironment(HookEnvironment& env)
 
     env.Size = sizeof(HookEnvironment);
     env.State = IslandState::None;
+    env.IsOversea = FALSE;
 
     // Feature flags
     env.DebugMode            = TRUE;

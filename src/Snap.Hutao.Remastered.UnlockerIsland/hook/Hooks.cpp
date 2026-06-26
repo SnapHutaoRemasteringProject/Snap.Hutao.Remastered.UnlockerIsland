@@ -181,6 +181,8 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
     ScanDirect(InLevelClockPageCloseButtonClickedPattern, offsets.InLevelClockPageCloseButtonClicked);
 	ScanDirect(GetComponentPattern,                     offsets.GetComponent);
 	ScanDirect(AvatarPaimonAppearPattern,               offsets.AvatarPaimonAppear);
+	ScanDirect(PlayerPerspectivePattern,                offsets.PlayerPerspective);
+	ScanDirect(PlayerPerspectivePattern2,               offsets.PlayerPerspective2);
 
     // ---- REL (relative-call) patterns ----
     // Scan finds a CALL (E8) instruction; ResolveRelative gives the target.
@@ -198,7 +200,7 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
     ScanRel(SetActivePattern,          offsets.ObjectActive);
     ScanRel(IsActivePattern,           offsets.IsObjectActive);
     ScanRel(DisplayFogPattern,         offsets.SetFog);
-    ScanRel(PlayerPerspectivePattern,  offsets.PlayerPerspective);
+    //ScanRel(PlayerPerspectivePattern,  offsets.PlayerPerspective);
     ScanRel(SetupResinListPattern,     offsets.SetupResinList);
     ScanRel(CheckCanOpenMapPattern, offsets.CheckCanOpenMap);
 

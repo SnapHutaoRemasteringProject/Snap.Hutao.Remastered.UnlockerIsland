@@ -4,7 +4,8 @@
 #include "../Cache.h"
 #include "HooksShared.h"
 
-typedef void* (*PlayerPerspectiveFn)(void*, float, void*);
+typedef void (*PlayerPerspectiveFn)(void*, float);
+typedef void (*PlayerPerspectiveFn2)();
 
 void DisablePlayerPerspective::Initialize()
 {
@@ -14,6 +15,15 @@ void DisablePlayerPerspective::Initialize()
         if (playerPerspectiveAddr)
         {
             MH_CreateHook(playerPerspectiveAddr, &DisablePlayerPerspective::HookPlayerPerspective, &originalPlayerPerspective);
+        }
+    }
+
+    if (g_pEnv->Offsets.PlayerPerspective2)
+    {
+        LPVOID playerPerspectiveAddr = GetFunctionAddress(g_pEnv->Offsets.PlayerPerspective2);
+        if (playerPerspectiveAddr)
+        {
+            MH_CreateHook(playerPerspectiveAddr, &DisablePlayerPerspective::HookPlayerPerspective2, &originalPlayerPerspective2);
         }
     }
 }
@@ -28,17 +38,30 @@ bool DisablePlayerPerspective::IsEnabled()
     return g_pEnv->DisablePlayerPerspective != FALSE;
 }
 
-void* DisablePlayerPerspective::HookPlayerPerspective(void* rcx, float display, void* r8)
+void DisablePlayerPerspective::HookPlayerPerspective(void* rcx, float display)
 {
     if (g_pEnv->DisablePlayerPerspective && !CheckResistInBeyd())
     {
-        display = 1.0f;
+		return;
     }
 
     if (originalPlayerPerspective)
     {
         PlayerPerspectiveFn original = (PlayerPerspectiveFn)originalPlayerPerspective;
-        return original(rcx, display, r8);
+        original(rcx, display);
     }
-    return nullptr;
+}
+
+void DisablePlayerPerspective::HookPlayerPerspective2()
+{
+    if (g_pEnv->DisablePlayerPerspective && !CheckResistInBeyd())
+    {
+        return;
+    }
+
+    if (originalPlayerPerspective2)
+    {
+        PlayerPerspectiveFn2 original = (PlayerPerspectiveFn2)originalPlayerPerspective2;
+        original();
+    }
 }

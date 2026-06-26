@@ -13,5 +13,6 @@ public:
     void SetEnabled(bool enabled) override { (void)enabled; }
     FunctionType GetFunctionType() override { return FunctionType::DISABLE_PLAYER_PERSPECTIVE; }
 
-    static void* HookPlayerPerspective(void* rcx, float display, void* r8);
+    static void HookPlayerPerspective(void* rcx, float display);
+    static void HookPlayerPerspective2();
 };

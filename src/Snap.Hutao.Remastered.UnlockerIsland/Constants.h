@@ -31,6 +31,7 @@ extern std::string EventCameraMovePattern;
 extern std::string ShowOneDamageTextExPattern;
 extern std::string DisplayFogPattern;
 extern std::string PlayerPerspectivePattern;
+extern std::string PlayerPerspectivePattern2;
 extern std::string FindStringPattern;
 extern std::string CraftEntryPartnerPattern;
 extern std::string CraftEntryPattern;

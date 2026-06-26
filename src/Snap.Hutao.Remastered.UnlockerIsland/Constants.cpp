@@ -51,8 +51,13 @@ std::string EventCameraMovePattern = "41 57 41 56 56 57 55 53 48 83 EC ?? 48 89 
 std::string ShowOneDamageTextExPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 44 0F 29 9C 24 ? ? ? ? 44 0F 29 94 24 ? ? ? ? 44 0F 29 8C 24 ? ? ? ? 44 0F 29 84 24 ? ? ? ? 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 44 89 CF 45 89 C4";
 //REL
 std::string DisplayFogPattern = "E8 ?? ?? ?? ?? 80 3D ?? ?? ?? ?? 00 48 8B 05 ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9 0F 84 ?? ?? ?? ?? 4C 8B 05 ?? ?? ?? ?? BA 02 00 00 00 E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 F8 0B 74 ??";
-//REL
-std::string PlayerPerspectivePattern = "E8 ? ? ? ? 48 8B BE ? ? ? ? 80 3D ? ? ? ? ? 0F 85 ? ? ? ? 80 BE ? ? ? ? ? 74 11";
+//REL V1
+//std::string PlayerPerspectivePattern = "E8 ? ? ? ? 48 8B BE ? ? ? ? 80 3D ? ? ? ? ? 0F 85 ? ? ? ? 80 BE ? ? ? ? ? 74 11";
+
+// V2
+std::string PlayerPerspectivePattern = "41 56 56 57 55 53 48 83 EC 20 41 89 D0 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B BE ?? ?? ?? ?? 48 85 FF 0F 84";
+//实际函数在最下面的一个call中  sub_A3385A0(v33, v37, (unsigned int)&v81, (unsigned int)&v67, 1065353216, 0, 0i64, 0, 0, (__int64)v89); 
+std::string PlayerPerspectivePattern2 = "41 57 41 56 56 57 53 48 81 EC D0 03 00 00 48 89 CE 80 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8B 86 00 01 00 00 48 85 C0 0F 84";
 std::string FindStringPattern = "56 48 83 ec 20 48 89 ce e8 ? ? ? ? 48 89 f1 89 c2 48 83 c4 20 5e e9 ? ? ? ? cc cc cc cc";
 std::string CraftEntryPartnerPattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ? ? ? ? 4D 89 ? 4C 89 C6 49 89 D4 49 89 CE";
 std::string CraftEntryPattern = "41 56 56 57 53 48 83 EC 58 49 89 CE 80 3D ? ? ? ? 00 0F 84 ? ? ? ? 80 3D ? ? ? ? 00 48 8B 0D ? ? ? ? 0F 85";
@@ -98,10 +103,11 @@ HookFunctionOffsets g_ChinaOffsets = {
     /* SetupResinList */ 0x104a47e0,
     /* ResinList */ 0x220,
     /* FindString */ 0x449eb0,
-    /* PlayerPerspective */ 0xfe61660,
+    /* PlayerPerspective */ 0xFE60830,
     /* IsObjectActive */ 0x10ffef0,
     /* GameUpdate */ 0x16be9c20,
-    /* Reserved */ 0, 0, 0, 0, 0, 0,
+    /* Reserved */ 0, 0, 0, 0, 0,
+    /* PlayerPerspective2 */ 0x100B5C64,
     /* AvatarPaimonAppear */ 0x11a655e0,
     /* GetComponent */ 0x173a9300,
     /* GetText */ 0x174a92e0,
@@ -134,10 +140,11 @@ HookFunctionOffsets g_OverseaOffsets = {
     /* SetupResinList */ 0x104a5eb0,
     /* ResinList */ 0x230,
     /* FindString */ 0x4499e0,
-    /* PlayerPerspective */ 0xfe5afb0,
+    /* PlayerPerspective */ 0x100bae20,
     /* IsObjectActive */ 0x10ffef0,
     /* GameUpdate */ 0x16be2480,
-    /* Reserved */ 0, 0, 0, 0, 0, 0,
+    /* Reserved */ 0, 0, 0, 0, 0,
+    /* PlayerPerspective2 */ 0x100BB577,
     /* AvatarPaimonAppear */ 0x11a6d300,
     /* GetComponent */ 0x173a1b50,
     /* GetText */ 0x174a1b70,

@@ -27,6 +27,7 @@
 #include "../Logger.h"
 
 #include <vector>
+#include <Windows.h>
 
 // Offsets are defined in Constants.cpp (g_ChinaOffsets / g_OverseaOffsets)
 
@@ -140,6 +141,39 @@ static void DispatchUpdate()
 	}
 }
 
+DWORD ScanPlayerDiveMosaic()
+{
+	void* caller = Scanner::Scan(PlayerDiveMosaicPattern);
+	void* displayEffect = Scanner::Scan(DisplayEffectPattern);
+
+	if (!caller || !displayEffect)
+		return 0;
+
+	int window = 0x800;
+	void* lastCall = nullptr;
+
+	for (int i = 0; i < window - 4; ++i)
+	{
+		uint8_t* currentByte = (uint8_t*)caller + i;
+
+		if (IsCallOpcode(currentByte))
+		{
+			void* target = Scanner::ResolveRelative(currentByte, 1, 5);
+			if (target == displayEffect)
+			{
+				lastCall = currentByte;
+			}
+		}
+	}
+
+	if (lastCall)
+	{
+		return (DWORD)GetVirtualAddress((INT64)lastCall);
+	}
+
+	return 0;
+}
+
 // ===================================================================
 // Pattern-scan offset resolver
 // Overrides whatever offsets the test or fallback tables provided
@@ -181,7 +215,7 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
 	ScanDirect(GetComponentPattern,                     offsets.GetComponent);
 	ScanDirect(AvatarPaimonAppearPattern,               offsets.AvatarPaimonAppear);
 	ScanDirect(PlayerPerspectivePattern,                offsets.PlayerPerspective);
-	ScanDirect(PlayerPerspectivePattern2,               offsets.PlayerPerspective2);
+	offsets.PlayerDiveMosaic = ScanPlayerDiveMosaic();
 
     // ---- REL (relative-call) patterns ----
     // Scan finds a CALL (E8) instruction; ResolveRelative gives the target.

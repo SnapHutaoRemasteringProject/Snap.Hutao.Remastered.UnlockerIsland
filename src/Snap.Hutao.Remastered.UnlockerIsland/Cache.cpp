@@ -8,15 +8,18 @@ bool g_cachedIsResisted = false;
 
 typedef Il2CppString* (*FindStringFn)(const char*);
 typedef void* (*GetComponentFn)(void*, Il2CppString*);
-typedef Il2CppString* (*GetTextFn)(void*);
+
+Il2CppString* GetText(void* pText)
+{
+    return *(Il2CppString**)((uintptr_t)pText + 0xE0);
+}
 
 bool CacheResistState()
 {
-    if (findString && getComponent && getText)
+    if (findString && getComponent)
     {
         FindStringFn findStringFunc = (FindStringFn)findString;
         GetComponentFn getComponentFunc = (GetComponentFn)getComponent;
-        GetTextFn getTextFunc = (GetTextFn)getText;
 
         void* uidObj = FindGameObject(UID_PATH);
         if (!uidObj)
@@ -36,7 +39,7 @@ bool CacheResistState()
             if (textComp)
             {
                 Log("Text component was found for resist check");
-                Il2CppString* textContent = getTextFunc(textComp);
+                Il2CppString* textContent = GetText(textComp);
                 if (textContent)
                 {
                     bool isResisted = wcsstr(textContent->chars, L"GUID") != nullptr;

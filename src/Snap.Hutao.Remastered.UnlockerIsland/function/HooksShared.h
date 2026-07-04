@@ -16,7 +16,6 @@ extern LPVOID findGameObject;   // FindGameObjectFn
 extern LPVOID setActive;        // SetActiveFn (also hooked by HideGrass)
 extern LPVOID getActive;        // GetActiveFn
 extern LPVOID getComponent;     // GetComponentFn (used by Cache)
-extern LPVOID getText;          // GetTextFn (used by Cache)
 extern LPVOID getName;          // GetNameFn (used by HideGrass)
 
 // --- Input device switching (used by TouchMode, GamepadHotSwitch) ---
@@ -51,7 +50,7 @@ extern bool requestOpenCraft;
 extern LPVOID originalGetFrameCount;
 extern LPVOID originalSetFov;
 extern LPVOID originalPlayerPerspective;
-extern LPVOID originalPlayerPerspective2;
+extern LPVOID originalPlayerDiveMosaic;
 extern LPVOID originalSetupQuestBanner;
 extern LPVOID originalEventCameraMove;
 extern LPVOID originalShowOneDamageTextEx;

@@ -15,7 +15,7 @@ public:
     FunctionType GetFunctionType() override { return FunctionType::DISABLE_PLAYER_PERSPECTIVE; }
 
     static void HookPlayerPerspective(void* rcx, bool display);
-    static void HookPlayerPerspective2(void* a1, float a2);
+    static void HookPlayerDiveMosaic(void* a1, float a2);
     
 private:
     Patch* patch;

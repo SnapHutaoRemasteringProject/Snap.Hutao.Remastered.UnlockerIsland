@@ -39,7 +39,6 @@ LPVOID findGameObject = nullptr;
 LPVOID setActive = nullptr;
 LPVOID getActive = nullptr;
 LPVOID getComponent = nullptr;
-LPVOID getText = nullptr;
 LPVOID getName = nullptr;
 
 // Input switching
@@ -76,7 +75,7 @@ bool requestOpenCraft = false;
 LPVOID originalGetFrameCount = nullptr;
 LPVOID originalSetFov = nullptr;
 LPVOID originalPlayerPerspective = nullptr;
-LPVOID originalPlayerPerspective2 = nullptr;
+LPVOID originalPlayerDiveMosaic = nullptr;
 LPVOID originalSetupQuestBanner = nullptr;
 LPVOID originalEventCameraMove = nullptr;
 LPVOID originalShowOneDamageTextEx = nullptr;
@@ -262,10 +261,6 @@ void SetupHooks()
 	if (offsets->GetComponent)
 	{
 		getComponent = GetFunctionAddress(offsets->GetComponent);
-	}
-	if (offsets->GetText)
-	{
-		getText = GetFunctionAddress(offsets->GetText);
 	}
 
 	// Set up the master SetFov dispatch hook

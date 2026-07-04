@@ -40,11 +40,11 @@ struct HookFunctionOffsets
 	DWORD Reserved3;
 	DWORD Reserved4;
 	DWORD Reserved5;
-	DWORD PlayerPerspective2;
+	DWORD PlayerDiveMosaic;
 	DWORD AvatarPaimonAppear;                  // GlobalActor.AvatarPaimonAppear
 
 	DWORD GetComponent;                        // GameObject.GetComponent(String type)
-	DWORD GetText;                             // Text.get_text
+	DWORD Reserved6;                             // Text.get_text
 
 	DWORD GetName;                             // Object.get_name
 

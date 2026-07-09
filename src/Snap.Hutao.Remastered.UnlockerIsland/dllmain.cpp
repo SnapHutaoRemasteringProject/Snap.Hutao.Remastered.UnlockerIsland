@@ -87,6 +87,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "ProvideOffsets = " << g_pEnv->ProvideOffsets << std::endl;
 		std::cout << "EnableSetFov = " << g_pEnv->EnableSetFov << " (FOV=" << g_pEnv->FieldOfView << ")" << std::endl;
 		std::cout << "DisablePlayerPerspective = " << g_pEnv->DisablePlayerPerspective << std::endl;
+		std::cout << "DisablePlayerDiveMosaic = " << g_pEnv->DisablePlayerDiveMosaic << std::endl;
 		std::cout << "DisableFog = " << g_pEnv->DisableFog << std::endl;
 		std::cout << "EnableSetFps = " << g_pEnv->EnableSetFps << " (TargetFps=" << g_pEnv->TargetFps << ")" << std::endl;
 		std::cout << "RemoveTeamProgress = " << g_pEnv->RemoveTeamProgress << std::endl;

@@ -163,6 +163,7 @@
     <ClInclude Include="function\HooksShared.h" />
     <ClInclude Include="function\FovOverride.h" />
     <ClInclude Include="function\DisablePlayerPerspective.h" />
+    <ClInclude Include="function\DisablePlayerDiveMosaic.h" />
     <ClInclude Include="function\DisableFog.h" />
     <ClInclude Include="function\EnableSetFps.h" />
     <ClInclude Include="function\RemoveTeamProgress.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="utils\UnityUtils.cpp" />
     <ClCompile Include="function\FovOverride.cpp" />
     <ClCompile Include="function\DisablePlayerPerspective.cpp" />
+    <ClCompile Include="function\DisablePlayerDiveMosaic.cpp" />
     <ClCompile Include="function\DisableFog.cpp" />
     <ClCompile Include="function\EnableSetFps.cpp" />
     <ClCompile Include="function\RemoveTeamProgress.cpp" />

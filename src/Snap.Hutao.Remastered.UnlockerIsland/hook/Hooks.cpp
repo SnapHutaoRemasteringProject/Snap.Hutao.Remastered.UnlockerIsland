@@ -4,6 +4,7 @@
 #include "../function/HooksShared.h"
 #include "../function/FovOverride.h"
 #include "../function/DisablePlayerPerspective.h"
+#include "../function/DisablePlayerDiveMosaic.h"
 #include "../function/DisableFog.h"
 #include "../function/EnableSetFps.h"
 #include "../function/RemoveTeamProgress.h"
@@ -235,6 +236,7 @@ void SetupHooks()
 	// Order does not matter; each reads from g_pEnv->Offsets in Initialize()
 	g_functions.push_back(new FovOverride());
 	g_functions.push_back(new DisablePlayerPerspective());
+	g_functions.push_back(new DisablePlayerDiveMosaic());
 	g_functions.push_back(new DisableFog());
 	g_functions.push_back(new EnableSetFps());
 	g_functions.push_back(new RemoveTeamProgress());

@@ -96,6 +96,9 @@
     <ClInclude Include="function\DisablePlayerPerspective.h">
       <Filter>头文件\function</Filter>
     </ClInclude>
+    <ClInclude Include="function\DisablePlayerDiveMosaic.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
     <ClInclude Include="function\DisableFog.h">
       <Filter>头文件\function</Filter>
     </ClInclude>
@@ -189,6 +192,9 @@
       <Filter>源文件\function</Filter>
     </ClCompile>
     <ClCompile Include="function\DisablePlayerPerspective.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\DisablePlayerDiveMosaic.cpp">
       <Filter>源文件\function</Filter>
     </ClCompile>
     <ClCompile Include="function\DisableFog.cpp">

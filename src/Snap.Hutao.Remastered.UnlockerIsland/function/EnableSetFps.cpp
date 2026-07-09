@@ -3,7 +3,6 @@
 #include "../dllmain.h"
 #include "../Cache.h"
 #include "../Logger.h"
-#include "../hook/HookWndProc.h"
 #include "HooksShared.h"
 
 typedef int(*GetFrameCountFn)();
@@ -42,23 +41,14 @@ void EnableSetFps::OnUpdate()
 	}
 	lastResisted = isResisted;
 
-	if (g_pEnv->EnableSetFps)
+	if (isResisted)
 	{
-		HWND hWnd = GetUnityMainWindow();
-		if (hWnd && IsIconic(hWnd))
-		{
-			// 窗口最小化时限制10帧
-			setFrameCountFunc(10);
-		}
-		else if (isResisted)
-		{
-			// 千星奇域内锁60帧
-			setFrameCountFunc(60);
-		}
-		else
-		{
-			setFrameCountFunc(g_pEnv->TargetFps);
-		}
+		// 千星奇域内锁60帧
+		setFrameCountFunc(60);
+	}
+	else if (g_pEnv->EnableSetFps)
+	{
+		setFrameCountFunc(g_pEnv->TargetFps);
 	}
 }
 

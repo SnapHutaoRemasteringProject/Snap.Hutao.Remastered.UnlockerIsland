@@ -16,7 +16,6 @@ struct HookEnvironment
     BOOL  EnableSetFov;
     FLOAT FieldOfView;
     BOOL  DisablePlayerPerspective;
-    BOOL  DisablePlayerDiveMosaic;
     BOOL  DisableFog;
     BOOL  EnableSetFps;
     DWORD TargetFps;
@@ -39,6 +38,7 @@ struct HookEnvironment
     BOOL  InLevelClockPageSpeedUp;
     DWORD CombineHotkey;
     BOOL  WeakMapCheck;
+    BOOL  DisablePlayerDiveMosaic;
 
     HookFunctionOffsets Offsets;
 };

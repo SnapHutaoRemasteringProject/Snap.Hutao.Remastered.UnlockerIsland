@@ -21,7 +21,6 @@
 #include "../function/CombineHotkey.h"
 #include "../function/WeakMapCheck.h"
 
-#include "../MacroDetector.h"
 #include "../Cache.h"
 #include "../utils/Task.h"
 #include "../Logger.h"
@@ -97,7 +96,6 @@ LPVOID fnDisplayFog = nullptr;
 // Function registry & dispatch
 // ===================================================================
 static std::vector<IFunction*> g_functions;
-static bool macroDetectorInitialized = false;
 
 typedef int (*SetFovFn)(void*, float);
 typedef void (*UpdateFn)(void*);
@@ -107,18 +105,7 @@ static void DispatchUpdate()
 {
 	bool isResisted = CheckResistInBeyd();
 
-	if (isResisted && !isResistedLastFrame)
-	{
-		MacroDetector::GetInstance().ShowLimitedMessage();
-	}
-
 	isResistedLastFrame = isResisted;
-
-	if (!macroDetectorInitialized)
-	{
-		MacroDetector::GetInstance().Initialize();
-		macroDetectorInitialized = true;
-	}
 
 	// Throttled (2000ms) operations — refresh resist (千星奇域) state
 	static ULONGLONG lastExecutionTime = 0;
@@ -172,11 +159,6 @@ static int MasterHookSetFov(void* a1, float changeFovValue)
 static void HookGameUpdate(void* pThis)
 {
 	bool isResisted = CheckResistInBeyd();
-
-	if (isResisted && !isResistedLastFrame)
-	{
-		MacroDetector::GetInstance().ShowLimitedMessage();
-	}
 
 	isResistedLastFrame = isResisted;
 

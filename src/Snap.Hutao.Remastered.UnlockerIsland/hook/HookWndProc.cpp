@@ -1,7 +1,6 @@
 #include "HookWndProc.h"
 #include "Hooks.h"
 #include "../function/HooksShared.h"
-#include "../MacroDetector.h"
 #include "../GamepadHotSwitch.h"
 #include "../Logger.h"
 #include <commctrl.h>
@@ -12,11 +11,6 @@ static UINT_PTR g_subclassId = 1;
 
 LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (uMsg == WM_LBUTTONDOWN || uMsg == WM_RBUTTONDOWN)
-    {
-        MacroDetector::GetInstance().RecordClick();
-    }
-
     switch (uMsg)
     {
     case WM_KEYDOWN:

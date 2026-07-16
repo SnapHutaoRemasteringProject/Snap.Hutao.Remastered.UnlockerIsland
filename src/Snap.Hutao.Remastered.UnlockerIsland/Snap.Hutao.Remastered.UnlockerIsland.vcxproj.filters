@@ -54,9 +54,7 @@
     <ClInclude Include="IslandState.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MacroDetector.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
+
     <ClInclude Include="Cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -158,9 +156,7 @@
     <ClCompile Include="framework.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MacroDetector.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+
     <ClCompile Include="Cache.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

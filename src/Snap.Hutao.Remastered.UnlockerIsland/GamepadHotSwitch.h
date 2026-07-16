@@ -51,9 +51,9 @@ private:
 	bool isGamepadMode{ false };
 	bool isInChatPage{ false };
 
-	volatile bool m_mouseActivity{ false };
-	volatile bool m_keyboardActivity{ false };
-	volatile ULONGLONG m_pauseUntilTime{ 0 };
+	std::atomic<bool> m_mouseActivity{ false };
+	std::atomic<bool> m_keyboardActivity{ false };
+	std::atomic<ULONGLONG> m_pauseUntilTime{ 0 };
 
 	LONGLONG m_lastMousePos{ 0 };
 	ULONGLONG m_lastGamepadActivityTime{ 0 };

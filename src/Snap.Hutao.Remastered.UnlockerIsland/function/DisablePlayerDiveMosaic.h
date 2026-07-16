@@ -17,5 +17,5 @@ public:
     static void HookPlayerDiveMosaic(void* a1, float a2);
 
 private:
-    Patch* patch;
+    Patch* patch = nullptr;
 };

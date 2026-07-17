@@ -24,6 +24,7 @@
 #include "../Cache.h"
 #include "../utils/Task.h"
 #include "../Logger.h"
+#include "../hook/HookWndProc.h"
 
 #include <vector>
 
@@ -161,6 +162,11 @@ static void HookGameUpdate(void* pThis)
 	bool isResisted = CheckResistInBeyd();
 
 	isResistedLastFrame = isResisted;
+
+	if (!GetUnityMainWindow())
+	{
+		InitializeWndProcHooks();
+	}
 
 	Task::Tick();
 

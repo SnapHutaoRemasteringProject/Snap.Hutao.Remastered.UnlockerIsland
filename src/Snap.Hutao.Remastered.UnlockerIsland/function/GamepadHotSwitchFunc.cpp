@@ -84,7 +84,6 @@ postChatCheck:
 		}
 
 		hotSwitch.SetEnabled(true);
-		InitializeWndProcHooks();
 
 		Log("[GamepadHotSwitch] Initialized and enabled");
 	}

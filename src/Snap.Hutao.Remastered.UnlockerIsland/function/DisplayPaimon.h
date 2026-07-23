@@ -14,6 +14,8 @@ public:
     FunctionType GetFunctionType() override { return FunctionType::DISPLAY_PAIMON; }
 
 private:
-    ULONGLONG m_lastExecuteTime = 0;
-    static constexpr ULONGLONG THROTTLE_MS = 5000;
+    bool m_cacheValid = false;
+    void* m_cachedPaimon = nullptr;
+    void* m_cachedDivePaimon = nullptr;
+    void* m_cachedBeydPaimon = nullptr;
 };

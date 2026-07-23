@@ -29,31 +29,46 @@ void DisplayPaimon::OnUpdate()
         return;
     }
 
-    // Execute logic only every 5000ms to reduce performance impact
-    ULONGLONG now = GetTickCount64();
-    if (now - m_lastExecuteTime < THROTTLE_MS)
-    {
-        return;
-    }
-    m_lastExecuteTime = now;
-
     if (!getActive || !avatarPaimonAppear)
     {
         return;
     }
 
+    // Cache GameObject pointers once, re-cache if invalidated
+    if (!m_cacheValid)
+    {
+        m_cachedPaimon = FindGameObject(PAIMON_PATH);
+        m_cachedDivePaimon = FindGameObject(DIVE_PAIMON_PATH);
+        m_cachedBeydPaimon = FindGameObject(BEYD_PAIMON_PATH);
+
+        if (!m_cachedPaimon || !m_cachedDivePaimon || !m_cachedBeydPaimon)
+        {
+            return;
+        }
+
+        m_cacheValid = true;
+    }
+
     GetActiveFn getActiveFunc = (GetActiveFn)getActive;
 
-    void* paimonObj = FindGameObject(PAIMON_PATH);
-    void* divePaimonObj = FindGameObject(DIVE_PAIMON_PATH);
-    void* beydPaimonObj = FindGameObject(BEYD_PAIMON_PATH);
-
-    if (!paimonObj || !divePaimonObj || !beydPaimonObj)
+    bool anyActive = false;
+    __try
     {
+        anyActive = getActiveFunc(m_cachedPaimon)
+            || getActiveFunc(m_cachedDivePaimon)
+            || getActiveFunc(m_cachedBeydPaimon);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        // Object was destroyed or invalidated, re-cache next frame
+        m_cacheValid = false;
+        m_cachedPaimon = nullptr;
+        m_cachedDivePaimon = nullptr;
+        m_cachedBeydPaimon = nullptr;
         return;
     }
 
-    if (getActiveFunc(paimonObj) || getActiveFunc(divePaimonObj) || getActiveFunc(beydPaimonObj))
+    if (anyActive)
     {
         return;
     }

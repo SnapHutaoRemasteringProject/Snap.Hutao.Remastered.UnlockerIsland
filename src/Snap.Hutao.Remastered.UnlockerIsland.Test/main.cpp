@@ -55,6 +55,7 @@ static std::wstring FindGameExecutable()
         L"D:\\Genshin Impact Game\\GenshinImpact.exe",
         L"E:\\Genshin Impact Game\\YuanShen.exe",
         L"E:\\Genshin Impact Game\\GenshinImpact.exe",
+        L"D:\\miHoYo Launcher\\games\\Genshin Impact Game\\YuanShen.exe"
     };
 
     for (const auto& path : candidates)
@@ -283,6 +284,7 @@ static void ConfigureEnvironment(HookEnvironment& env)
     env.EnableSetFov         = TRUE;
     env.FieldOfView          = 90.0f;
     env.DisablePlayerPerspective = TRUE;
+    env.DisablePlayerDiveMosaic = TRUE;
     env.EnableSetFps         = TRUE;
     env.TargetFps            = 2000;
     env.RemoveTeamProgress   = TRUE;
@@ -292,7 +294,7 @@ static void ConfigureEnvironment(HookEnvironment& env)
     env.DisplayPaimon        = TRUE;
     env.HidePlayerInfo       = TRUE;
     env.HideGrass            = TRUE;
-    env.GamepadHotSwitch     = TRUE;
+    env.GamepadHotSwitch     = FALSE;
     env.InLevelClockPageSpeedUp = TRUE;
     env.WeakMapCheck         = TRUE;
     env.CombineHotkey        = VK_F12;
@@ -328,7 +330,6 @@ static void ConfigureEnvironment(HookEnvironment& env)
     env.Offsets.GameUpdate               = 0x15394C70;
     env.Offsets.AvatarPaimonAppear       = 0x107BAC60;
     env.Offsets.GetComponent             = 0x15B61F60;
-    env.Offsets.GetText                  = 0x15C45190;
     env.Offsets.GetName                  = 0x15B79680;
     env.Offsets.CheckCanOpenMap          = 0x69E9DD3;
 }
@@ -343,33 +344,46 @@ static int Inject()
     auto gamePath = FindGameExecutable();
     if (gamePath.empty())
     {
-        std::wcerr << L"Game executable not found. "
-                    << L"Adjust the candidate paths in FindGameExecutable()."
+        std::cout << "Game executable not found. "
+                    << "Adjust the candidate paths in FindGameExecutable()."
                     << std::endl;
+		Sleep(10000);
         return 1;
     }
 
     // 2. Locate the target DLL
     auto dllPath = GetDllPath(TargetDllName);
     if (dllPath.empty())
+    {
+        std::cout << "Dll not found. "
+                    << "Adjust the candidate paths in GetDllPath()."
+                    << std::endl;
+        Sleep(10000);
         return 1;
+    }
 
     // 3. Launch game (suspended)
     auto game = GameProcess::LaunchSuspended(gamePath);
     if (!game)
-        return 1;
+    {
+		std::cout << "Failed to launch game." << std::endl;
+		Sleep(10000);
+		return 1;
+    }
 
     // 4. Create shared memory and initialise HookEnvironment
     SharedMemory sharedMem;
     if (!sharedMem.Create())
-        return 1;
+    {
+		std::cout << "Failed to create shared memory." << std::endl;
+    }
 
     ConfigureEnvironment(*sharedMem.env);
 
     // 5. Inject DLL
     if (!InjectDll(game.process.get(), dllPath))
     {
-        std::wcerr << L"Injection failed." << std::endl;
+        std::cout << "Injection failed." << std::endl;
         return 1;
     }
 
@@ -377,7 +391,7 @@ static int Inject()
     Sleep(2000);
     game.Resume();
 
-    std::wcout << L"All done." << std::endl;
+    std::cout << "All done." << std::endl;
     return 0;
 }
 

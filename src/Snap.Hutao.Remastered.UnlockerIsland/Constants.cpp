@@ -20,6 +20,7 @@ std::list<std::wstring> BeyondWhiteList
 	L"41376171429",
 	L"15605228819", // 剑斗木桩
 	L"7448990007",  // B站的一个木桩
+	L"24196747524",
 };
 
 const char* PAIMON_PATH = "/EntityRoot/OtherGadgetRoot/NPC_Guide_Paimon(Clone)";

@@ -1,4 +1,4 @@
-#include "dllmain.h"
+﻿#include "dllmain.h"
 #include "hook/Hooks.h"
 #include "GamepadHotSwitch.h"
 #include <cstdio>
@@ -57,8 +57,8 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 {
 	InitializeHookEnvironment();
 
-	g_pEnv->State = IslandState::Started;
 	g_pEnv->Size = sizeof(HookEnvironment);
+	g_pEnv->State = IslandState::Started;
 
 	HMODULE module = GetModuleHandleW(L"YuanShen.exe");
 	HMODULE module2 = GetModuleHandleW(L"GenshinImpact.exe");
@@ -109,6 +109,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "CombineHotkey = 0x" << std::hex << g_pEnv->CombineHotkey << std::dec << std::endl;
 		std::cout << "WeakMapCheck = " << g_pEnv->WeakMapCheck << std::endl;
 		std::cout << "FastSkipTalk = " << g_pEnv->FastSkipTalk << std::endl;
+		std::cout << "RedirectCatherine = " << g_pEnv->RedirectCatherine << std::endl;
 	}
 
 	SetupHooks();
@@ -141,7 +142,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "    /* PlayerPerspective */ 0x" << std::hex << o.PlayerPerspective << "," << std::endl;
 		std::cout << "    /* IsObjectActive */ 0x" << std::hex << o.IsObjectActive << "," << std::endl;
 		std::cout << "    /* GameUpdate */ 0x" << std::hex << o.GameUpdate << "," << std::endl;
-		std::cout << "    /* Reserved1 */ 0x" << std::hex << o.Reserved1 << "," << std::endl;
+		std::cout << "    /* CatherineEntry */ 0x" << std::hex << o.CatherineEntry << "," << std::endl;
 		std::cout << "    /* SetupPlayerProfilePage */ 0x" << std::hex << o.SetupPlayerProfilePage << "," << std::endl;
 		std::cout << "    /* SetWaterMaskUID */ 0x" << std::hex << o.SetWaterMaskUID << "," << std::endl;
 		std::cout << "    /* FastSkipTalk */ 0x" << std::hex << o.FastSkipTalk << "," << std::endl;
@@ -154,6 +155,9 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "    /* InLevelClockPageOkButtonClicked */ 0x" << std::hex << o.InLevelClockPageOkButtonClicked << "," << std::endl;
 		std::cout << "    /* InLevelClockPageCloseButtonClicked */ 0x" << std::hex << o.InLevelClockPageCloseButtonClicked << "," << std::endl;
 		std::cout << "    /* ClosePage */ 0x" << std::hex << o.ClosePage << "," << std::endl;
+		std::cout << "    /* CatherineOpenDialog */ 0x" << std::hex << o.CatherineOpenDialog << "," << std::endl;
+		std::cout << "    /* CatherineDialogCtor */ 0x" << std::hex << o.CatherineDialogCtor << "," << std::endl;
+		std::cout << "    /* ExplorationEntry */ 0x" << std::hex << o.ExplorationEntry << "," << std::endl;
 		std::cout << "};" << std::endl;
 	}
 

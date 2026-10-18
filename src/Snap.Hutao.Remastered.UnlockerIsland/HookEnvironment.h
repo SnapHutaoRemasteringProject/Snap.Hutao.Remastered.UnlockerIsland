@@ -40,6 +40,7 @@ struct HookEnvironment
     BOOL  WeakMapCheck;
     BOOL  DisablePlayerDiveMosaic;
     BOOL  FastSkipTalk;
+    BOOL  RedirectCatherine;
 
     HookFunctionOffsets Offsets;
 };

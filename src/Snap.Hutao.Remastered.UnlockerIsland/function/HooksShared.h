@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Windows.h>
 #include "../utils/MemoryUtils.h"
@@ -67,3 +67,16 @@ extern LPVOID originalSetupPlayerProfilePage;
 // --- Non-hooked function call targets ---
 extern LPVOID setFrameCount;
 extern LPVOID fnDisplayFog;
+
+// --- Catherine redirect（每日委托入口 → 凯瑟琳委托奖励确认弹窗）---
+// 签名与 trampoline 都跟着 hook 一起放这里，定义在 Hooks.cpp。
+typedef void (*CatherineEntryFn)(void* self);                              // BJLLHHFDAEM::JEFBGNIMIHF（虚调用，只有 this）
+typedef bool (*CatherineOpenDialogFn)(void* self, int32_t idx);             // BLMOGIINPEM::LNJINJKFFHK
+typedef void (*CatherineDialogCtorFn)(void* self, void* method);            // BLMOGIINPEM::.ctor
+typedef bool (*ExplorationEntryFn)(void* action, Il2CppString* text);       // HGPJJCNAHLB(UIFactory)::BKJHPFINMPE（静态）
+typedef Il2CppString* (*FindStringFn)(const char* text);                    // 字符串 helper（UTF-8 -> Il2CppString）
+
+extern LPVOID catherineOpenDialog;            // LNJINJKFFHK 本体（开窗逻辑的调用目标）
+extern LPVOID explorationPageEntry;           // UIFactory::BKJHPFINMPE（偶数次调用目标）
+extern LPVOID originalCatherineEntry;         // 以下两个是 MH_CreateHook 的 trampoline
+extern LPVOID originalCatherineDialogCtor;

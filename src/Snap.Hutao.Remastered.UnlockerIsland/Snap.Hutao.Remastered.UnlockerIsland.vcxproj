@@ -81,6 +81,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;SNAPHUTAOREMASTEREDUNLOCKISLAND_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -99,14 +100,13 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;SNAPHUTAOREMASTEREDUNLOCKISLAND_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>NUL</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -121,6 +121,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <CallingConvention>FastCall</CallingConvention>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,12 +144,11 @@
       <CallingConvention>FastCall</CallingConvention>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>NUL</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>minhook.x64.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -180,6 +180,7 @@
     <ClInclude Include="function\CombineHotkey.h" />
     <ClInclude Include="function\WeakMapCheck.h" />
     <ClInclude Include="function\FastSkipTalk.h" />
+    <ClInclude Include="function\CatherineRedirect.h" />
     <ClInclude Include="GamepadHotSwitch.h" />
     <ClInclude Include="HookEnvironment.h" />
     <ClInclude Include="HookFunctionOffsets.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="function\CombineHotkey.cpp" />
     <ClCompile Include="function\WeakMapCheck.cpp" />
     <ClCompile Include="function\FastSkipTalk.cpp" />
+    <ClCompile Include="function\CatherineRedirect.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

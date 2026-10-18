@@ -35,7 +35,7 @@ struct HookFunctionOffsets
 
 	DWORD IsObjectActive;                      // GameObject.get_active
 	DWORD GameUpdate;                          // MainThreadDispatcher.Update
-	DWORD Reserved1;
+	DWORD CatherineEntry;                      // BJLLHHFDAEM::JEFBGNIMIHF 每日委托入口（凯瑟琳重定向源）[pattern scan] (was Reserved1)
 	DWORD SetupPlayerProfilePage;               // [pattern scan] (was Reserved2)
 	DWORD SetWaterMaskUID;                     // MonoUIWaterMask.SetWaterMaskUID  [pattern scan] (was Reserved3)
 	DWORD FastSkipTalk;                        // 跳过对话冷却（NOP 补丁地址，特征码扫描结果 + 0x37E，国服/外服通用）(was Reserved4)
@@ -53,4 +53,9 @@ struct HookFunctionOffsets
 	DWORD InLevelClockPageOkButtonClicked;
 	DWORD InLevelClockPageCloseButtonClicked;
 	DWORD ClosePage;
+
+	// 凯瑟琳重定向的两个 hook 目标（追加在末尾，已有字段偏移不变）
+	DWORD CatherineOpenDialog;                 // BLMOGIINPEM::LNJINJKFFHK  [pattern scan]
+	DWORD CatherineDialogCtor;                 // BLMOGIINPEM::.ctor         [pattern scan]
+	DWORD ExplorationEntry;                    // HGPJJCNAHLB(UIFactory)::BKJHPFINMPE [pattern scan]
 };

@@ -18,6 +18,7 @@ extern const char* FRIEND_PAGE_PATH;
 extern const char* UID_PATH;
 extern const char* QUEST_BANNER_PATH;
 extern const char* SYNTHESIS_PAGE_NAME;
+extern const char* EXPLORATION_PAGE_ID;
 
 extern const wchar_t* BEYOND_TEXT_COLOR_ORIGINAL;
 extern const wchar_t* BEYOND_TEXT_COLOR_GREEN;
@@ -58,6 +59,10 @@ extern std::string SetTextPattern;
 extern std::string SetWaterMaskUIDPattern;
 extern std::string SetupPlayerProfilePagePattern;
 extern std::string FastSkipTalkPattern;
+extern std::string CatherineEntryPattern;
+extern std::string CatherineOpenDialogPattern;
+extern std::string CatherineDialogCtorPattern;
+extern std::string ExplorationEntryPattern;
 
 // Hardcoded offsets (used when game does not provide offsets via shared memory)
 extern HookFunctionOffsets g_ChinaOffsets;

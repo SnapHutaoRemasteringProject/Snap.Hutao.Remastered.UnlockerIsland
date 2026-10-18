@@ -1,6 +1,7 @@
-#include "Scanner.h"
+﻿#include "Scanner.h"
 #include "../utils/MemoryUtils.h"
 #include <Psapi.h>
+#include <cstring>
 #include <sstream>
 #include <vector>
 #include <inttypes.h>
@@ -82,19 +83,53 @@ namespace Scanner
                 if (regionSize >= pSize)
                 {
                     const uint8_t* pStart = (const uint8_t*)mbi.BaseAddress;
-                    for (size_t i = 0; i <= regionSize - pSize; ++i)
+                    const size_t last = regionSize - pSize;
+
+                    if (pattern[0] == -1)
                     {
-                        bool found = true;
-                        for (size_t j = 0; j < pSize; ++j)
+                        // 首字节是通配符：退回朴素扫描
+                        for (size_t i = 0; i <= last; ++i)
                         {
-                            if (pattern[j] != -1 && pattern[j] != pStart[i + j])
+                            bool found = true;
+                            for (size_t j = 0; j < pSize; ++j)
                             {
-                                found = false;
-                                break;
+                                if (pattern[j] != -1 && pattern[j] != pStart[i + j])
+                                {
+                                    found = false;
+                                    break;
+                                }
                             }
+                            if (found)
+                                return (void*)(pStart + i);
                         }
-                        if (found)
-                            return (void*)(pStart + i);
+                    }
+                    else
+                    {
+                        // memchr 锚定首字节：400MB 的模块里比逐字节快一个数量级
+                        const uint8_t anchor = (uint8_t)pattern[0];
+                        size_t i = 0;
+                        while (i <= last)
+                        {
+                            const void* hit = memchr(pStart + i, anchor, last - i + 1);
+                            if (hit == nullptr)
+                                break;
+
+                            const size_t idx = (const uint8_t*)hit - pStart;
+                            bool found = true;
+                            for (size_t j = 1; j < pSize; ++j)
+                            {
+                                if (pattern[j] != -1 && pattern[j] != pStart[idx + j])
+                                {
+                                    found = false;
+                                    break;
+                                }
+                            }
+
+                            if (found)
+                                return (void*)(pStart + idx);
+
+                            i = idx + 1;
+                        }
                     }
                 }
             }

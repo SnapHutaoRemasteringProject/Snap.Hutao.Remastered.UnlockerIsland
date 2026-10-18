@@ -145,6 +145,9 @@
     <ClInclude Include="function\FastSkipTalk.h">
       <Filter>头文件\function</Filter>
     </ClInclude>
+    <ClInclude Include="function\CatherineRedirect.h">
+      <Filter>头文件\function</Filter>
+    </ClInclude>
     <ClInclude Include="utils\Patch.h">
       <Filter>头文件\utils</Filter>
     </ClInclude>
@@ -245,6 +248,9 @@
       <Filter>源文件\function</Filter>
     </ClCompile>
     <ClCompile Include="function\FastSkipTalk.cpp">
+      <Filter>源文件\function</Filter>
+    </ClCompile>
+    <ClCompile Include="function\CatherineRedirect.cpp">
       <Filter>源文件\function</Filter>
     </ClCompile>
     <ClCompile Include="utils\Patch.cpp">

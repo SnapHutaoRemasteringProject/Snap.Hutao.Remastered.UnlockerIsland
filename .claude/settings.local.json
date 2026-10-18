@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(grep -rn \"CreateConsole\\\\|SetupAntiAntiDebugHooks\" *.cpp)",
+      "Bash(grep:*)",
+      "Bash(sed -i 's|#include \"\"\"\"\\\\.\\\\./Cache\\\\.h\"\"\"\"|#include \"\"\"\"../BeyondResist.h\"\"\"\"|' function/CombineHotkey.cpp function/DisableCameraMove.cpp function/DisableDamageText.cpp function/DisableFog.cpp function/DisablePlayerPerspective.cpp function/EnableSetFps.cpp function/HideGrass.cpp function/RemoveTeamProgress.cpp hook/Hooks.cpp)",
+      "Bash(sed -i 's|#include \"\"\"\"Cache\\\\.h\"\"\"\"|#include \"\"\"\"BeyondResist.h\"\"\"\"|' BeyondResist.cpp)",
+      "Read(//d/dump/**)"
+    ]
+  }
+}

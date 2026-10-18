@@ -21,6 +21,7 @@
 #include "../function/CombineHotkey.h"
 #include "../function/WeakMapCheck.h"
 #include "../function/FastSkipTalk.h"
+#include "../function/CatherineRedirect.h"
 
 #include "../BeyondResist.h"
 #include "../utils/Task.h"
@@ -96,6 +97,12 @@ LPVOID originalSetupPlayerProfilePage = nullptr;
 // Non-hooked call targets
 LPVOID setFrameCount = nullptr;
 LPVOID fnDisplayFog = nullptr;
+
+// Catherine redirect（定义在这里，声明在 function/HooksShared.h）
+LPVOID catherineOpenDialog = nullptr;
+LPVOID explorationPageEntry = nullptr;
+LPVOID originalCatherineEntry = nullptr;
+LPVOID originalCatherineDialogCtor = nullptr;
 
 // ===================================================================
 // Function registry & dispatch
@@ -250,6 +257,47 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
 }
 
 // ===================================================================
+// 凯瑟琳重定向用到的偏移
+//
+// 一条特征码同时适配国服/国际服（同版本）；换版本要重新生成，
+// 方法见 docs/catherine-redirect-version-guide.md。
+// 这四个字段是后加的，外部 Provider 通常不填；所以无论 ProvideOffsets 与否，
+// 这里都补扫一遍（只补 0 值的，已有就跳过）。
+// ===================================================================
+static void ResolveCatherineOffsetsFromPatterns(HookFunctionOffsets& offsets)
+{
+	auto ScanIfMissing = [&](const std::string& pattern, DWORD& out)
+	{
+		if (out != 0 || pattern.empty())
+		{
+			return;
+		}
+
+		if (auto* addr = Scanner::Scan(pattern))
+		{
+			out = (DWORD)GetVirtualAddress((INT64)addr);
+		}
+	};
+
+	ScanIfMissing(CatherineEntryPattern,      offsets.CatherineEntry);
+	ScanIfMissing(CatherineOpenDialogPattern, offsets.CatherineOpenDialog);
+	ScanIfMissing(CatherineDialogCtorPattern, offsets.CatherineDialogCtor);
+	ScanIfMissing(ExplorationEntryPattern,    offsets.ExplorationEntry);
+
+	// 特征码是按游戏版本写死的（只跨服务器通用）：遇到新版本会全部扫不到，
+	// 用一条明确的日志提示去重新生成，而不是让功能静默失效。
+	if (offsets.CatherineEntry == 0 || offsets.CatherineOpenDialog == 0 ||
+		offsets.CatherineDialogCtor == 0 || offsets.ExplorationEntry == 0)
+	{
+		Logf("CatherineRedirect: signature miss (entry=0x%08lX open=0x%08lX ctor=0x%08lX exploration=0x%08lX)"
+			" - 游戏版本可能已更新，需要按 docs/catherine-redirect-version-guide.md 重新生成特征码",
+			(unsigned long)offsets.CatherineEntry, (unsigned long)offsets.CatherineOpenDialog,
+			(unsigned long)offsets.CatherineDialogCtor, (unsigned long)offsets.ExplorationEntry);
+	}
+}
+
+
+// ===================================================================
 // Master SetFov hook — also serves as the main per-frame dispatch
 // ===================================================================
 static int MasterHookSetFov(void* a1, float changeFovValue)
@@ -351,6 +399,9 @@ void SetupHooks()
 		ResolveOffsetsFromPatterns(*offsets);
 	}
 
+	// 四个凯瑟琳字段两种模式都要补（外部 Provider 一般不认识这几个新字段）
+	ResolveCatherineOffsetsFromPatterns(*offsets);
+
 	g_pEnv->Offsets = *offsets;
 
 	// Create and register all IFunction instances
@@ -374,6 +425,7 @@ void SetupHooks()
 	g_functions.push_back(new CombineHotkey());
 	g_functions.push_back(new WeakMapCheck());
 	g_functions.push_back(new FastSkipTalk());
+	g_functions.push_back(new CatherineRedirect());
 
 	// Initialize all functions (resolves offsets, creates MinHook hooks)
 	for (auto* func : g_functions)

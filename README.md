@@ -65,3 +65,19 @@ MinHook is restored through vcpkg manifest mode with a local overlay port:
 - `vcpkg-ports/minhook`
 
 The overlay port tracks upstream `TsudaKageyu/minhook` at `v1.3.4` and replaces the older checked-in `libMinHook.x64.lib` binaries.
+
+### Semiannual MinHook vcpkg overlay update checks
+
+The [MinHook overlay port](vcpkg-ports/minhook) is updated by the
+[Check MinHook vcpkg Overlay workflow](.github/workflows/check-minhook-update.yml).
+It runs every January 1 and July 1 (UTC) and supports manual runs.
+
+The check compares the version in `vcpkg-ports/minhook/vcpkg.json` against
+upstream **stable Git tags**. On a newer tag it updates both the vcpkg port version
+and the pinned commit SHA in `portfile.cmake`, then proposes a PR for review.
+The workflow does **not** automatically merge dependency updates.
+
+This uses a dedicated check because Dependabot's vcpkg support updates
+`builtin-baseline` for registry ports, not pinned Git commits in local overlay
+portfiles. GitHub Actions must be allowed to create pull requests in the
+repository settings for automatic PR creation to work.

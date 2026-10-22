@@ -1,0 +1,7 @@
+# Dependabot version updates: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+version: 2
+updates:
+  - package-ecosystem: "vcpkg"
+    directory: "/vcpkg-ports/minhook" # vcpkg-ports/minhook/vcpkg.json
+    schedule:
+      interval: "semiannually"

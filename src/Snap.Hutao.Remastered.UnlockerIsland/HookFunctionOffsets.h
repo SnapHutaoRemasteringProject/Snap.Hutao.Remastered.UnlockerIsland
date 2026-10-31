@@ -58,4 +58,7 @@ struct HookFunctionOffsets
 	DWORD CatherineOpenDialog;                 // BLMOGIINPEM::LNJINJKFFHK  [pattern scan]
 	DWORD CatherineDialogCtor;                 // BLMOGIINPEM::.ctor         [pattern scan]
 	DWORD ExplorationEntry;                    // HGPJJCNAHLB(UIFactory)::BKJHPFINMPE [pattern scan]
+
+	// 派蒙显示（追加在末尾，已有字段偏移不变）
+	DWORD AvatarPaimonDisappear;               // MoleMole.BaseActor.AvatarPaimonDisappear  [pattern scan]
 };

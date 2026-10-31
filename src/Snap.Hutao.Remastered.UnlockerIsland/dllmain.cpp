@@ -148,6 +148,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam)
 		std::cout << "    /* FastSkipTalk */ 0x" << std::hex << o.FastSkipTalk << "," << std::endl;
 		std::cout << "    /* SetText */ 0x" << std::hex << o.SetText << "," << std::endl;
 		std::cout << "    /* AvatarPaimonAppear */ 0x" << std::hex << o.AvatarPaimonAppear << "," << std::endl;
+		std::cout << "    /* AvatarPaimonDisappear */ 0x" << std::hex << o.AvatarPaimonDisappear << "," << std::endl;
 		std::cout << "    /* GetComponent */ 0x" << std::hex << o.GetComponent << "," << std::endl;
 		std::cout << "    /* PlayerDiveMosaic */ 0x" << std::hex << o.PlayerDiveMosaic << "," << std::endl;
 		std::cout << "    /* GetName */ 0x" << std::hex << o.GetName << "," << std::endl;

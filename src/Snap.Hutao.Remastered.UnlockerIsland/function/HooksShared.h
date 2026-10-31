@@ -32,6 +32,7 @@ extern LPVOID openTeamPageAccordingly;
 
 // --- Paimon display (used by DisplayPaimon) ---
 extern LPVOID avatarPaimonAppear;
+extern LPVOID originalAvatarPaimonDisappear;
 
 // --- InLevelClockPage (used by InLevelClockPageSpeedUp) ---
 extern LPVOID inLevelClockPageCloseButtonClicked;

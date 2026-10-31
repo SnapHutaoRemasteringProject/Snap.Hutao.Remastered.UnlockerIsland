@@ -93,6 +93,7 @@ LPVOID originalInLevelClockPageOkButtonClicked = nullptr;
 LPVOID originalGameUpdate = nullptr;
 LPVOID originalSetWaterMaskUID = nullptr;
 LPVOID originalSetupPlayerProfilePage = nullptr;
+LPVOID originalAvatarPaimonDisappear = nullptr;
 
 // Non-hooked call targets
 LPVOID setFrameCount = nullptr;
@@ -205,6 +206,7 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
     ScanDirect(InLevelClockPageCloseButtonClickedPattern, offsets.InLevelClockPageCloseButtonClicked);
 	ScanDirect(GetComponentPattern,                     offsets.GetComponent);
 	ScanDirect(AvatarPaimonAppearPattern,               offsets.AvatarPaimonAppear);
+	ScanDirect(AvatarPaimonDisappearPattern,            offsets.AvatarPaimonDisappear);
 	ScanDirect(PlayerPerspectivePattern,                offsets.PlayerPerspective);
 	ScanDirect(SetTextPattern,                          offsets.SetText);
     offsets.PlayerDiveMosaic = ScanPlayerDiveMosaic();
@@ -399,7 +401,6 @@ void SetupHooks()
 		ResolveOffsetsFromPatterns(*offsets);
 	}
 
-	// 四个凯瑟琳字段两种模式都要补（外部 Provider 一般不认识这几个新字段）
 	ResolveCatherineOffsetsFromPatterns(*offsets);
 
 	g_pEnv->Offsets = *offsets;

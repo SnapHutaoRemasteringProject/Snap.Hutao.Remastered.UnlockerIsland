@@ -38,7 +38,7 @@ struct HookFunctionOffsets
 	DWORD CatherineEntry;                      // BJLLHHFDAEM::JEFBGNIMIHF 每日委托入口（凯瑟琳重定向源）[pattern scan] (was Reserved1)
 	DWORD SetupPlayerProfilePage;               // [pattern scan] (was Reserved2)
 	DWORD SetWaterMaskUID;                     // MonoUIWaterMask.SetWaterMaskUID  [pattern scan] (was Reserved3)
-	DWORD FastSkipTalk;                        // 跳过对话冷却（NOP 补丁地址，特征码扫描结果 + 0x37E，国服/外服通用）(was Reserved4)
+	DWORD FastSkipTalk;                        // 对话冷却 JBE 的 NOP 补丁地址（UCOMISS 特征码结果 + 7）(was Reserved4)
 	DWORD SetText;                             // UnityEngine.UI.Text.set_text
 	DWORD AvatarPaimonAppear;                  // GlobalActor.AvatarPaimonAppear
 

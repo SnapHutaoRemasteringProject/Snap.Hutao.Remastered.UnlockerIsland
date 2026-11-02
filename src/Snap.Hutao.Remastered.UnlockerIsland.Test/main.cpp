@@ -40,7 +40,7 @@ struct RemoteMemDeleter
 // ---------------------------------------------------------------------------
 
 constexpr auto SharedMemName = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
-constexpr auto TargetDllName = L"Dumper.dll";
+constexpr auto TargetDllName = L"Snap.Hutao.Remastered.UnlockerIsland.dll";
 
 // ---------------------------------------------------------------------------
 // Game path resolution
@@ -49,6 +49,8 @@ constexpr auto TargetDllName = L"Dumper.dll";
 static std::wstring FindGameExecutable()
 {
     const std::vector<std::wstring> candidates = {
+        L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\YuanShen.exe",
+        L"C:\\Program Files\\Genshin Impact\\Genshin Impact Game\\GenshinImpact.exe",
         L"D:\\Genshin Impact Game\\YuanShen.exe",
         L"D:\\Genshin Impact Game\\GenshinImpact.exe",
     };

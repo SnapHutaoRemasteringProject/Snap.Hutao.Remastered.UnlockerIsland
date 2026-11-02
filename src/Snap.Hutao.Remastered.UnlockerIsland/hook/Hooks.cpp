@@ -240,29 +240,34 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
             offsets.ClosePage = Scanner::ReadFieldOffset(addr, 0x2A);
     }
 
-    // FastSkipTalk = scan_result + 0x37E
+    // UCOMISS (7 bytes) followed by the six-byte cooldown JBE to skip.
+    // 7.2 CN: comparison RVA 0x10C5E7A0, branch RVA 0x10C5E7A7.
     if (!FastSkipTalkPattern.empty())
     {
         if (auto* addr = Scanner::Scan(FastSkipTalkPattern))
-            offsets.FastSkipTalk = (DWORD)(GetVirtualAddress((INT64)addr) + 0x37E);
+            offsets.FastSkipTalk = (DWORD)(GetVirtualAddress((INT64)addr) + 7);
     }
 
-    // ResinList = *(int32_t*)(SetupResinList_resolved + 0x27)
-    // needs SetupResinListPattern scanned & resolved first.
+    // 7.2: MOV RCX,[RBX+disp32] at +0x24; disp32 at +0x27 is 0x228.
+    // Validate the operand's instruction: the old +0x1A read a metadata guard.
     if (offsets.SetupResinList != 0)
     {
         auto* funcAddr = GetFunctionAddress(offsets.SetupResinList);
-        if (funcAddr)
-            offsets.ResinList = Scanner::ReadFieldOffset(funcAddr, 0x1A);
+        const auto* code = reinterpret_cast<const uint8_t*>(funcAddr);
+        if (code && code[0x24] == 0x48 && code[0x25] == 0x8B && code[0x26] == 0x8B &&
+            code[0x2B] == 0x48 && code[0x2C] == 0x85 && code[0x2D] == 0xC9)
+            offsets.ResinList = Scanner::ReadFieldOffset(funcAddr, 0x27);
+        if (offsets.ResinList == 0)
+            offsets.SetupResinList = 0;
     }
-    // If SetupResinList couldn't be resolved, ResinList stays as fallback.
+    // A failed field check disables the dependent hook.
 }
 
 // ===================================================================
 // 凯瑟琳重定向用到的偏移
 //
-// 一条特征码同时适配国服/国际服（同版本）；换版本要重新生成，
-// 方法见 docs/catherine-redirect-version-guide.md。
+// 当前特征码已在 7.2 国服离线核验，其他版本/服务器需要独立验证。
+// 核验记录见 docs/signatures-7.2-cn.md。
 // 这四个字段是后加的，外部 Provider 通常不填；所以无论 ProvideOffsets 与否，
 // 这里都补扫一遍（只补 0 值的，已有就跳过）。
 // ===================================================================
@@ -292,7 +297,7 @@ static void ResolveCatherineOffsetsFromPatterns(HookFunctionOffsets& offsets)
 		offsets.CatherineDialogCtor == 0 || offsets.ExplorationEntry == 0)
 	{
 		Logf("CatherineRedirect: signature miss (entry=0x%08lX open=0x%08lX ctor=0x%08lX exploration=0x%08lX)"
-			" - 游戏版本可能已更新，需要按 docs/catherine-redirect-version-guide.md 重新生成特征码",
+			" - 游戏版本可能已更新，请参考 docs/signatures-7.2-cn.md 重新核验特征码",
 			(unsigned long)offsets.CatherineEntry, (unsigned long)offsets.CatherineOpenDialog,
 			(unsigned long)offsets.CatherineDialogCtor, (unsigned long)offsets.ExplorationEntry);
 	}

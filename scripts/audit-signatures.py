@@ -106,6 +106,26 @@ def main():
         return matches[0]['rva']
 
     try:
+        # An earlier OpenTeam signature uniquely matched an unrelated timed
+        # action. Require the actual entry -> progress setup -> CheckCanEnter
+        # relationship as well as uniqueness. All addresses come from scanning.
+        team = unique('OpenTeamPattern')
+        body = image.read(team, 0x100)
+        marker = b'\x48\x89\xC1\x48\x83\xC4\x28\xE9'
+        tail = body.find(marker)
+        if tail < 0:
+            raise ValueError('OpenTeam lacks the page-instance tail call to progress setup')
+        jump = team + tail + len(marker) - 1
+        progress = jump + 5 + struct.unpack('<i', image.read(jump + 1, 4))[0]
+        progress_body = image.read(progress, 0x200)
+        check_enter = unique('CheckCanEnterPattern')
+        calls = [progress + offset + 5 + struct.unpack_from('<i', progress_body, offset + 1)[0]
+                 for offset in range(len(progress_body) - 4) if progress_body[offset] == 0xE8]
+        if check_enter not in calls:
+            raise ValueError('OpenTeam progress setup does not call the scanned CheckCanEnter')
+        derived['OpenTeam'] = team
+        derived['OpenTeamProgressEntry'] = progress
+        derived['OpenTeamChecksCanEnter'] = True
         comparison = unique('FastSkipTalkPattern')
         if image.read(comparison, 3) != b'\x0F\x2E\x87' or image.read(comparison + 7, 2) != b'\x0F\x86':
             raise ValueError('FastSkipTalk does not identify UCOMISS + six-byte JBE')

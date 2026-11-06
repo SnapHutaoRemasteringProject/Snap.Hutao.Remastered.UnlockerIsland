@@ -17,7 +17,7 @@ SHA-256：`8b014f64b5dc12fbc476e0c362b053abfdd7a1378cd282e4ad81057621dbd6b5`。
 | SwitchInputDeviceToTouchScreenPattern | 两个同构实现，旧规则先命中重复簇 | 初始化守卫的 RIP 位移保留最高字节 `F5`，区分重复簇的 `F8` |
 | SwitchInputDeviceToKeyboardPattern | 同上 | 同一组已确认输入函数，使用相同的 `F5` 约束 |
 | SwitchInputDeviceToJoypadPattern | 同上 | 同一组已确认输入函数，使用相同的 `F5` 约束 |
-| ShowOneDamageTextExPattern | 末尾寄存器分配已变，旧规则零命中 | `44 89 CF` → `44 89 CB`，保留完整保存寄存器骨架 |
+| ShowOneDamageTextExPattern | 首轮 `CF` → `CB` 替换误认了向量运算函数，用户实测无效 | 已撤销该替换，恢复原签名；真正粒子伤害显示入口尚未确认，此项未完成适配 |
 | CheckCanEnterPattern | 旧规则同时命中另一个无关函数 | 延长函数骨架，保留 `48 8B 81 A0 A3 00 00` 和 `8B 90 84 02 00 00` 等本版字段约束 |
 | OpenTeamPattern | 原规则零命中；首轮替换又误认了另一个带进度流程的入口 | 真正队伍入口仍使用 `B9 0C 00 00 00`；匹配本版 `0F 84` 初始化长跳转和 `84 C0 75` 返回分支，并核对进度入口对 CheckCanEnter 的调用 |
 | CatherineEntryPattern | 原规则固定了旧 RIP/调用位移及 `9C` 字段范围 | 保留函数骨架，对这些位移完整通配 |
@@ -58,6 +58,11 @@ FastSkipTalk 新签名从比较指令开始，消费者取签名内紧随其后�
 ClosePage 的虚表位移仍由签名中的 `41 FF 90 disp32` 读取，核验值为 `0x338`。
 
 ## 验证
+
+后续更正：以下首轮“全部有命中”的统计不能视为功能身份验证。
+ShowOneDamageTextEx 的 CB 候选已被参数及调用关系排除，恢复原规则后仍待适配。
+三个输入切换签名也已恢复原写法：仅凭多命中不足以添加 F5 位移约束。
+运行时只读检查未检出目标类/方法名称，未取得可确认的新伤害数字签名。
 
 41 条现有签名全部有命中，其中 40 条唯一命中。
 `GetNamePattern` 保留两处匹配：两者具有相同的名字读取和字符串转换路径，

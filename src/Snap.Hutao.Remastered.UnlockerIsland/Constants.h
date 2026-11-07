@@ -64,6 +64,8 @@ extern std::string CatherineEntryPattern;
 extern std::string CatherineOpenDialogPattern;
 extern std::string CatherineDialogCtorPattern;
 extern std::string ExplorationEntryPattern;
+extern std::string CatherineDialogCtorPatternOversea;
+extern std::string ExplorationEntryPatternOversea;
 
 // Hardcoded offsets (used when game does not provide offsets via shared memory)
 extern HookFunctionOffsets g_ChinaOffsets;

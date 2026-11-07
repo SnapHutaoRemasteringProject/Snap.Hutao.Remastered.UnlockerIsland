@@ -283,8 +283,12 @@ static void ResolveCatherineOffsetsFromPatterns(HookFunctionOffsets& offsets)
 
 	ScanIfMissing(CatherineEntryPattern,      offsets.CatherineEntry);
 	ScanIfMissing(CatherineOpenDialogPattern, offsets.CatherineOpenDialog);
-	ScanIfMissing(CatherineDialogCtorPattern, offsets.CatherineDialogCtor);
-	ScanIfMissing(ExplorationEntryPattern,    offsets.ExplorationEntry);
+
+	// 这两个函数的国服/国际服编译结果不同，两条特征码互不命中，先扫本国再扫另一条。
+	ScanIfMissing(CatherineDialogCtorPattern,         offsets.CatherineDialogCtor);
+	ScanIfMissing(CatherineDialogCtorPatternOversea,  offsets.CatherineDialogCtor);
+	ScanIfMissing(ExplorationEntryPattern,            offsets.ExplorationEntry);
+	ScanIfMissing(ExplorationEntryPatternOversea,     offsets.ExplorationEntry);
 
 	// 特征码是按游戏版本写死的（只跨服务器通用）：遇到新版本会全部扫不到，
 	// 用一条明确的日志提示去重新生成，而不是让功能静默失效。

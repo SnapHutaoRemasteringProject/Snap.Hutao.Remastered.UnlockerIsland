@@ -30,6 +30,7 @@
 #include "../hook/HookWndProc.h"
 
 #include <vector>
+#include <cstring>
 #include <Windows.h>
 
 // Offsets are defined in Constants.cpp (g_ChinaOffsets / g_OverseaOffsets)
@@ -165,6 +166,97 @@ DWORD ScanPlayerDiveMosaic()
 }
 
 // ===================================================================
+// Resin 列表的字段偏移
+//
+// SetupResinList 里对树脂列表的访问总是编译成
+//     48 8B <modrm=10xxx011> <disp32>    ; mov reg,[rbx+disp32]
+//     48 85 C9                            ; test rcx,rcx
+//     0F 84 <rel32>                       ; je
+// 取第一条这样的指令的 disp32。7.2 国服 = 0x228、国际服 = 0x230。
+// 找不到返回 0（调用方据此禁用树脂过滤，而不是拿垃圾偏移去解引用）。
+// ===================================================================
+static DWORD FindResinListFieldOffset(LPVOID function)
+{
+    if (function == nullptr)
+    {
+        return 0;
+    }
+
+    const auto* code = static_cast<const uint8_t*>(function);
+
+    __try
+    {
+        for (int i = 0; i + 11 <= 0x60; ++i)
+        {
+            // mov r64, [rbx+disp32]：REX.W + 8B + modrm(mod=10, rm=011)
+            // 紧跟着是 test rcx,rcx 和 je（0F 84 rel32 或 74 rel8 都认）
+            if (code[i] == 0x48 && code[i + 1] == 0x8B && (code[i + 2] & 0xC7) == 0x83 &&
+                code[i + 7] == 0x48 && code[i + 8] == 0x85 && code[i + 9] == 0xC9 &&
+                (code[i + 10] == 0x0F || code[i + 10] == 0x74))
+            {
+                DWORD displacement = 0;
+                memcpy(&displacement, code + i + 3, sizeof(displacement));
+                return displacement;
+            }
+        }
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return 0;
+    }
+
+    return 0;
+}
+
+// ===================================================================
+// 对话冷却门（FastSkipTalk 要 NOP 的那条指令）
+//
+// 函数里是
+//     0F 2E <modrm 10xxx???> <disp32>   ; ucomiss xmm0,[reg+disp32]  当前时间 vs 冷却时间戳
+//     0F 86 <rel32>                     ; jbe  -> 冷却没到就直接返回
+// 把那条 jbe 换成 6 个 0x90，等效于"冷却永远已过"。
+//
+// 这条 jbe 在 7.0 国服 = 0x09123FBE、7.1 国服 = 0x0D43F38E、7.2 国服 = 0x10C5E7A7、
+// 7.2 国际服 = 0x10C761D0 —— 相对函数入口的偏移从 0x37E 漂到 0x3A7 / 0x3B0，
+// 所以不能再写死 +0x37E，改成按指令形状在函数体里找。
+// ===================================================================
+static void* FindDialogueCooldownJump(void* function)
+{
+    if (function == nullptr)
+    {
+        return nullptr;
+    }
+
+    const auto* code = static_cast<const uint8_t*>(function);
+
+    __try
+    {
+        for (int i = 0; i + 9 <= 0x600; ++i)
+        {
+            if (code[i] != 0x0F || code[i + 1] != 0x2E)
+            {
+                continue;                          // ucomiss
+            }
+            if ((code[i + 2] & 0xC0) != 0x80)
+            {
+                continue;                          // 只认 [reg+disp32]
+            }
+            if (code[i + 7] != 0x0F || code[i + 8] != 0x86)
+            {
+                continue;                          // jbe rel32
+            }
+            return const_cast<uint8_t*>(code + i + 7);
+        }
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
+// ===================================================================
 // Pattern-scan offset resolver
 // Overrides whatever offsets the test or fallback tables provided
 // with values obtained via pattern scanning. Functions that have no
@@ -240,20 +332,33 @@ static void ResolveOffsetsFromPatterns(HookFunctionOffsets& offsets)
             offsets.ClosePage = Scanner::ReadFieldOffset(addr, 0x2A);
     }
 
-    // FastSkipTalk = scan_result + 0x37E
+    // FastSkipTalk：先特征码定位函数入口，再在函数体里找那条冷却 jbe
     if (!FastSkipTalkPattern.empty())
     {
-        if (auto* addr = Scanner::Scan(FastSkipTalkPattern))
-            offsets.FastSkipTalk = (DWORD)(GetVirtualAddress((INT64)addr) + 0x37E);
+        if (auto* funcAddr = Scanner::Scan(FastSkipTalkPattern))
+        {
+            if (auto* cooldownJump = FindDialogueCooldownJump(funcAddr))
+            {
+                offsets.FastSkipTalk = (DWORD)GetVirtualAddress((INT64)cooldownJump);
+            }
+            else
+            {
+                Log("FastSkipTalk: cooldown jump not found in function - feature disabled");
+            }
+        }
     }
 
-    // ResinList = *(int32_t*)(SetupResinList_resolved + 0x27)
-    // needs SetupResinListPattern scanned & resolved first.
     if (offsets.SetupResinList != 0)
     {
         auto* funcAddr = GetFunctionAddress(offsets.SetupResinList);
         if (funcAddr)
-            offsets.ResinList = Scanner::ReadFieldOffset(funcAddr, 0x1A);
+        {
+            offsets.ResinList = FindResinListFieldOffset(funcAddr);
+            if (offsets.ResinList == 0)
+            {
+                Log("ResinList: field offset not found in SetupResinList - resin filtering disabled");
+            }
+        }
     }
     // If SetupResinList couldn't be resolved, ResinList stays as fallback.
 }

@@ -95,7 +95,63 @@ python scripts\crossverify.py --with71   # 附带 7.1 命中情况
   两条互不命中（已验证），`Hooks.cpp::ResolveCatherineOffsetsFromPatterns`
   按 "先本国、再另一条" 的顺序扫，命中即停，所以不依赖 `IsOversea` 标志。
 
-## 5. 已知限制
+## 5. 派生的字段偏移（ResinList / ClosePage）—— 7.2 踩过的坑
+
+有些偏移不是特征码命中值，而是**从函数机器码里读出来的小整数**，这类最脆：
+
+| 偏移 | 来源 | 7.2 国服 | 7.2 国际服 |
+|---|---|---|---|
+| `ResinList` | `SetupResinList` 里 `mov reg,[rbx+disp32]` 的 disp32 | `0x228` | `0x230` |
+| `ClosePage` | `ClosePageCaller` + `0x2A` 处的 disp32 | `0x338` | `0x338` |
+| `FastSkipTalk` | 函数里 `ucomiss xmm0,[reg+disp32]` 后面那条 `jbe rel32` | `0x10C5E7A7` | `0x10C761D0` |
+
+**ResinList 曾经是错的**：旧代码按固定偏移 `func + 0x1A` 去读，7.2 重新编译后这个
+位置落进了函数开头 `cmp byte [rip+..]` 的 RIP 位移里，读出来是 `0xF51C77`；
+`ResinItem::HookSetupResinList` 拿它当字段偏移去 `this + 0xF51C77` 取列表指针，
+于是 `resinList->Count()` 直接访问非法地址崩溃（现象：`resinList = 0x3D49BA7B3E`）。
+
+现在改成**按指令形状定位**（`Hooks.cpp::FindResinListFieldOffset`）：
+
+```
+48 8B <modrm 10xxx011> <disp32>   ; mov reg,[rbx+disp32]
+48 85 C9                          ; test rcx,rcx
+0F 84 <rel32>                     ; je
+```
+
+在函数前 `0x60` 字节里找第一条这样的指令并取其 disp32，国服/国际服分别得到
+`0x228` / `0x230`（两边确实不同，所以不能写死）。找不到就返回 0 并打日志。
+
+同时 `ResinItem` 加了防御：偏移为 0、列表指针为空、或 `Count()` 不在 `1..4096`
+范围时直接跳过本次处理 —— 宁可不过滤树脂，也不再拿错偏移解引用。
+
+复现/检查：
+
+```powershell
+python scripts\check_derived.py   # 两服务器的 ResinList / ClosePage / FastSkipTalk 站点
+```
+
+### FastSkipTalk 的 `+0x37E` 也曾错位
+
+原来是"特征码命中 + 固定 `0x37E`"。7.2 国服命中点 `0x10C5E400`，`+0x37E = 0x10C5E77E`
+正好落在 `48 83 79 10 00` 的第 4 个字节上，NOP 6 字节会把
+`cmp [rcx+0x10],0; je; call` 打烂（国际服则落在 `48 85 C9` 上，多吃掉下一条指令首字节）。
+
+翻旧客户端（`D:\Genshin Impact Game\7.0\YuanShen.exe`、`7.1\YuanShen.exe`）确认了
+这条补丁**一直都是在 NOP 同一条指令**：
+
+| 版本 | 补丁地址 | 指令 |
+|---|---|---|
+| 7.0 国服（硬编码） | `0x09123FBE` | `0F 86 A2 00 00 00` = `jbe`（在 `ucomiss xmm0,[rdi+0x32C]` 后面）|
+| 7.1 国服（+0x37E） | `0x0D43F38E` | `0F 86 A2 00 00 00` = `jbe`（在 `ucomiss xmm0,[rdi+0x30C]` 后面）|
+| 7.2 国服（新） | `0x10C5E7A7` | `0F 86 A2 00 00 00` = `jbe`（在 `ucomiss xmm0,[rdi+0x30C]` 后面）|
+| 7.2 国际服（新） | `0x10C761D0` | `0F 86 A2 00 00 00` = `jbe`（在 `ucomiss xmm0,[rdi+0x2F8]` 后面）|
+
+语义就是"当前时间 <= 冷却时间戳 → 直接 return"，NOP 掉就等于冷却永远已过。
+现在 `Hooks.cpp::FindDialogueCooldownJump` 在函数体里按形状找
+`0F 2E <modrm 10xxx???> <disp32> 0F 86 <rel32>`（函数里只有这一条是 rel32 形式，
+另外两条比较用的是短跳 `76 ??`），两个客户端都能正确命中。
+
+## 6. 已知限制与待办
 
 * 双服务器都验证的是 **7.2**；7.1 已被游戏更新淘汰，不再向后兼容
   （`ShowOneDamageText` / `OpenTeam` / 四条凯瑟琳特征码在 7.1 里不会再命中）。
@@ -105,11 +161,12 @@ python scripts\crossverify.py --with71   # 附带 7.1 命中情况
   后面的字节就整体错位，特征码只能截断在错位点之前
   （`CatherineDialogCtor` 就只剩 77 字节可共用，因此才走双特征码方案）。
 
-## 6. 验收清单
+## 7. 验收清单
 
 - [x] `python scripts\verify_patterns.py` → 0 条无命中（国服）
 - [x] `python scripts\crossverify.py` → 0 problem（国服 + 国际服）
 - [x] Release x64 编译通过（`Snap.Hutao.Remastered.UnlockerIsland.dll`）
+- [x] `ResinList` 7.2 国服 `0x228` / 国际服 `0x230`（`scripts\check_derived.py`）
 - [ ] 进游戏实测：每日委托重定向、队伍页、伤害数字、雾/视角/输入切换等
       （需要 `Test.exe` 注入：`TargetDllName` 已指向主 DLL，`DebugMode = TRUE`，
       控制台会打印完整偏移表；确认四个凯瑟琳偏移不再是 0）
